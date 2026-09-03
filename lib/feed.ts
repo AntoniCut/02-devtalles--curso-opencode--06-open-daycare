@@ -47,7 +47,7 @@ export interface ClassroomInfo {
 export const currentUser: CurrentUser = {
   name: "Caro Giménez",
   initials: "C",
-  role: "Maestra · Soles",
+  role: "Maestra · Sala Soles",
 };
 
 /** - `información de la sala para el encabezado` */
