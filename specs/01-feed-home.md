@@ -64,14 +64,14 @@ El badge (texto y colores LOGRO/ACTIVIDAD/ANUNCIO) se deriva de `type` mediante 
 
 ## Acceptance criteria
 
-- [ ] `/` renderiza el feed con sidebar fijo a la izquierda (248px, sticky) y contenido centrado (max-width 760px).
-- [ ] Títulos en Fredoka y resto en Nunito (verificable en DevTools).
-- [ ] Badges con colores exactos del mockup: LOGRO `#3E9B6C`, ACTIVIDAD `#2E89A6`, ANUNCIO `#4E72C8`.
-- [ ] El post ACTIVIDAD muestra el placeholder punteado con el texto "Foto · pintando con témperas".
-- [ ] Todos los enlaces internos usan `next/link` y apuntan a las rutas futuras indicadas.
-- [ ] La captura de `/` es visualmente idéntica a `references/screenshots/feed.png` (sin diferencias apreciables de layout o colores).
-- [ ] `pnpm lint` y `pnpm build` pasan sin errores.
-- [ ] La consola del navegador no muestra errores ni warnings de hidratación.
+- [x] `/` renderiza el feed con sidebar fijo a la izquierda (248px, sticky) y contenido centrado (max-width 760px).
+- [x] Títulos en Fredoka y resto en Nunito (verificable en DevTools).
+- [x] Badges con colores exactos del mockup: LOGRO `#3E9B6C`, ACTIVIDAD `#2E89A6`, ANUNCIO `#4E72C8`.
+- [x] El post ACTIVIDAD muestra el placeholder punteado con el texto "Foto · pintando con témperas".
+- [x] Todos los enlaces internos usan `next/link` y apuntan a las rutas futuras indicadas.
+- [x] La captura de `/` es visualmente idéntica a `references/screenshots/feed.png` (sin diferencias apreciables de layout o colores).
+- [x] `pnpm lint` y `pnpm build` pasan sin errores.
+- [x] La consola del navegador no muestra errores ni warnings de hidratación.
 
 ## Decisions
 

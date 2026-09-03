@@ -9,6 +9,7 @@ body {
   background: #F6ECDF;
   color: #3F362E;
   font-family: var(--font-nunito), system-ui, sans-serif;
+  line-height: normal;
 }
 
 /* scrollbar del mockup */

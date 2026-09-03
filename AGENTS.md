@@ -53,4 +53,6 @@ Las skills del proyecto viven en `.agents/skills/` (`spec`, `spec-impl`), instal
 - El usuario cambia el estado a `Approved` manualmente; `/spec-impl NN-slug` crea la rama `spec-NN-slug` (según `AutoCreateBranch` en `specs/.spec-config.yml`) e implementa paso a paso con pausas para revisar diffs.
 - `spec-impl` **nunca** commitea automáticamente — el commit es decisión del usuario.
 - Verificación visual de criterios de aceptación: usar el MCP de Playwright contra `references/screenshots/`.
+- **Agente verificador** (`.opencode/agent/spec-verifier.md`): subagente que verifica los criterios de aceptación de un spec, corrige el código de los criterios que fallan y marca los checkboxes del spec. Usa modelo con visión + Playwright (comparación contra `references/screenshots/`) + Context7. Nunca commitea ni toca la línea de Estado del spec — solo el checklist de "Acceptance criteria".
+
 

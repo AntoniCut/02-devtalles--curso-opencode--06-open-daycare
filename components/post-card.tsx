@@ -24,7 +24,7 @@ const badges: Record<PostType, TypeBadge> = {
 
 /** - `icono corazón de los likes` */
 const heartIcon: ReactElement = (
-  <svg width="19" height="19" viewBox="0 0 24 24" fill="#E0654A" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21.2l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z" />
   </svg>
 );
@@ -113,7 +113,7 @@ const PostCard = ({ post }: PostCardProps): ReactElement => {
 
       {/*  -----  acciones  -----  */}
       <div className="flex items-center gap-4.5 mt-4 pt-3.5 border-t border-[#F0E6D8]">
-        <span className="flex items-center gap-1.75 text-[#E0654A] font-bold text-sm">
+        <span className="flex items-center gap-1.75 text-[#94887B] font-bold text-sm">
           {heartIcon}
           {post.likes}
         </span>
