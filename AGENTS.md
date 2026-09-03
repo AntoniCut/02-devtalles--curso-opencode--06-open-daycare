@@ -1,4 +1,4 @@
-<!-- BEGIN:nextjs-agent-rules -->
+
 
 # This is NOT the Next.js you know
 
@@ -6,7 +6,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
 
-<!-- END:nextjs-agent-rules -->
+
 
 ## Stack y comandos
 
@@ -15,18 +15,35 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - `pnpm-workspace.yaml` bloquea los build scripts de `sharp` y `unrs-resolver` (`allowBuilds: false`) — no los rehabilites sin motivo.
 - Alias de imports: `@/*` → raíz del proyecto (definido en `tsconfig.json`).
 
+
+
 ## Objetivo del proyecto
 
 Portar las maquetas HTML de `references/pantallas/*.dc.html` a rutas del App Router, manteniendo el estilo **idéntico**. `references/screenshots/*.png` son los objetivos de comparación visual. `CLAUDE.md` solo re-exporta este archivo (`@AGENTS.md`).
 
 - No hay autenticación ni base de datos todavía — los enlaces y datos son mock.
-- Navegación interna **siempre con `next/link`**, no con `<a>`.
+- Navegación interna **siempre con** `next/link`, no con `<a>`.
 - Comunicación con el usuario en **español**.
+
+
 
 ## MCPs
 
 - **Playwright**: screenshots, snapshots de accesibilidad y logs de consola tienen que guardarse en la carpeta `.playwright-mcp/` (está gitignored, excepto su contenido). El MCP está habilitado vía `opencode.json`.
 - **Context7**: usarlo para traer documentación actualizada de Next.js/React antes de escribir código — esta versión de Next 16 difiere de los datos de entrenamiento.
+
+
+
+## Spec Driven Development - Skills
+
+- **/spec**: Usaremos esta habilidad para crear las especificaciones.
+- **/spec-imp**: Usaremos esta skill para hacer las implementaciones.
+- Leer las skill globales sobre comentarios de código y de typescript.
+
+## Reglas de código
+
+- Usar código limpio, nombres, variables, funciones, etc, en inglés.
+
 
 ## Workflow de specs
 
@@ -36,3 +53,4 @@ Las skills del proyecto viven en `.agents/skills/` (`spec`, `spec-impl`), instal
 - El usuario cambia el estado a `Approved` manualmente; `/spec-impl NN-slug` crea la rama `spec-NN-slug` (según `AutoCreateBranch` en `specs/.spec-config.yml`) e implementa paso a paso con pausas para revisar diffs.
 - `spec-impl` **nunca** commitea automáticamente — el commit es decisión del usuario.
 - Verificación visual de criterios de aceptación: usar el MCP de Playwright contra `references/screenshots/`.
+
