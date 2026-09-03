@@ -79,7 +79,7 @@ const navItems: NavItem[] = [
 ];
 
 /** - `estilos base de los enlaces del menú` */
-const navItemBaseClass = "flex items-center gap-3 py-[11px] px-3 rounded-xl text-[14.5px]";
+const navItemBaseClass = "flex items-center gap-3 py-2.75 px-3 rounded-xl text-[14.5px]";
 
 /** - `estilos del enlace del menú activo` */
 const navItemActiveClass = "bg-[#FBE3D8] text-[#D9583C] font-extrabold";
@@ -97,10 +97,10 @@ const Sidebar = (): ReactElement => {
   const pathname = usePathname();
 
   return (
-    <aside className="w-[248px] flex-none bg-[#FFFDF9] border-r border-[#ECE0D0] flex flex-col px-4 py-6 sticky top-0 h-screen">
+    <aside className="w-62 flex-none bg-[#FFFDF9] border-r border-[#ECE0D0] flex flex-col px-4 py-6 sticky top-0 h-screen">
       {/*  -----  logo  -----  */}
-      <Link href="/" className="flex items-center gap-[11px] pt-1 px-2 pb-[22px]">
-        <div className="w-[38px] h-[38px] rounded-xl bg-[linear-gradient(155deg,#F8C3A8,#F2937A)] flex items-center justify-center flex-none">
+      <Link href="/" className="flex items-center gap-2.75 pt-1 px-2 pb-5.5">
+        <div className="w-9.5 h-9.5 rounded-xl bg-linear-155/srgb from-[#F8C3A8] to-[#F2937A] flex items-center justify-center flex-none">
           {sunIcon}
         </div>
         <div>
@@ -112,7 +112,7 @@ const Sidebar = (): ReactElement => {
       {/*  -----  botón nueva publicación  -----  */}
       <Link
         href="/crear-publicacion"
-        className="flex items-center justify-center gap-2 w-full py-3 rounded-[14px] bg-[linear-gradient(180deg,#F4977E,#EE8164)] text-white font-extrabold text-[14.5px] shadow-[0_8px_18px_-8px_rgba(238,129,100,.75)] mb-[18px]"
+        className="flex items-center justify-center gap-2 w-full py-3 rounded-[14px] bg-linear-to-b/srgb from-[#F4977E] to-[#EE8164] text-white font-extrabold text-[14.5px] shadow-[0_8px_18px_-8px_rgba(238,129,100,.75)] mb-4.5"
       >
         {plusIcon}
         Nueva publicación
@@ -138,8 +138,8 @@ const Sidebar = (): ReactElement => {
 
       {/*  -----  usuario conectado  -----  */}
       <div className="border-t border-[#ECE0D0] pt-3.5 mt-2.5">
-        <div className="flex items-center gap-[11px] px-2 py-1.5">
-          <div className="w-[38px] h-[38px] rounded-full bg-[#F2937A] text-white font-display font-semibold text-base flex items-center justify-center flex-none">
+        <div className="flex items-center gap-2.75 px-2 py-1.5">
+          <div className="w-9.5 h-9.5 rounded-full bg-[#F2937A] text-white font-display font-semibold text-base flex items-center justify-center flex-none">
             {currentUser.initials}
           </div>
           <div className="flex-1 min-w-0">
