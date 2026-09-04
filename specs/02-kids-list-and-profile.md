@@ -80,16 +80,16 @@ Identificadores en inglés; strings de UI en español (provienen del mockup), ig
 
 ## Acceptance criteria
 
-- [ ] `/kids` renderiza sidebar (248px, sticky) y contenido centrado (max-width 880px); captura visualmente idéntica a `references/screenshots/ninos.png`.
-- [ ] Grid de 2 columnas con las 8 tarjetas; badges MANÍ y LACTOSA (`#FBD8CC`/`#D9684A`), VINCULAR (`#F9D2DE`/`#C56486`), resto con chevron `#CBB89F`.
-- [ ] Hover en tarjeta: borde `#F2A78E` y desplazamiento -2px.
-- [ ] Escribir en "Buscar niño…" filtra por nombre y actualiza el contador; al vaciar vuelven los 8.
-- [ ] Cada tarjeta navega con `next/link` a `/kids/{slug}` (ej. `/kids/mateo-fernandez`); `/kids/inexistente` da 404.
-- [ ] `/kids/[slug]` es visualmente idéntico a `perfil-nino.dc.html`: avatar 84px, Editar, tarjeta de alergias, tabla de datos, columna 300px con "Resumen del día", PADRES VINCULADOS (ACTIVA `#CFEBD8`/`#3E9B6C`, PENDIENTE `#F7E7A6`/`#9A7B1E`), "Vincular otro padre".
-- [ ] La tarjeta roja de alergias solo se muestra si `allergyNote` existe; la lista de padres refleja el mock de cada niño.
-- [ ] "Volver a Niños" navega a `/kids`; el ítem Niños del sidebar queda activo en `/kids` y en `/kids/[slug]`.
-- [ ] Links internos con `next/link` a rutas futuras: `/agregar-nino`, `/resumen-dia`, `/vincular-padre`.
-- [ ] `pnpm lint` y `pnpm build` sin errores; consola sin errores ni warnings de hidratación.
+- [x] `/kids` renderiza sidebar (248px, sticky) y contenido centrado (max-width 880px); captura visualmente idéntica a `references/screenshots/ninos.png`.
+- [x] Grid de 2 columnas con las 8 tarjetas; badges MANÍ y LACTOSA (`#FBD8CC`/`#D9684A`), VINCULAR (`#F9D2DE`/`#C56486`), resto con chevron `#CBB89F`.
+- [x] Hover en tarjeta: borde `#F2A78E` y desplazamiento -2px.
+- [x] Escribir en "Buscar niño…" filtra por nombre y actualiza el contador; al vaciar vuelven los 8.
+- [x] Cada tarjeta navega con `next/link` a `/kids/{slug}` (ej. `/kids/mateo-fernandez`); `/kids/inexistente` da 404.
+- [x] `/kids/[slug]` es visualmente idéntico a `perfil-nino.dc.html`: avatar 84px, Editar, tarjeta de alergias, tabla de datos, columna 300px con "Resumen del día", PADRES VINCULADOS (ACTIVA `#CFEBD8`/`#3E9B6C`, PENDIENTE `#F7E7A6`/`#9A7B1E`), "Vincular otro padre".
+- [x] La tarjeta roja de alergias solo se muestra si `allergyNote` existe; la lista de padres refleja el mock de cada niño.
+- [x] "Volver a Niños" navega a `/kids`; el ítem Niños del sidebar queda activo en `/kids` y en `/kids/[slug]`.
+- [x] Links internos con `next/link` a rutas futuras: `/agregar-nino`, `/resumen-dia`, `/vincular-padre`.
+- [x] `pnpm lint` y `pnpm build` sin errores; consola sin errores ni warnings de hidratación.
 
 ## Decisions
 
