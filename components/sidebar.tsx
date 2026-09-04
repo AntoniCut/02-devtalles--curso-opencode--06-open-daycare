@@ -73,7 +73,7 @@ const logoutIcon: ReactElement = (
 /** - `entradas del menú lateral` */
 const navItems: NavItem[] = [
   { label: "Feed", href: "/", icon: homeIcon },
-  { label: "Niños", href: "/ninos", icon: kidsIcon },
+  { label: "Niños", href: "/kids", icon: kidsIcon },
   { label: "Avisos", href: "/avisos", icon: bellIcon },
   { label: "Mi cuenta", href: "/mi-cuenta", icon: userIcon },
 ];
@@ -121,7 +121,7 @@ const Sidebar = (): ReactElement => {
       {/*  -----  menú lateral  -----  */}
       <nav className="flex flex-col gap-1 flex-1">
         {navItems.map((item) => {
-          const isActive: boolean = pathname === item.href;
+          const isActive: boolean = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
 
           return (
             <Link
