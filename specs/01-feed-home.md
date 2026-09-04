@@ -1,6 +1,6 @@
 # SPEC 01 — Home `/` con feed de maestra
 
-> **Estado:** Approved
+> **Estado:** Implemted
 > **Depende de:** —
 > **Fecha:** 2026-09-03
 > **Objetivo:** Portar la maqueta `references/pantallas/feed.dc.html` a la ruta `/` del App Router con estilo idéntico, usando Tailwind y datos mock.
