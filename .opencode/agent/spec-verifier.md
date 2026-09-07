@@ -1,7 +1,7 @@
 ---
 description: Verifies spec acceptance criteria. Use for spec verification, acceptance criteria checks, marking spec checkboxes, visual comparison against references/screenshots, and validating Next.js recommendations via Context7.
 mode: subagent
-model: deepseek/deepseek-v4-flash-vision-exp
+model: opencode-go/deepseek-v4-flash-vision-exp
 permission:
   edit: allow
   bash:

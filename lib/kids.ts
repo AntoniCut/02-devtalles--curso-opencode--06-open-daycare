@@ -1,0 +1,161 @@
+/*
+    *  ---------------------------------------  *
+    *  -----  kids.ts  --  /lib/kids.ts  -----  *
+    *  ---------------------------------------  *
+*/
+
+/** - `estado de vinculación de un padre` */
+export type ParentStatus = "active" | "pending";
+
+/** - `padre vinculado al niño` */
+export interface LinkedParent {
+  name: string;
+  relation: string; // "Mamá" | "Papá"
+  status: ParentStatus; // active → badge ACTIVA · pending → "invitación enviada"
+  initial: string;
+  background: string;
+  color: string;
+}
+
+/** - `etiqueta opcional de la tarjeta (MANÍ, LACTOSA, VINCULAR)` */
+export interface KidTag {
+  label: string;
+  variant: "alert" | "invite"; // mapa de colores en kid-card.tsx
+}
+
+/** - `niño de la sala` */
+export interface Kid {
+  slug: string;
+  name: string;
+  age: string;
+  initial: string;
+  background: string;
+  color: string;
+  tag?: KidTag; // si no existe, se muestra el chevron ">"
+  allergyNote?: string; // si existe, se muestra la tarjeta roja de alergias
+  birthDate: string;
+  classroom: string;
+  entry: string;
+  parents: LinkedParent[];
+}
+
+/** - `niños de la sala (los 8 del mockup)` */
+export const kids: Kid[] = [
+  {
+    slug: "mateo-fernandez",
+    name: "Mateo Fernández",
+    age: "3 años",
+    initial: "M",
+    background: "#A9D9E8",
+    color: "#1F7A93",
+    tag: { label: "MANÍ", variant: "alert" },
+    allergyNote: "Alergia al maní. Evitar frutos secos. Lleva inhalador en la mochila.",
+    birthDate: "12 mar 2022",
+    classroom: "Soles",
+    entry: "feb 2025",
+    parents: [
+      { name: "Lucía Fernández", relation: "Mamá", status: "active", initial: "L", background: "#C9B6E8", color: "#FFFFFF" },
+      { name: "Diego Fernández", relation: "Papá", status: "pending", initial: "D", background: "#A9C7E8", color: "#FFFFFF" },
+    ],
+  },
+  {
+    slug: "sofia-mendez",
+    name: "Sofía Méndez",
+    age: "2 años",
+    initial: "S",
+    background: "#F4B8CC",
+    color: "#C44A7A",
+    birthDate: "3 ago 2023",
+    classroom: "Soles",
+    entry: "mar 2025",
+    parents: [
+      { name: "Paula Méndez", relation: "Mamá", status: "active", initial: "P", background: "#F4B8CC", color: "#FFFFFF" },
+    ],
+  },
+  {
+    slug: "benjamin-ruiz",
+    name: "Benjamín Ruiz",
+    age: "3 años",
+    initial: "B",
+    background: "#B9DEC4",
+    color: "#3E8B62",
+    birthDate: "28 ene 2022",
+    classroom: "Soles",
+    entry: "feb 2025",
+    parents: [
+      { name: "Marcela Ruiz", relation: "Mamá", status: "active", initial: "M", background: "#B9DEC4", color: "#FFFFFF" },
+      { name: "Andrés Ruiz", relation: "Papá", status: "active", initial: "A", background: "#A9D9E8", color: "#FFFFFF" },
+    ],
+  },
+  {
+    slug: "valentina-soto",
+    name: "Valentina Soto",
+    age: "2 años",
+    initial: "V",
+    background: "#F4DC8E",
+    color: "#9A7B1E",
+    tag: { label: "VINCULAR", variant: "invite" },
+    birthDate: "15 sep 2023",
+    classroom: "Soles",
+    entry: "abr 2025",
+    parents: [],
+  },
+  {
+    slug: "tomas-diaz",
+    name: "Tomás Díaz",
+    age: "3 años",
+    initial: "T",
+    background: "#C9B6E8",
+    color: "#7B5FC0",
+    tag: { label: "LACTOSA", variant: "alert" },
+    allergyNote: "Intolerancia a la lactosa. Tomar leche deslactosada.",
+    birthDate: "9 nov 2022",
+    classroom: "Soles",
+    entry: "feb 2025",
+    parents: [
+      { name: "Jorge Díaz", relation: "Papá", status: "active", initial: "J", background: "#C9B6E8", color: "#FFFFFF" },
+    ],
+  },
+  {
+    slug: "emma-castro",
+    name: "Emma Castro",
+    age: "2 años",
+    initial: "E",
+    background: "#F4B8CC",
+    color: "#C44A7A",
+    birthDate: "22 jun 2023",
+    classroom: "Soles",
+    entry: "mar 2025",
+    parents: [
+      { name: "Valeria Castro", relation: "Mamá", status: "active", initial: "V", background: "#F4DC8E", color: "#FFFFFF" },
+    ],
+  },
+  {
+    slug: "lucas-romero",
+    name: "Lucas Romero",
+    age: "3 años",
+    initial: "L",
+    background: "#A9D9E8",
+    color: "#1F7A93",
+    birthDate: "4 may 2022",
+    classroom: "Soles",
+    entry: "feb 2025",
+    parents: [
+      { name: "Martín Romero", relation: "Papá", status: "active", initial: "M", background: "#A9C7E8", color: "#FFFFFF" },
+    ],
+  },
+  {
+    slug: "olivia-vega",
+    name: "Olivia Vega",
+    age: "2 años",
+    initial: "O",
+    background: "#B9DEC4",
+    color: "#3E8B62",
+    birthDate: "30 dic 2023",
+    classroom: "Soles",
+    entry: "abr 2025",
+    parents: [
+      { name: "Carla Vega", relation: "Mamá", status: "active", initial: "C", background: "#C9B6E8", color: "#FFFFFF" },
+    ],
+  },
+];
