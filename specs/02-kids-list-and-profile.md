@@ -1,6 +1,6 @@
 # SPEC 02 — Pantallas `/kids` y `/kids/[slug]`
 
-> **Estado:** Approved
+> **Estado:** Implementado
 > **Depende de:** SPEC 01
 > **Fecha:** 2026-09-04
 > **Objetivo:** Portar las maquetas `references/pantallas/ninos.dc.html` y `references/pantallas/perfil-nino.dc.html` a las rutas `/kids` y `/kids/[slug]` con estilo idéntico, Tailwind y datos mock.
