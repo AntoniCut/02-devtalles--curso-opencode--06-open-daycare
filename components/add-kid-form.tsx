@@ -6,7 +6,7 @@
 "use client";
 
 import { useState } from "react";
-import type { ChangeEvent, FormEvent, ReactElement } from "react";
+import type { ChangeEvent, ReactElement, SubmitEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { classrooms } from "@/lib/kids";
@@ -165,7 +165,7 @@ const AddKidForm = (): ReactElement => {
    * ------------------------------------
    * - Valida el formulario; si es válido navega a la lista de niños.
    */
-  const handleSubmit = (event: FormEvent<HTMLFormElement>): void => {
+  const handleSubmit = (event: SubmitEvent<HTMLFormElement>): void => {
     event.preventDefault();
     const nextErrors = validateForm(name, birthDate, classroom);
     setErrors(nextErrors);
