@@ -13,7 +13,7 @@
 - Header de la tarjeta: "Cancelar" (link a `/kids`, `#94887B`), título "Agregar niño" (Fredoka 600 18px) y "Guardar" (`#D9583C`), separados por border-bottom `#ECE0D0`.
 - Formulario (client component `components/add-kid-form.tsx`): Nombre completo, Fecha de nacimiento, Sala, Alergias (etiquetas) y Notas médicas, con labels 12px extrabold tracking `.7px` `#94887B` e inputs blancos radius 14px borde 1.5px `#EADFD0`.
 - **Máscara dd/mm/aaaa** en la fecha: input controlado que solo acepta dígitos, inserta `/` automáticamente tras dd y mm, máximo 10 caracteres, placeholder "dd/mm/aaaa".
-- **Validación al guardar**: Nombre y Sala requeridos; Fecha requerida y con formato `\d{2}/\d{2}/\d{4}` (solo formato). Errores: borde `#D9583C` + mensaje pequeño `#D9583C` bajo el campo ("Campo requerido" / "Formato inválido (dd/mm/aaaa)"). El error del campo se limpia al corregirlo.
+- **Validación al guardar**: Nombre y Sala requeridos; Fecha requerida y con formato `\d{2}/\d{2}/\d{4}` + fecha real en el calendario (cualquier año; `12/13/2022` y `31/02/2022` fallan). Errores: borde `#D9583C` + mensaje pequeño `#D9583C` bajo el campo ("Campo requerido" / "Formato inválido (dd/mm/aaaa)"). El error del campo se limpia al corregirlo.
 - Formulario válido → `Guardar` navega a `/kids` (sin persistir el niño).
 - Sala: `<select>` nativo estilizado con `appearance-none` y chevron `#B0A290` (igual al mockup), arranca vacío con placeholder "Seleccionar sala…" y opciones **Soles**, **Estrellas**, **Lunas** hardcodeadas en `lib/kids.ts`.
 - Alergias y Notas médicas sin validación (opcionales).
@@ -21,7 +21,7 @@
 **Out of scope (para specs futuros):**
 
 - Persistir el niño nuevo — la lista de `/kids` sigue siendo el mock de 8 (sin base de datos).
-- Validación de fecha real del calendario o "no futura" — solo formato (decisión del usuario).
+- Validar que la fecha no sea futura — la fecha admite cualquier año (decisión del usuario).
 - Autenticación, API y estados de envío/loading.
 - Dropdown custom accesible — select nativo estilizado.
 - Responsive móvil/tablet y modo oscuro.
@@ -49,7 +49,7 @@ Identificadores en inglés; strings de UI en español (provienen del mockup), ig
 1. `lib/kids.ts`: exportar `classrooms` con las 3 salas.
 2. `components/add-kid-form.tsx` ("use client"): tarjeta completa — header (Cancelar `next/link` a `/kids`, título, Guardar), inputs Nombre/Fecha/Alergias, select de Sala estilizado con chevron, textarea Notas. Test manual: `pnpm dev` → `/agregar-nino` idéntica a la maqueta.
 3. Máscara de fecha: valor derivado de dígitos (strip no-dígitos, máx 8, `/` tras posiciones 2 y 4), `inputMode="numeric"`, `maxLength={10}`. Test: escribir `08092026` muestra `08/09/2026`.
-4. Validación en submit: requeridos nombre/fecha/sala + regex de formato de fecha; estado de errores con borde `#D9583C` y mensaje bajo el campo; limpiar error al editar el campo; válido → `router.push("/kids")`.
+4. Validación en submit: requeridos nombre/fecha/sala + fecha con formato dd/mm/aaaa y real en el calendario (cualquier año); estado de errores con borde `#D9583C` y mensaje bajo el campo; limpiar error al editar el campo; válido → `router.push("/kids")`.
 5. `app/agregar-nino/page.tsx`: wrapper centrado (`min-h-screen`, padding 40px 24px) + `metadata`. Verificar riesgo del body `flex flex-col` del root layout (patrón SPEC 03).
 6. Verificación visual con Playwright contra `agregar-nino.dc.html` renderizado (no existe screenshot PNG) + prueba manual de los 3 errores y del flujo válido → `/kids` + `pnpm lint` + `pnpm build`.
 
@@ -62,7 +62,7 @@ Identificadores en inglés; strings de UI en español (provienen del mockup), ig
 - [ ] Placeholder gris `#B6A99B` en todos los campos vacíos ("Ej. Martina López", "dd/mm/aaaa", "Ej. Maní, Lactosa", "Indicaciones, medicación, contactos…").
 - [ ] Escribir `08092026` en la fecha muestra `08/09/2026`; solo acepta dígitos y máximo 10 caracteres.
 - [ ] Submit con campos vacíos muestra 3 errores (borde `#D9583C` + "Campo requerido") en Nombre, Fecha y Sala; **no** navega.
-- [ ] Fecha `12/13/2022` muestra "Formato inválido (dd/mm/aaaa)"; `12/11/2022` pasa (solo formato, sin validar calendario).
+- [ ] Fecha `12/13/2022` muestra "Formato inválido (dd/mm/aaaa)"; también `31/02/2022`; `12/11/2022` pasa (formato + existencia en calendario, cualquier año).
 - [ ] Al corregir un campo con error, su error desaparece.
 - [ ] Sala: select nativo estilizado con chevron `#B0A290`, placeholder "Seleccionar sala…" en gris, opciones Soles, Estrellas y Lunas.
 - [ ] Formulario válido → "Guardar" navega a `/kids`; "Cancelar" navega a `/kids` con `next/link`.
@@ -75,7 +75,7 @@ Identificadores en inglés; strings de UI en español (provienen del mockup), ig
 - **Sí:** ruta `/agregar-nino` — el botón "Agregar niño" de `/kids` (SPEC 02) ya apunta ahí.
 - **Sí:** formulario client component; "Guardar" valida y navega a `/kids` sin persistir (mock estático, patrón SPEC 02/03).
 - **Sí:** errores con borde `#D9583C` + mensaje bajo el campo — paleta existente, feedback claro sin romper el estilo.
-- **Sí:** validación de fecha **solo formato** `\d{2}/\d{2}/\d{4}` (decisión explícita del usuario: no valida calendario ni fecha futura).
+- **Sí:** validación de fecha **formato + existencia en calendario, cualquier año** (resolución de ambigüedad durante la implementación: la opción "solo formato" del cuestionario tenía por descripción validar el calendario, y el criterio `12/13/2022 → error` exige fecha real; "no futura" queda fuera).
 - **Sí:** salas Soles/Estrellas/Lunas en `lib/kids.ts` (dominio kids, reutilizable); Soles ya existe en el mock de los 8 niños.
 - **Sí:** select nativo estilizado (`appearance-none` + chevron absoluto) — accesible y se ve idéntico al mockup.
 - **Sí:** select arranca vacío "Seleccionar sala…" (decisión del usuario) — hace real la validación de requerido; única divergencia visual menor vs mockup.
