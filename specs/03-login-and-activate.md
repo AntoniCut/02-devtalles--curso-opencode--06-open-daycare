@@ -37,16 +37,16 @@ Identificadores en inglés; strings de UI en español (provienen del mockup), ig
 
 ## Acceptance criteria
 
-- [ ] `/login` renderiza sin sidebar: dos columnas, panel gradiente con círculos decorativos, logo 46px, titular Fredoka 42px y footer "Guardería Sala Soles".
-- [ ] `/login` NO muestra el selector "INGRESO COMO" (Personal/Familia).
-- [ ] Email prellenado con `caro@opendaycare.com`; contraseña vacía con placeholder "••••••••".
-- [ ] "Iniciar sesión" navega a `/` y "Activá tu cuenta" a `/activate`, ambos con `next/link`.
-- [ ] `/activate` renderiza logo 58px con gradiente y sombra, tarjeta de invitación con avatar "M" (`#A9D9E8`/`#1F7A93`) y "Mateo · Sala Soles".
-- [ ] Código de invitación prellenado `7K4P9` (Fredoka, letter-spacing 3px), email `lucia.fernandez@gmail.com`, contraseña con borde `#F2A78E`.
-- [ ] Checkbox de autorización estático y marcado: caja `#5FB97E`, fondo `#FBF1D6`, texto `#8A7234`.
-- [ ] "Activar mi cuenta" navega a `/parent-feed` (404 temporal) e "Iniciar sesión" a `/login`, con `next/link`.
-- [ ] Ambas páginas son visualmente idénticas a sus maquetas HTML renderizadas.
-- [ ] `pnpm lint` y `pnpm build` sin errores; consola sin errores ni warnings de hidratación.
+- [x] `/login` renderiza sin sidebar: dos columnas, panel gradiente con círculos decorativos, logo 46px, titular Fredoka 42px y footer "Guardería Sala Soles".
+- [x] `/login` NO muestra el selector "INGRESO COMO" (Personal/Familia).
+- [x] Email prellenado con `caro@opendaycare.com`; contraseña vacía con placeholder "••••••••".
+- [x] "Iniciar sesión" navega a `/` y "Activá tu cuenta" a `/activate`, ambos con `next/link`.
+- [x] `/activate` renderiza logo 58px con gradiente y sombra, tarjeta de invitación con avatar "M" (`#A9D9E8`/`#1F7A93`) y "Mateo · Sala Soles".
+- [x] Código de invitación prellenado `7K4P9` (Fredoka, letter-spacing 3px), email `lucia.fernandez@gmail.com`, contraseña con borde `#F2A78E`.
+- [x] Checkbox de autorización estático y marcado: caja `#5FB97E`, fondo `#FBF1D6`, texto `#8A7234`.
+- [x] "Activar mi cuenta" navega a `/parent-feed` (404 temporal) e "Iniciar sesión" a `/login`, con `next/link`.
+- [x] Ambas páginas son visualmente idénticas a sus maquetas HTML renderizadas.
+- [x] `pnpm lint` y `pnpm build` sin errores; consola sin errores ni warnings de hidratación.
 
 ## Decisions
 
