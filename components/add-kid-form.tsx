@@ -6,7 +6,7 @@
 "use client";
 
 import { useState } from "react";
-import type { ReactElement } from "react";
+import type { ChangeEvent, ReactElement } from "react";
 import Link from "next/link";
 import { classrooms } from "@/lib/kids";
 
@@ -25,6 +25,27 @@ const fieldClasses: string = "w-full py-[13px] px-4 rounded-[14px] border-[1.5px
 
 /**
  * --------------------------------
+ * -----  `maskBirthDate(raw)`  -----
+ * --------------------------------
+ * - Aplica la máscara dd/mm/aaaa: solo dígitos, máximo 8, con "/" automática.
+ */
+const maskBirthDate = (raw: string): string => {
+  const digits = raw.replace(/\D/g, "").slice(0, 8);
+
+  //  -----  sin dígitos suficientes todavía, sin separadores  -----
+  if (digits.length <= 2) {
+    return digits;
+  }
+  //  -----  día completo, sin mes completo  -----
+  if (digits.length <= 4) {
+    return `${digits.slice(0, 2)}/${digits.slice(2)}`;
+  }
+  //  -----  día y mes completos o más  -----
+  return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
+};
+
+/**
+ * --------------------------------
  * -----  `AddKidForm()`  -----
  * --------------------------------
  * - Formulario para agregar un niño: header Cancelar/Guardar y campos del mockup.
@@ -35,6 +56,16 @@ const AddKidForm = (): ReactElement => {
   const [classroom, setClassroom] = useState<string>("");
   const [allergies, setAllergies] = useState<string>("");
   const [notes, setNotes] = useState<string>("");
+
+  /**
+   * ------------------------------------------
+   * -----  `handleBirthDateChange(event)`  -----
+   * ------------------------------------------
+   * - Actualiza la fecha aplicando la máscara dd/mm/aaaa.
+   */
+  const handleBirthDateChange = (event: ChangeEvent<HTMLInputElement>): void => {
+    setBirthDate(maskBirthDate(event.target.value));
+  };
 
   //  -----  estilos del select: placeholder gris hasta elegir sala  -----
   const selectClasses = `appearance-none w-full py-[13px] pl-4 pr-[40px] rounded-[14px] border-[1.5px] border-[#EADFD0] bg-white text-[15px] font-bold outline-none ${classroom === "" ? "text-[#B6A99B]" : "text-[#3F362E]"}`;
@@ -73,8 +104,10 @@ const AddKidForm = (): ReactElement => {
             <input
               id="birth-date"
               type="text"
+              inputMode="numeric"
+              maxLength={10}
               value={birthDate}
-              onChange={(event) => setBirthDate(event.target.value)}
+              onChange={handleBirthDateChange}
               placeholder="dd/mm/aaaa"
               className={fieldClasses}
             />
