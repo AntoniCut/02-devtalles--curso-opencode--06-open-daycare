@@ -40,6 +40,10 @@ export interface Kid {
 }
 
 /** - `niños de la sala (los 8 del mockup)` */
+/** - `salas hardcodeadas del daycare (select de agregar niño)` */
+export const classrooms: string[] = ["Soles", "Estrellas", "Lunas"];
+
+/** - `niños de la sala (los 8 del mockup)` */
 export const kids: Kid[] = [
   {
     slug: "mateo-fernandez",
