@@ -1,6 +1,6 @@
 # SPEC 03 — Login `/login` y activación `/activate`
 
-> **Estado:** Aprovado
+> **Estado:** Implemented
 > **Depende de:** SPEC 01
 > **Fecha:** 2026-09-08
 > **Objetivo:** Portar las maquetas `references/pantallas/login.dc.html` y `references/pantallas/activar-cuenta.dc.html` a las rutas `/login` y `/activate` (route group `(auth)`) con estilo idéntico, sin el selector Personal/Familia del login.

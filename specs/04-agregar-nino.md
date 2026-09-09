@@ -1,6 +1,6 @@
 # SPEC 04 — Pantalla `/agregar-nino`
 
-> **Estado:** Aprovado
+> **Estado:** Implemented
 > **Depende de:** SPEC 02
 > **Fecha:** 2026-09-08
 > **Objetivo:** Portar la maqueta `references/pantallas/agregar-nino.dc.html` a la ruta `/agregar-nino` como formulario funcional con validación de requeridos, máscara de fecha dd/mm/aaaa y salas hardcodeadas, con estilo idéntico.
