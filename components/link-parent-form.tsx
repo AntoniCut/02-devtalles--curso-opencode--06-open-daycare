@@ -6,8 +6,9 @@
 "use client";
 
 import { useState } from "react";
-import type { ChangeEvent, ReactElement } from "react";
+import type { ChangeEvent, ReactElement, SubmitEvent } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 /** - `parentesco del padre/madre vinculado` */
 type Relation = "Mamá" | "Papá" | "Tutor/a";
@@ -41,8 +42,46 @@ const sendIcon: ReactElement = (
 /** - `estilos de las etiquetas de los campos (sin margen)` */
 const labelClasses: string = "block text-[12px] font-extrabold tracking-[.7px] text-[#94887B]";
 
-/** - `estilos de los inputs del formulario` */
-const fieldStyles: string = "w-full py-[13px] px-4 rounded-[14px] border-[1.5px] border-[#EADFD0] bg-white text-[15px] text-[#3F362E] outline-none placeholder:text-[#B6A99B]";
+/** - `formato de email admitido` */
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+/** - `errores de validación del formulario, por campo` */
+interface FormErrors {
+  name?: string;
+  email?: string;
+}
+
+/**
+ * -------------------------------------
+ * -----  `fieldStyles(hasError)`  -----
+ * -------------------------------------
+ * - Estilos de un campo; borde rojo cuando tiene error de validación.
+ */
+const fieldStyles = (hasError: boolean): string => `w-full py-[13px] px-4 rounded-[14px] border-[1.5px] ${hasError ? "border-[#D9583C]" : "border-[#EADFD0]"} bg-white text-[15px] text-[#3F362E] outline-none placeholder:text-[#B6A99B]`;
+
+/**
+ * -------------------------------------
+ * -----  `validateForm(name, email)`  -----
+ * -------------------------------------
+ * - Valida los requeridos y el formato del email; devuelve los errores por campo.
+ */
+const validateForm = (name: string, email: string): FormErrors => {
+  const errors: FormErrors = {};
+
+  //  -----  nombre: requerido  -----
+  if (name.trim() === "") {
+    errors.name = "Campo requerido";
+  }
+  //  -----  email: requerido  -----
+  if (email === "") {
+    errors.email = "Campo requerido";
+  }
+  //  -----  email: formato inválido  -----
+  else if (!EMAIL_PATTERN.test(email)) {
+    errors.email = "Email inválido";
+  }
+  return errors;
+};
 
 /**
  * ------------------------------------
@@ -57,12 +96,14 @@ const pillStyles = (selected: boolean): string => `flex-1 py-[11px] rounded-full
  * -----  `LinkParentForm()`  -----
  * ------------------------------------
  * - Formulario para vincular un padre al niño: header con cierre, banner informativo,
- *   campos nombre/email, pills de parentesco y tarjeta del código de invitación.
+ *   campos nombre/email con validación, pills de parentesco y tarjeta del código.
  */
 const LinkParentForm = (): ReactElement => {
+  const router = useRouter();
   const [name, setName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [relation, setRelation] = useState<Relation>("Mamá");
+  const [errors, setErrors] = useState<FormErrors>({});
 
   /**
    * -------------------------------------
@@ -74,18 +115,64 @@ const LinkParentForm = (): ReactElement => {
     setRelation(item);
   };
 
+  /**
+   * -------------------------------------------------
+   * -----  `clearErrorIfValid(field, value)`  -----
+   * -------------------------------------------------
+   * - Limpia el error de un campo cuando su valor pasa a ser válido.
+   */
+  const clearErrorIfValid = (field: keyof FormErrors, value: string): void => {
+    //  -----  el campo no tiene error, nada que limpiar  -----
+    if (!errors[field]) {
+      return;
+    }
+    //  -----  el nuevo valor del campo es válido según su tipo  -----
+    let isValid: boolean = true;
+    if (field === "name") {
+      isValid = value.trim() !== "";
+    }
+    if (field === "email") {
+      isValid = EMAIL_PATTERN.test(value);
+    }
+    if (isValid) {
+      setErrors((current) => ({ ...current, [field]: undefined }));
+    }
+  };
+
   //  -----  nombre del padre/madre  -----
   const handleNameChange = (event: ChangeEvent<HTMLInputElement>): void => {
     setName(event.target.value);
+    clearErrorIfValid("name", event.target.value);
   };
 
   //  -----  email del padre/madre  -----
   const handleEmailChange = (event: ChangeEvent<HTMLInputElement>): void => {
     setEmail(event.target.value);
+    clearErrorIfValid("email", event.target.value);
+  };
+
+  /**
+   * ------------------------------------
+   * -----  `handleSubmit(event)`  -----
+   * ------------------------------------
+   * - Valida el formulario; si es válido navega al perfil del niño.
+   */
+  const handleSubmit = (event: SubmitEvent<HTMLFormElement>): void => {
+    event.preventDefault();
+    const nextErrors = validateForm(name, email);
+    setErrors(nextErrors);
+
+    //  -----  formulario válido: navegar al perfil sin persistir (mock)  -----
+    if (Object.keys(nextErrors).length === 0) {
+      router.push("/kids/mateo-fernandez");
+    }
   };
 
   return (
-    <form className="w-full max-w-[480px] bg-[#FBF4EC] border border-[#ECE0D0] rounded-[24px] shadow-[0_20px_50px_-24px_rgba(63,54,46,.35)] overflow-hidden">
+    <form
+      onSubmit={handleSubmit}
+      className="w-full max-w-[480px] bg-[#FBF4EC] border border-[#ECE0D0] rounded-[24px] shadow-[0_20px_50px_-24px_rgba(63,54,46,.35)] overflow-hidden"
+    >
       {/*  -----  header: título, subtítulo y cierre  -----  */}
       <div className="flex items-center justify-between py-5 px-[26px] border-b border-[#ECE0D0]">
         <div>
@@ -114,8 +201,11 @@ const LinkParentForm = (): ReactElement => {
             value={name}
             onChange={handleNameChange}
             placeholder="Ej. Diego Fernández"
-            className={fieldStyles}
+            aria-invalid={Boolean(errors.name)}
+            aria-describedby={errors.name ? "name-error" : undefined}
+            className={fieldStyles(Boolean(errors.name))}
           />
+          {errors.name && <p id="name-error" className="mt-1.5 text-[12.5px] font-bold text-[#D9583C]">{errors.name}</p>}
         </div>
 
         {/*  -----  email  -----  */}
@@ -127,8 +217,11 @@ const LinkParentForm = (): ReactElement => {
             value={email}
             onChange={handleEmailChange}
             placeholder="correo@ejemplo.com"
-            className={fieldStyles}
+            aria-invalid={Boolean(errors.email)}
+            aria-describedby={errors.email ? "email-error" : undefined}
+            className={fieldStyles(Boolean(errors.email))}
           />
+          {errors.email && <p id="email-error" className="mt-1.5 text-[12.5px] font-bold text-[#D9583C]">{errors.email}</p>}
         </div>
 
         {/*  -----  parentesco (pills seleccionables)  -----  */}
@@ -157,7 +250,7 @@ const LinkParentForm = (): ReactElement => {
         </div>
 
         {/*  -----  CTA enviar invitación  -----  */}
-        <button type="button" className="flex w-full items-center justify-center gap-[9px] rounded-[14px] bg-[linear-gradient(180deg,#F4977E,#EE8164)] py-[14px] text-[15.5px] font-extrabold text-white shadow-[0_10px_22px_-8px_rgba(238,129,100,.7)] cursor-pointer">
+        <button type="submit" className="flex w-full items-center justify-center gap-[9px] rounded-[14px] bg-[linear-gradient(180deg,#F4977E,#EE8164)] py-[14px] text-[15.5px] font-extrabold text-white shadow-[0_10px_22px_-8px_rgba(238,129,100,.7)] cursor-pointer">
           {sendIcon}
           Enviar invitación
         </button>
