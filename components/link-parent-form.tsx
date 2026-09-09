@@ -171,6 +171,7 @@ const LinkParentForm = (): ReactElement => {
   return (
     <form
       onSubmit={handleSubmit}
+      noValidate
       className="w-full max-w-[480px] bg-[#FBF4EC] border border-[#ECE0D0] rounded-[24px] shadow-[0_20px_50px_-24px_rgba(63,54,46,.35)] overflow-hidden"
     >
       {/*  -----  header: título, subtítulo y cierre  -----  */}

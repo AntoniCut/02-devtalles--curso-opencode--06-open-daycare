@@ -53,19 +53,19 @@ No se crea ni modifica `lib/`: el código es estático y `lib/kids.ts` (SPEC 02)
 
 ## Acceptance criteria
 
-- [ ] `/vincular-padre` renderiza la tarjeta centrada (max-w 480px, `#FBF4EC`, borde `#ECE0D0`, radius 24px, sombra) visualmente idéntica a `vincular-padre.dc.html`.
-- [ ] Header con "Vincular padre" (Fredoka 600 18px) + "a Mateo Fernández" (13px `#A89A8B`) y botón X (34×34, radius 10px, `#F0E6D8`, icono `#94887B`) que navega a `/kids/mateo-fernandez` con `next/link`.
-- [ ] Banner azul `#E3ECFB` radius 14px con icono info `#4E72C8` y el texto del mockup en `#3F5694`.
-- [ ] Labels 12px extrabold tracking `.7px` `#94887B`; inputs padding 13px/16px, radius 14px, borde 1.5px `#EADFD0`, fondo blanco, texto 15px; placeholders `#B6A99B`.
-- [ ] Parentesco: 3 pills (Mamá, Papá, Tutor/a); Mamá preseleccionada (`#CCD8F4`/`#9FB8EC`/`#4E72C8`); al hacer clic en otra pill cambia la selección.
-- [ ] Tarjeta de código: fondo `#FBF1D6`, borde dashed `#E6D08A`, radius 16px; "CÓDIGO DE INVITACIÓN" `#A88526`; código `7K4P9` Fredoka 600 34px tracking 7px `#8A7234`; "Vence en 7 días" `#A88526`.
-- [ ] CTA "Enviar invitación" con gradiente `#F4977E→#EE8164`, radius 14px, sombra e icono send, a ancho completo.
-- [ ] Submit vacío muestra 2 errores (borde `#D9583C` + "Campo requerido") en Nombre y Email; **no** navega.
-- [ ] Email con formato inválido (ej. `hola@`) muestra "Email inválido"; un email válido lo pasa.
-- [ ] Al corregir un campo con error, su error desaparece.
-- [ ] Formulario válido → navega a `/kids/mateo-fernandez`.
-- [ ] `metadata` propia ("Vincular padre · OpenDayCare"); consola sin errores ni warnings de hidratación.
-- [ ] `pnpm lint` y `pnpm build` sin errores.
+- [x] `/vincular-padre` renderiza la tarjeta centrada (max-w 480px, `#FBF4EC`, borde `#ECE0D0`, radius 24px, sombra) visualmente idéntica a `vincular-padre.dc.html`.
+- [x] Header con "Vincular padre" (Fredoka 600 18px) + "a Mateo Fernández" (13px `#A89A8B`) y botón X (34×34, radius 10px, `#F0E6D8`, icono `#94887B`) que navega a `/kids/mateo-fernandez` con `next/link`.
+- [x] Banner azul `#E3ECFB` radius 14px con icono info `#4E72C8` y el texto del mockup en `#3F5694`.
+- [x] Labels 12px extrabold tracking `.7px` `#94887B`; inputs padding 13px/16px, radius 14px, borde 1.5px `#EADFD0`, fondo blanco, texto 15px; placeholders `#B6A99B`.
+- [x] Parentesco: 3 pills (Mamá, Papá, Tutor/a); Mamá preseleccionada (`#CCD8F4`/`#9FB8EC`/`#4E72C8`); al hacer clic en otra pill cambia la selección.
+- [x] Tarjeta de código: fondo `#FBF1D6`, borde dashed `#E6D08A`, radius 16px; "CÓDIGO DE INVITACIÓN" `#A88526`; código `7K4P9` Fredoka 600 34px tracking 7px `#8A7234`; "Vence en 7 días" `#A88526`.
+- [x] CTA "Enviar invitación" con gradiente `#F4977E→#EE8164`, radius 14px, sombra e icono send, a ancho completo.
+- [x] Submit vacío muestra 2 errores (borde `#D9583C` + "Campo requerido") en Nombre y Email; **no** navega.
+- [x] Email con formato inválido (ej. `hola@`) muestra "Email inválido"; un email válido lo pasa.
+- [x] Al corregir un campo con error, su error desaparece.
+- [x] Formulario válido → navega a `/kids/mateo-fernandez`.
+- [x] `metadata` propia ("Vincular padre · OpenDayCare"); consola sin errores ni warnings de hidratación.
+- [x] `pnpm lint` y `pnpm build` sin errores.
 
 ## Decisions
 
