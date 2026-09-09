@@ -55,20 +55,20 @@ Identificadores en inglés; strings de UI en español (provienen del mockup), ig
 
 ## Acceptance criteria
 
-- [ ] `/agregar-nino` renderiza la tarjeta centrada (max-w 520px, `#FBF4EC`, borde `#ECE0D0`, radius 24px, sombra) visualmente idéntica a `agregar-nino.dc.html`.
-- [ ] Header con "Cancelar" (`#94887B`, bold 15px), "Agregar niño" (Fredoka 600 18px) y "Guardar" (`#D9583C`, extrabold 15px), border-bottom `#ECE0D0`.
-- [ ] Labels 12px extrabold tracking `.7px` `#94887B`; inputs padding 13px/16px, radius 14px, borde 1.5px `#EADFD0`, fondo blanco, texto 15px.
-- [ ] Fecha y Sala comparten fila (flex, gap 14px, cada una `flex:1`).
-- [ ] Placeholder gris `#B6A99B` en todos los campos vacíos ("Ej. Martina López", "dd/mm/aaaa", "Ej. Maní, Lactosa", "Indicaciones, medicación, contactos…").
-- [ ] Escribir `08092026` en la fecha muestra `08/09/2026`; solo acepta dígitos y máximo 10 caracteres.
-- [ ] Submit con campos vacíos muestra 3 errores (borde `#D9583C` + "Campo requerido") en Nombre, Fecha y Sala; **no** navega.
-- [ ] Fecha `12/13/2022` muestra "Formato inválido (dd/mm/aaaa)"; también `31/02/2022`; `12/11/2022` pasa (formato + existencia en calendario, cualquier año).
-- [ ] Al corregir un campo con error, su error desaparece.
-- [ ] Sala: select nativo estilizado con chevron `#B0A290`, placeholder "Seleccionar sala…" en gris, opciones Soles, Estrellas y Lunas.
-- [ ] Formulario válido → "Guardar" navega a `/kids`; "Cancelar" navega a `/kids` con `next/link`.
-- [ ] Alergias y Notas médicas se envían sin validación.
-- [ ] `metadata` propia ("Agregar niño · OpenDayCare"); consola sin errores ni warnings de hidratación.
-- [ ] `pnpm lint` y `pnpm build` sin errores.
+- [x] `/agregar-nino` renderiza la tarjeta centrada (max-w 520px, `#FBF4EC`, borde `#ECE0D0`, radius 24px, sombra) visualmente idéntica a `agregar-nino.dc.html`.
+- [x] Header con "Cancelar" (`#94887B`, bold 15px), "Agregar niño" (Fredoka 600 18px) y "Guardar" (`#D9583C`, extrabold 15px), border-bottom `#ECE0D0`.
+- [x] Labels 12px extrabold tracking `.7px` `#94887B`; inputs padding 13px/16px, radius 14px, borde 1.5px `#EADFD0`, fondo blanco, texto 15px.
+- [x] Fecha y Sala comparten fila (flex, gap 14px, cada una `flex:1`).
+- [x] Placeholder gris `#B6A99B` en todos los campos vacíos ("Ej. Martina López", "dd/mm/aaaa", "Ej. Maní, Lactosa", "Indicaciones, medicación, contactos…").
+- [x] Escribir `08092026` en la fecha muestra `08/09/2026`; solo acepta dígitos y máximo 10 caracteres.
+- [x] Submit con campos vacíos muestra 3 errores (borde `#D9583C` + "Campo requerido") en Nombre, Fecha y Sala; **no** navega.
+- [x] Fecha `12/13/2022` muestra "Formato inválido (dd/mm/aaaa)"; también `31/02/2022`; `12/11/2022` pasa (formato + existencia en calendario, cualquier año).
+- [x] Al corregir un campo con error, su error desaparece.
+- [x] Sala: select nativo estilizado con chevron `#B0A290`, placeholder "Seleccionar sala…" en gris, opciones Soles, Estrellas y Lunas.
+- [x] Formulario válido → "Guardar" navega a `/kids`; "Cancelar" navega a `/kids` con `next/link`.
+- [x] Alergias y Notas médicas se envían sin validación.
+- [x] `metadata` propia ("Agregar niño · OpenDayCare"); consola sin errores ni warnings de hidratación.
+- [x] `pnpm lint` y `pnpm build` sin errores.
 
 ## Decisions
 
