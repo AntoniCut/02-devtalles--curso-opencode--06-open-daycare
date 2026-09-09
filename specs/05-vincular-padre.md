@@ -1,6 +1,6 @@
 # SPEC 05 — Pantalla `/vincular-padre`
 
-> **Estado:** Aprovado
+> **Estado:** Implementado
 > **Depende de:** SPEC 02
 > **Fecha:** 2026-09-09
 > **Objetivo:** Portar la maqueta `references/pantallas/vincular-padre.dc.html` a la ruta `/vincular-padre` como formulario funcional con validación de requeridos y estilo idéntico.
