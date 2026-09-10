@@ -96,3 +96,31 @@ export const posts: Post[] = [
     comments: 0,
   },
 ];
+
+/*
+    *  -------------------------------------------------------------  *
+    *  -----  Crear publicación (pantalla /crear-publicacion)  -----  *
+    *  -------------------------------------------------------------  *
+*/
+
+/** - `id de los tipos de la pantalla de crear publicación` */
+export type CreatePostTypeId = "meal" | "nap" | "activity" | "achievement" | "mood" | "photo" | "announcement";
+
+/** - `opción de tipo de publicación del formulario de crear publicación` */
+export interface CreatePostTypeOption {
+  id: CreatePostTypeId;
+  label: string; // texto del chip, ej. "Comida"
+  background: string; // color fijo del chip
+  color: string; // color del texto del chip
+}
+
+/** - `tipos del formulario de nueva publicación (los 7 del mockup, con colores exactos)` */
+export const postTypeOptions: CreatePostTypeOption[] = [
+  { id: "meal", label: "Comida", background: "#9A7B1E", color: "#FFFFFF" },
+  { id: "nap", label: "Siesta", background: "#E7DCF6", color: "#7B5FC0" },
+  { id: "activity", label: "Actividad", background: "#2E89A6", color: "#FFFFFF" },
+  { id: "achievement", label: "Logro", background: "#CFEBD8", color: "#3E9B6C" },
+  { id: "mood", label: "Ánimo", background: "#F9D2DE", color: "#C56486" },
+  { id: "photo", label: "Foto", background: "#FBD8CC", color: "#D9684A" },
+  { id: "announcement", label: "Anuncio", background: "#CCD8F4", color: "#4E72C8" },
+];
