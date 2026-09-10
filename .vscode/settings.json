@@ -2,5 +2,9 @@
   "css.lint.unknownAtRules": "ignore",
   "editor.quickSuggestions": {
     "strings": "on"
-  }
+  },
+  "files.associations": {
+    "*.css": "tailwindcss"
+  },
+  "tailwindCSS.experimental.configFile": "app/globals.css"
 }
