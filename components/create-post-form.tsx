@@ -100,9 +100,10 @@ const wholeClassChipStyles = (selected: boolean): string => `rounded-full border
  * -----  `typeChipStyles(selected)`  -----
  * -------------------------------------
  * - Estilos de un chip de tipo; el anillo #3F362E aparece solo al seleccionar.
- *   El borde transparente con padding compensado mantiene la caja exacta del mockup.
+ *   El borde transparente con padding compensado mantiene la caja exacta del mockup
+ *   (el borde de 1.5px se renderiza como 1px en DPR 1, por eso el padding es 7px/15px).
  */
-const typeChipStyles = (selected: boolean): string => `rounded-full border-[1.5px] py-[6.5px] px-[14.5px] font-extrabold text-[13.5px] cursor-pointer ${selected ? "border-[#3F362E]" : "border-transparent"}`;
+const typeChipStyles = (selected: boolean): string => `rounded-full border-[1.5px] py-[7px] px-[15px] font-extrabold text-[13.5px] cursor-pointer ${selected ? "border-[#3F362E]" : "border-transparent"}`;
 
 /**
  * -------------------------------------

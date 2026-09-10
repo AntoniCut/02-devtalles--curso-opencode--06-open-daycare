@@ -1,6 +1,6 @@
 # SPEC 06 — Pantalla `/crear-publicacion`
 
-> **Estado:** Aprovado
+> **Estado:** Implementado
 > **Depende de:** SPEC 01, SPEC 02
 > **Fecha:** 2026-09-10
 > **Objetivo:** Portar la maqueta `references/pantallas/crear-publicacion.dc.html` a la ruta `/crear-publicacion` como formulario funcional con chips de destinatarios y tipo, validación de requeridos y estilo idéntico.
@@ -65,21 +65,21 @@ Identificadores en inglés; strings de UI en español (mockup). No se modifica `
 
 ## Acceptance criteria
 
-- [ ] `/crear-publicacion` renderiza la tarjeta centrada (max-w 580px, `#FBF4EC`, borde `#ECE0D0`, radius 24px, sombra) visualmente idéntica a `crear-publicacion.dc.html`.
-- [ ] Header: "Cancelar" (`#94887B` bold 15px) a la izquierda, "Nueva publicación" (Fredoka 600 18px) al centro y "Publicar" (`#D9583C` extrabold 15px) a la derecha, con border-bottom `#ECE0D0`.
-- [ ] PARA: 4 chips — Mateo preseleccionado (borde/fondo `#3F362E`, texto blanco, avatar 26px `#A9D9E8`/`#1F7A93`); Sofía, Benjamín y "Toda la sala" sin seleccionar (`#FFFDF9`/`#ECE0D0`/`#6E6359`).
-- [ ] Clic en un niño lo agrega a la selección (multi) y deselecciona "Toda la sala"; clic en un niño seleccionado lo quita.
-- [ ] Clic en "Toda la sala" lo selecciona y deselecciona a todos los niños.
-- [ ] TIPO: 7 chips con colores exactos (Comida `#9A7B1E`/blanco, Siesta `#E7DCF6`/`#7B5FC0`, Actividad `#2E89A6`/blanco, Logro `#CFEBD8`/`#3E9B6C`, Ánimo `#F9D2DE`/`#C56486`, Foto `#FBD8CC`/`#D9684A`, Anuncio `#CCD8F4`/`#4E72C8`).
-- [ ] Ningún TIPO preseleccionado; al clic queda seleccionado con anillo `#3F362E` y solo uno a la vez.
-- [ ] Textarea precargada con el texto del mockup; editable; placeholder `#B6A99B` "Contá cómo le fue hoy…" al vaciarla; min-height 120px, resize vertical.
-- [ ] FOTOS: tile de cámara `#CBB89F` y tile "Agregar" dashed `#DBCDBA` con ícono + `#C5503A` — estáticos, sin input file.
-- [ ] Submit con descripción vacía muestra borde `#D9583C` + "Campo requerido" bajo el textarea; **no** navega.
-- [ ] Submit sin tipo muestra "Elegí un tipo" `#D9583C` bajo la sección TIPO; **no** navega.
-- [ ] Al escribir en la descripción o elegir un tipo, desaparece su error.
-- [ ] Formulario válido → "Publicar" navega a `/`; "Cancelar" navega a `/` con `next/link`.
-- [ ] `metadata` propia ("Nueva publicación · OpenDayCare"); consola sin errores ni warnings de hidratación.
-- [ ] `pnpm lint` y `pnpm build` sin errores.
+- [x] `/crear-publicacion` renderiza la tarjeta centrada (max-w 580px, `#FBF4EC`, borde `#ECE0D0`, radius 24px, sombra) visualmente idéntica a `crear-publicacion.dc.html`.
+- [x] Header: "Cancelar" (`#94887B` bold 15px) a la izquierda, "Nueva publicación" (Fredoka 600 18px) al centro y "Publicar" (`#D9583C` extrabold 15px) a la derecha, con border-bottom `#ECE0D0`.
+- [x] PARA: 4 chips — Mateo preseleccionado (borde/fondo `#3F362E`, texto blanco, avatar 26px `#A9D9E8`/`#1F7A93`); Sofía, Benjamín y "Toda la sala" sin seleccionar (`#FFFDF9`/`#ECE0D0`/`#6E6359`).
+- [x] Clic en un niño lo agrega a la selección (multi) y deselecciona "Toda la sala"; clic en un niño seleccionado lo quita.
+- [x] Clic en "Toda la sala" lo selecciona y deselecciona a todos los niños.
+- [x] TIPO: 7 chips con colores exactos (Comida `#9A7B1E`/blanco, Siesta `#E7DCF6`/`#7B5FC0`, Actividad `#2E89A6`/blanco, Logro `#CFEBD8`/`#3E9B6C`, Ánimo `#F9D2DE`/`#C56486`, Foto `#FBD8CC`/`#D9684A`, Anuncio `#CCD8F4`/`#4E72C8`).
+- [x] Ningún TIPO preseleccionado; al clic queda seleccionado con anillo `#3F362E` y solo uno a la vez.
+- [x] Textarea precargada con el texto del mockup; editable; placeholder `#B6A99B` "Contá cómo le fue hoy…" al vaciarla; min-height 120px, resize vertical.
+- [x] FOTOS: tile de cámara `#CBB89F` y tile "Agregar" dashed `#DBCDBA` con ícono + `#C5503A` — estáticos, sin input file.
+- [x] Submit con descripción vacía muestra borde `#D9583C` + "Campo requerido" bajo el textarea; **no** navega.
+- [x] Submit sin tipo muestra "Elegí un tipo" `#D9583C` bajo la sección TIPO; **no** navega.
+- [x] Al escribir en la descripción o elegir un tipo, desaparece su error.
+- [x] Formulario válido → "Publicar" navega a `/`; "Cancelar" navega a `/` con `next/link`.
+- [x] `metadata` propia ("Nueva publicación · OpenDayCare"); consola sin errores ni warnings de hidratación.
+- [x] `pnpm lint` y `pnpm build` sin errores.
 
 ## Decisions
 
