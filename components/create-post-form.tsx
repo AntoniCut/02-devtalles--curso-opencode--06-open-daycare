@@ -6,8 +6,9 @@
 "use client";
 
 import { useState } from "react";
-import type { ChangeEvent, ReactElement } from "react";
+import type { ChangeEvent, ReactElement, SubmitEvent } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { postTypeOptions } from "@/lib/feed";
 import type { CreatePostTypeId } from "@/lib/feed";
 import { kids } from "@/lib/kids";
@@ -52,6 +53,32 @@ const MOCK_DESCRIPTION = "Pintamos con témperas esta mañana. Mateo eligió el 
 /** - `estilos de las etiquetas de sección` */
 const sectionLabelClasses: string = "text-[12px] font-extrabold tracking-[.7px] text-[#94887B]";
 
+/** - `errores de validación del formulario, por campo` */
+interface FormErrors {
+  typeId?: string; // "Elegí un tipo"
+  description?: string; // "Campo requerido"
+}
+
+/**
+ * ----------------------------------------------------
+ * -----  `validateForm(typeId, description)`  -----
+ * ----------------------------------------------------
+ * - Valida los requeridos del formulario; devuelve los errores por campo.
+ */
+const validateForm = (typeId: CreatePostTypeId | null, description: string): FormErrors => {
+  const errors: FormErrors = {};
+
+  //  -----  tipo: requerido  -----
+  if (typeId === null) {
+    errors.typeId = "Elegí un tipo";
+  }
+  //  -----  descripción: requerida  -----
+  if (description.trim() === "") {
+    errors.description = "Campo requerido";
+  }
+  return errors;
+};
+
 /**
  * --------------------------------------------------
  * -----  `recipientChipStyles(selected)`  -----
@@ -85,14 +112,21 @@ const typeChipStyles = (selected: boolean): string => `rounded-full border-[1.5p
  *   destinatarios y de tipo, descripción y tiles de fotos estáticos.
  */
 const CreatePostForm = (): ReactElement => {
+  const router = useRouter();
   const [recipients, setRecipients] = useState<string[]>(["mateo-fernandez"]);
   const [wholeClass, setWholeClass] = useState<boolean>(false);
   const [typeId, setTypeId] = useState<CreatePostTypeId | null>(null);
   const [description, setDescription] = useState<string>(MOCK_DESCRIPTION);
+  const [errors, setErrors] = useState<FormErrors>({});
 
   //  -----  descripción de la publicación  -----
   const handleDescriptionChange = (event: ChangeEvent<HTMLTextAreaElement>): void => {
     setDescription(event.target.value);
+
+    //  -----  el error de la descripción se limpia al corregirla  -----
+    if (errors.description && event.target.value.trim() !== "") {
+      setErrors((current) => ({ ...current, description: undefined }));
+    }
   };
 
   /**
@@ -125,10 +159,32 @@ const CreatePostForm = (): ReactElement => {
    */
   const handleType = (id: CreatePostTypeId): void => {
     setTypeId(id);
+
+    //  -----  el error del tipo se limpia al elegir uno  -----
+    if (errors.typeId) {
+      setErrors((current) => ({ ...current, typeId: undefined }));
+    }
+  };
+
+  /**
+   * ------------------------------------
+   * -----  `handleSubmit(event)`  -----
+   * ------------------------------------
+   * - Valida el formulario; si es válido navega al feed sin persistir (mock).
+   */
+  const handleSubmit = (event: SubmitEvent<HTMLFormElement>): void => {
+    event.preventDefault();
+    const nextErrors = validateForm(typeId, description);
+    setErrors(nextErrors);
+
+    //  -----  formulario válido: navegar al feed sin persistir (mock)  -----
+    if (Object.keys(nextErrors).length === 0) {
+      router.push("/");
+    }
   };
 
   return (
-    <form noValidate className="w-full max-w-[580px] bg-[#FBF4EC] border border-[#ECE0D0] rounded-[24px] shadow-[0_20px_50px_-24px_rgba(63,54,46,.35)] overflow-hidden">
+    <form onSubmit={handleSubmit} noValidate className="w-full max-w-[580px] bg-[#FBF4EC] border border-[#ECE0D0] rounded-[24px] shadow-[0_20px_50px_-24px_rgba(63,54,46,.35)] overflow-hidden">
       {/*  -----  header: cancelar, título y publicar  -----  */}
       <div className="flex items-center justify-between py-5 px-[26px] border-b border-[#ECE0D0]">
         <Link href="/" className="text-[#94887B] font-bold text-[15px]">Cancelar</Link>
@@ -191,6 +247,7 @@ const CreatePostForm = (): ReactElement => {
               </button>
             ))}
           </div>
+          {errors.typeId && <p id="type-error" className="mt-1.5 text-[12.5px] font-bold text-[#D9583C]">{errors.typeId}</p>}
         </div>
 
         {/*  -----  descripción de la publicación  -----  */}
@@ -201,8 +258,11 @@ const CreatePostForm = (): ReactElement => {
             value={description}
             onChange={handleDescriptionChange}
             placeholder="Contá cómo le fue hoy…"
-            className="w-full min-h-[120px] resize-y py-[14px] px-4 rounded-[14px] border-[1.5px] border-[#EADFD0] bg-white text-[15px] text-[#3F362E] leading-[1.5] outline-none placeholder:text-[#B6A99B]"
+            aria-invalid={Boolean(errors.description)}
+            aria-describedby={errors.description ? "description-error" : undefined}
+            className={`w-full min-h-[120px] resize-y py-[14px] px-4 rounded-[14px] border-[1.5px] ${errors.description ? "border-[#D9583C]" : "border-[#EADFD0]"} bg-white text-[15px] text-[#3F362E] leading-[1.5] outline-none placeholder:text-[#B6A99B]`}
           />
+          {errors.description && <p id="description-error" className="mt-1.5 text-[12.5px] font-bold text-[#D9583C]">{errors.description}</p>}
         </div>
 
         {/*  -----  fotos: tiles estáticos del mockup  -----  */}
