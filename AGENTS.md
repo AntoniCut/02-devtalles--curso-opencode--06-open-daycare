@@ -21,7 +21,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 Portar las maquetas HTML de `references/pantallas/*.dc.html` a rutas del App Router, manteniendo el estilo **idéntico**. `references/screenshots/*.png` son los objetivos de comparación visual. `CLAUDE.md` solo re-exporta este archivo (`@AGENTS.md`).
 
-- No hay autenticación ni base de datos todavía — los enlaces y datos son mock.
+- Base de datos: **Supabase** (configurado vía MCP). El esquema de referencia vive en el proyecto externo `07-db-Schema` — **no está implementado aún**; los enlaces y datos de las pantallas siguen siendo mock. Credenciales en `.env` (`SUPABASE_DB_PASSWORD`, ver `.env.example`; `.env` no se commitea).
 - Navegación interna **siempre con** `next/link`, no con `<a>`.
 - Comunicación con el usuario en **español**.
 
@@ -31,6 +31,7 @@ Portar las maquetas HTML de `references/pantallas/*.dc.html` a rutas del App Rou
 
 - **Playwright**: screenshots, snapshots de accesibilidad y logs de consola tienen que guardarse en la carpeta `.playwright-mcp/` (está gitignored, excepto su contenido). El MCP está habilitado vía `opencode.json`.
 - **Context7**: usarlo para traer documentación actualizada de Next.js/React antes de escribir código — esta versión de Next 16 difiere de los datos de entrenamiento.
+- **Supabase**: acceso al proyecto (SQL, logs, advisors, tipos TypeScript, migraciones). Usar sus herramientas para inspeccionar tablas antes de cambios de esquema; las migraciones van directas al proyecto remoto, aplicarlas con cuidado.
 
 
 
@@ -47,12 +48,19 @@ Portar las maquetas HTML de `references/pantallas/*.dc.html` a rutas del App Rou
 
 ## Workflow de specs
 
-Las skills del proyecto viven en `.agents/skills/` (`spec`, `spec-impl`), instaladas desde `klerith/fernando-skills` (`skills-lock.json`).
+Las skills del proyecto viven en `.agents/skills/` (`spec`, `spec-impl`, `supabase`, `supabase-postgres-best-practices`), instaladas con `skills-lock.json` desde `klerith/fernando-skills` y `supabase/agent-skills`.
 
 - `/spec <descripción>`: crea `specs/NN-slug.md` en estado `Draft` (carpeta `specs/`, numeración secuencial de 2 dígitos).
 - El usuario cambia el estado a `Approved` manualmente; `/spec-impl NN-slug` crea la rama `spec-NN-slug` (según `AutoCreateBranch` en `specs/.spec-config.yml`) e implementa paso a paso con pausas para revisar diffs.
 - `spec-impl` **nunca** commitea automáticamente — el commit es decisión del usuario.
 - Verificación visual de criterios de aceptación: usar el MCP de Playwright contra `references/screenshots/`.
 - **Agente verificador** (`.opencode/agent/spec-verifier.md`): subagente que verifica los criterios de aceptación de un spec, corrige el código de los criterios que fallan y marca los checkboxes del spec. Usa modelo con visión + Playwright (comparación contra `references/screenshots/`) + Context7. Nunca commitea ni toca la línea de Estado del spec — solo el checklist de "Acceptance criteria".
+
+
+
+## Skills de Supabase
+
+- **supabase**: cargar SIEMPRE ante cualquier tarea con Supabase (DB, Auth, Edge Functions, Realtime, Storage, cliente `supabase-js`/`@supabase/ssr` en Next.js, RLS, migraciones, debugging, logs).
+- **supabase-postgres-best-practices**: cargar ANTES de tocar la base de datos (crear/alterar tablas y columnas, elegir tipos, RLS, índices, triggers, funciones, migraciones, optimización de queries). Aplica incluso a cambios de una columna.
 
 
