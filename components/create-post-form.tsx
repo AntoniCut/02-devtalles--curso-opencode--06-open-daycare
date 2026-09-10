@@ -70,10 +70,19 @@ const wholeClassChipStyles = (selected: boolean): string => `rounded-full border
 
 /**
  * -------------------------------------
+ * -----  `typeChipStyles(selected)`  -----
+ * -------------------------------------
+ * - Estilos de un chip de tipo; el anillo #3F362E aparece solo al seleccionar.
+ *   El borde transparente con padding compensado mantiene la caja exacta del mockup.
+ */
+const typeChipStyles = (selected: boolean): string => `rounded-full border-[1.5px] py-[6.5px] px-[14.5px] font-extrabold text-[13.5px] cursor-pointer ${selected ? "border-[#3F362E]" : "border-transparent"}`;
+
+/**
+ * -------------------------------------
  * -----  `CreatePostForm()`  -----
  * -------------------------------------
- * - Formulario de nueva publicación: header Cancelar/Publicar, chips de
- *   destinatarios, chips de tipo, descripción y tiles de fotos estáticos.
+ * - Formulario de nueva publicación: header Cancelar/Publicar, selección de
+ *   destinatarios y de tipo, descripción y tiles de fotos estáticos.
  */
 const CreatePostForm = (): ReactElement => {
   const [recipients, setRecipients] = useState<string[]>(["mateo-fernandez"]);
@@ -84,6 +93,38 @@ const CreatePostForm = (): ReactElement => {
   //  -----  descripción de la publicación  -----
   const handleDescriptionChange = (event: ChangeEvent<HTMLTextAreaElement>): void => {
     setDescription(event.target.value);
+  };
+
+  /**
+   * ---------------------------------------------------
+   * -----  `handleRecipientToggle(slug)`  -----
+   * ---------------------------------------------------
+   * - Agrega o quita un niño de la selección y deselecciona "Toda la sala".
+   */
+  const handleRecipientToggle = (slug: string): void => {
+    setRecipients((current) => (current.includes(slug) ? current.filter((item) => item !== slug) : [...current, slug]));
+    setWholeClass(false);
+  };
+
+  /**
+   * -------------------------------------
+   * -----  `handleWholeClass()`  -----
+   * -------------------------------------
+   * - Activa "Toda la sala" y deselecciona a todos los niños.
+   */
+  const handleWholeClass = (): void => {
+    setWholeClass(true);
+    setRecipients([]);
+  };
+
+  /**
+   * ----------------------------------
+   * -----  `handleType(id)`  -----
+   * ----------------------------------
+   * - Marca el tipo de publicación elegido (selección única, sin toggle-off).
+   */
+  const handleType = (id: CreatePostTypeId): void => {
+    setTypeId(id);
   };
 
   return (
@@ -109,6 +150,7 @@ const CreatePostForm = (): ReactElement => {
                   key={recipient.slug}
                   type="button"
                   aria-pressed={isSelected}
+                  onClick={() => handleRecipientToggle(recipient.slug)}
                   className={recipientChipStyles(isSelected)}
                 >
                   <span
@@ -124,6 +166,7 @@ const CreatePostForm = (): ReactElement => {
             <button
               type="button"
               aria-pressed={wholeClass}
+              onClick={handleWholeClass}
               className={wholeClassChipStyles(wholeClass)}
             >
               Toda la sala
@@ -131,7 +174,7 @@ const CreatePostForm = (): ReactElement => {
           </div>
         </div>
 
-        {/*  -----  tipo: chips de colores fijos del mockup  -----  */}
+        {/*  -----  tipo: selección única con anillo al clic  -----  */}
         <div className="mb-[22px]">
           <div className={`${sectionLabelClasses} mb-[10px]`}>TIPO</div>
           <div className="flex flex-wrap gap-[9px]">
@@ -140,7 +183,8 @@ const CreatePostForm = (): ReactElement => {
                 key={option.id}
                 type="button"
                 aria-pressed={typeId === option.id}
-                className="py-2 px-4 rounded-full font-extrabold text-[13.5px] cursor-pointer"
+                onClick={() => handleType(option.id)}
+                className={typeChipStyles(typeId === option.id)}
                 style={{ background: option.background, color: option.color }}
               >
                 {option.label}
