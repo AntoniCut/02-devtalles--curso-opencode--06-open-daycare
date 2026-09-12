@@ -10,6 +10,7 @@ import type { ReactElement } from "react";
 import Sidebar from "@/components/sidebar";
 import { kids } from "@/lib/kids";
 import type { Kid, LinkedParent } from "@/lib/kids";
+import { getAuthenticatedUser } from "@/lib/auth";
 
 /** - `texto del subtítulo del padre según su estado de vinculación` */
 const parentStatusText: Record<LinkedParent["status"], string> = {
@@ -104,6 +105,7 @@ const InfoRow = ({ label, value, hasBorder }: InfoRowProps): ReactElement => (
  */
 const KidProfilePage = async (props: PageProps<"/kids/[slug]">): Promise<ReactElement> => {
   const { slug } = await props.params;
+  await getAuthenticatedUser(`/kids/${slug}`);
   const kid: Kid | undefined = findKid(slug);
 
   //  -----  slug inexistente → 404  -----

@@ -6,6 +6,7 @@
 import type { Metadata } from "next";
 import type { ReactElement } from "react";
 import AddKidForm from "@/components/add-kid-form";
+import { getAuthenticatedUser } from "@/lib/auth";
 
 /** - `metadata de la página agregar niño` */
 export const metadata: Metadata = {
@@ -18,7 +19,8 @@ export const metadata: Metadata = {
  * --------------------------------
  * - Página standalone para dar de alta un niño: tarjeta centrada sobre el fondo del mockup.
  */
-const AgregarNinoPage = (): ReactElement => {
+const AgregarNinoPage = async (): Promise<ReactElement> => {
+  await getAuthenticatedUser("/agregar-nino");
   return (
     <div className="min-h-screen flex items-start justify-center py-10 px-6 bg-[#F6ECDF]">
       <AddKidForm />

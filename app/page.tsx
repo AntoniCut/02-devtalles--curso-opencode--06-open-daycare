@@ -8,6 +8,7 @@ import type { ReactElement } from "react";
 import Sidebar from "@/components/sidebar";
 import PostCard from "@/components/post-card";
 import { currentUser, classroom, posts } from "@/lib/feed";
+import { getAuthenticatedUser } from "@/lib/auth";
 
 /** - `icono cámara del composer` */
 const cameraIcon: ReactElement = (
@@ -23,7 +24,8 @@ const cameraIcon: ReactElement = (
  * ----------------------
  * - Home del feed de maestra: sidebar, saludo, composer y publicaciones del día.
  */
-const Home = (): ReactElement => {
+const Home = async (): Promise<ReactElement> => {
+  await getAuthenticatedUser();
   const firstName: string = currentUser.name.split(" ")[0];
 
   return (

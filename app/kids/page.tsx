@@ -9,6 +9,7 @@ import type { ReactElement } from "react";
 import Sidebar from "@/components/sidebar";
 import KidsBrowser from "@/components/kids-browser";
 import { kids } from "@/lib/kids";
+import { getAuthenticatedUser } from "@/lib/auth";
 
 /** - `metadata de la página de niños` */
 export const metadata: Metadata = {
@@ -28,7 +29,8 @@ const plusIcon: ReactElement = (
  * --------------------------------
  * - Página de gestión de niños: cabecera, buscador y grilla de tarjetas.
  */
-const KidsPage = (): ReactElement => {
+const KidsPage = async (): Promise<ReactElement> => {
+  await getAuthenticatedUser();
   return (
     <div className="flex min-h-screen bg-[#F6ECDF]">
       <Sidebar />
