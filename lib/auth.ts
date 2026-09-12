@@ -52,6 +52,15 @@ const ROLE_LABELS: Record<string, string> = {
 };
 
 /**
+ * ------------------------------------
+ * -----  `isInternalPath()`  -----
+ * ------------------------------------
+ * - Solo se aceptan rutas internas como destino `next` (sin `//`, sin esquema).
+ */
+export const isInternalPath = (path: string): boolean =>
+  path.startsWith("/") && !path.startsWith("//") && !path.includes(":");
+
+/**
  * ---------------------------------------------
  * -----  `getAuthenticatedProfile()`  -----
  * ---------------------------------------------

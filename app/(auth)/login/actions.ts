@@ -8,6 +8,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
+import { isInternalPath } from "@/lib/auth";
 
 /** - `estado que devuelve la Server Action de login al formulario` */
 export interface LoginState {
@@ -16,15 +17,6 @@ export interface LoginState {
 
 /** - `ruta interna por defecto tras iniciar sesión` */
 const DEFAULT_REDIRECT = "/";
-
-/**
- * ------------------------------------
- * -----  `isInternalPath()`  -----
- * ------------------------------------
- * - Solo se aceptan rutas internas como `next` (sin `//`, sin esquema).
- */
-const isInternalPath = (path: string): boolean =>
-  path.startsWith("/") && !path.startsWith("//") && !path.includes(":");
 
 /**
  * --------------------------------

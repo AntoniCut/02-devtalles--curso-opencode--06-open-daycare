@@ -6,6 +6,7 @@
 
 import { type NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/proxy";
+import { isInternalPath } from "@/lib/auth";
 
 /** - `rutas públicas que no exigen sesión` */
 const PUBLIC_PATHS = ["/login", "/activate"];
@@ -22,6 +23,15 @@ export async function proxy(request: NextRequest) {
   const isPublicPath = PUBLIC_PATHS.some(
     (path) => pathname === path || pathname.startsWith(`${path}/`),
   );
+
+  // Authenticated user hitting /login → back to the app (validated ?next= or /)
+  if (isAuthenticated && pathname === "/login") {
+    const url = request.nextUrl.clone();
+    const next = url.searchParams.get("next") ?? "";
+    url.searchParams.delete("next");
+    url.pathname = next && isInternalPath(next) ? next : "/";
+    return NextResponse.redirect(url);
+  }
 
   if (!isPublicPath && !isAuthenticated) {
     const url = request.nextUrl.clone();

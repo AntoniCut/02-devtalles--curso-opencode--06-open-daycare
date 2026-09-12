@@ -4,9 +4,13 @@
     *  ------------------------------------------------------  *
 */
 import Link from "next/link";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 import type { ReactElement } from "react";
 import LoginForm from "@/app/(auth)/login/login-form";
+import { createClient } from "@/utils/supabase/server";
+import { isInternalPath } from "@/lib/auth";
 
 /** - `metadata de la página de login` */
 export const metadata: Metadata = {
@@ -36,6 +40,14 @@ const LoginPage = async ({
 }): Promise<ReactElement> => {
   const { next } = await searchParams;
   const nextPath: string | undefined = typeof next === "string" ? next : undefined;
+
+  // Defense in depth: with an active session, login is pointless → back to the app
+  const cookieStore = await cookies();
+  const supabase = createClient(cookieStore);
+  const { data } = await supabase.auth.getUser();
+  if (data.user) {
+    redirect(nextPath && isInternalPath(nextPath) ? nextPath : "/");
+  }
 
   return (
     <div className="grid min-h-screen grid-cols-[1.05fr_1fr] bg-[#FBF4EC]">
