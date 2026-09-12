@@ -7,10 +7,12 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import type { ReactElement } from "react";
+import { cookies } from "next/headers";
 import Sidebar from "@/components/sidebar";
-import { kids } from "@/lib/kids";
+import { mapDbChildToKid } from "@/lib/kids";
 import type { Kid, LinkedParent } from "@/lib/kids";
 import { getAuthenticatedProfile } from "@/lib/auth";
+import { createClient } from "@/utils/supabase/server";
 
 /** - `texto del subtítulo del padre según su estado de vinculación` */
 const parentStatusText: Record<LinkedParent["status"], string> = {
@@ -24,8 +26,32 @@ const parentStatusBadge: Record<LinkedParent["status"], { label: string; color: 
   pending: { label: "PENDIENTE", color: "#9A7B1E", background: "#F7E7A6" },
 };
 
-/** - `búsqueda de un niño por su slug` */
-const findKid = (slug: string): Kid | undefined => kids.find((kid) => kid.slug === slug);
+/**
+ * -------------------------------------------
+ * -----  `fetchKids()`  -----
+ * -------------------------------------------
+ * - Los niños reales de la DB mapeados al modelo Kid (ordenados por nombre).
+ */
+const fetchKids = async (): Promise<Kid[]> => {
+  const cookieStore = await cookies();
+  const supabase = createClient(cookieStore);
+  const { data: children } = await supabase
+    .from("children")
+    .select("id, room_id, full_name, birth_date, enrolled_at, medical_notes, allergy_tags, rooms(name)")
+    .order("full_name");
+  return (children ?? []).map((child) =>
+    mapDbChildToKid({
+      id: child.id,
+      room_id: child.room_id,
+      full_name: child.full_name,
+      birth_date: child.birth_date,
+      enrolled_at: child.enrolled_at,
+      medical_notes: child.medical_notes,
+      allergy_tags: child.allergy_tags,
+      room_name: child.rooms?.[0]?.name ?? "",
+    }),
+  );
+};
 
 /** - `props de generateMetadata` */
 interface KidMetadataProps {
@@ -40,7 +66,8 @@ interface KidMetadataProps {
  */
 export const generateMetadata = async ({ params }: KidMetadataProps): Promise<Metadata> => {
   const { slug } = await params;
-  const kid: Kid | undefined = findKid(slug);
+  const kids: Kid[] = await fetchKids();
+  const kid: Kid | undefined = kids.find((item) => item.slug === slug);
 
   return {
     title: kid ? `${kid.name} · OpenDayCare` : "Niño · OpenDayCare",
@@ -106,7 +133,8 @@ const InfoRow = ({ label, value, hasBorder }: InfoRowProps): ReactElement => (
 const KidProfilePage = async (props: PageProps<"/kids/[slug]">): Promise<ReactElement> => {
   const { slug } = await props.params;
   const profile = await getAuthenticatedProfile(`/kids/${slug}`);
-  const kid: Kid | undefined = findKid(slug);
+  const kids: Kid[] = await fetchKids();
+  const kid: Kid | undefined = kids.find((item) => item.slug === slug);
 
   //  -----  slug inexistente → 404  -----
   if (!kid) {
