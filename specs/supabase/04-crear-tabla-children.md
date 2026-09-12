@@ -1,6 +1,6 @@
 # SPEC SUPABASE 04 — Crear tabla `children`
 
-> **Estado:** Aprovado
+> **Estado:** Implementado
 > **Depende de:** SPEC SUPABASE 03
 > **Fecha:** 2026-09-12
 > **Objetivo:** Crear la tabla `public.children` (tabla 4 del esquema de referencia 07-db-Schema) con FK a `rooms`, enum `child_status`, `allergy_tags text[]`, RLS habilitado, trigger `updated_at` reutilizando `set_updated_at()` e índice de la FK.
@@ -78,14 +78,14 @@ Notas sobre el mapeo desde el esquema de referencia:
 
 ## Acceptance criteria
 
-- [ ] Existe `supabase/migrations/YYYYMMDDHHMMSS_create_children.sql` con enum, DDL, RLS, índice de la FK y trigger.
-- [ ] `supabase_list_tables` muestra `public.children` con columnas `id`, `room_id`, `full_name`, `birth_date`, `enrolled_at`, `medical_notes`, `allergy_tags`, `photo_consent`, `status`, `created_at`, `updated_at`.
-- [ ] Existe el enum `child_status` con valores `active` y `archived`.
-- [ ] Existe el índice `children_room_id_idx` sobre `room_id`.
-- [ ] Hacer `UPDATE` sobre una fila cambia su `updated_at`.
-- [ ] `rls_enabled` es `true` para `children`.
-- [ ] `supabase_list_migrations` incluye `create_children`.
-- [ ] `supabase_get_advisors` no reporta avisos nuevos sobre `children` (solo `unused_index` INFO esperado y los avisos pre-existentes de `daycares`/`users`/`rooms`/`handle_new_user`).
+- [x] Existe `supabase/migrations/YYYYMMDDHHMMSS_create_children.sql` con enum, DDL, RLS, índice de la FK y trigger.
+- [x] `supabase_list_tables` muestra `public.children` con columnas `id`, `room_id`, `full_name`, `birth_date`, `enrolled_at`, `medical_notes`, `allergy_tags`, `photo_consent`, `status`, `created_at`, `updated_at`.
+- [x] Existe el enum `child_status` con valores `active` y `archived`.
+- [x] Existe el índice `children_room_id_idx` sobre `room_id`.
+- [x] Hacer `UPDATE` sobre una fila cambia su `updated_at`.
+- [x] `rls_enabled` es `true` para `children`.
+- [x] `supabase_list_migrations` incluye `create_children`.
+- [x] `supabase_get_advisors` no reporta avisos nuevos sobre `children` (solo `unused_index` INFO esperado y los avisos pre-existentes de `daycares`/`users`/`rooms`/`handle_new_user`).
 
 ## Decisions
 
