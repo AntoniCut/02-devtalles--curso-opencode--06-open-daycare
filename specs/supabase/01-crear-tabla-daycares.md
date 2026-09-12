@@ -1,6 +1,6 @@
 # SPEC SUPABASE 01 — Crear tabla `daycares` (reemplazo)
 
-> **Estado:** Aprovado
+> **Estado:** Implementado
 > **Depende de:** —
 > **Fecha:** 2026-09-12
 > **Objetivo:** Reemplazar la definición previa de la tabla raíz `daycares` en Supabase (nunca aplicada) con DDL + RLS + trigger `updated_at` + 4 filas seed, aplicando el patrón de migraciones versionadas en el repo y aplicadas al remoto vía MCP.

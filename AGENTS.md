@@ -21,7 +21,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 Portar las maquetas HTML de `references/pantallas/*.dc.html` a rutas del App Router, manteniendo el estilo **idéntico**. `references/screenshots/*.png` son los objetivos de comparación visual. `CLAUDE.md` solo re-exporta este archivo (`@AGENTS.md`).
 
-- Base de datos: **Supabase** (configurado vía MCP). El esquema de referencia vive en el proyecto externo `07-db-Schema` — **no está implementado aún**; los enlaces y datos de las pantallas siguen siendo mock. Credenciales en `.env` (`SUPABASE_DB_PASSWORD`, ver `.env.example`; `.env` no se commitea).
+- Base de datos: **Supabase** (configurado vía MCP). El esquema de referencia vive en el proyecto externo `07-db-Schema` — se implementa tabla por tabla vía specs (la raíz `daycares` ya está implementada); los enlaces y datos de las pantallas siguen siendo mock. Credenciales en `.env` (`SUPABASE_DB_PASSWORD`, ver `.env.example`; `.env` no se commitea).
 - Navegación interna **siempre con** `next/link`, no con `<a>`.
 - Comunicación con el usuario en **español**.
 
@@ -62,5 +62,19 @@ Las skills del proyecto viven en `.agents/skills/` (`spec`, `spec-impl`, `supaba
 
 - **supabase**: cargar SIEMPRE ante cualquier tarea con Supabase (DB, Auth, Edge Functions, Realtime, Storage, cliente `supabase-js`/`@supabase/ssr` en Next.js, RLS, migraciones, debugging, logs).
 - **supabase-postgres-best-practices**: cargar ANTES de tocar la base de datos (crear/alterar tablas y columnas, elegir tipos, RLS, índices, triggers, funciones, migraciones, optimización de queries). Aplica incluso a cambios de una columna.
+
+
+
+## Base de datos — patrón de migraciones (siempre)
+
+Cada vez que se manipule la base de datos (crear/alterar/dropear tablas, columnas, índices, triggers, funciones, RLS, seeds) se usa SIEMPRE el patrón de migraciones — nunca SQL ad-hoc de cambios contra el remoto:
+
+1. Cargar las skills `supabase` y `supabase-postgres-best-practices`.
+2. Crear el archivo con `supabase migration new <slug>` → `supabase/migrations/YYYYMMDDHHMMSS_<slug>.sql`, versionado en el repo (el repo es la fuente de verdad del esquema).
+3. Aplicar la migración al remoto con `supabase_apply_migration` (mismo SQL del archivo).
+4. Verificar con `supabase_list_migrations`, `supabase_list_tables` y `supabase_get_advisors`.
+5. `supabase_execute_sql` solo para lecturas, pruebas o verificación — no para cambios de esquema.
+
+Las specs de base de datos viven en `specs/supabase/`.
 
 
