@@ -1,6 +1,6 @@
 # SPEC SUPABASE 02 — Crear tabla `users` + enums + usuario staff de prueba
 
-> **Estado:** Aprovado
+> **Estado:** Implementado
 > **Depende de:** SPEC SUPABASE 01
 > **Fecha:** 2026-09-12
 > **Objetivo:** Crear los enums `user_role` y `user_status`, la tabla `public.users` vinculada a `auth.users` con RLS y trigger `updated_at`, el trigger `AFTER INSERT` en `auth.users` que genera el perfil automáticamente, y un usuario staff de prueba con auth real para poder probar el flujo end-to-end.
