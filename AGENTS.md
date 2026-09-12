@@ -22,6 +22,11 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 Portar las maquetas HTML de `references/pantallas/*.dc.html` a rutas del App Router, manteniendo el estilo **idéntico**. `references/screenshots/*.png` son los objetivos de comparación visual. `CLAUDE.md` solo re-exporta este archivo (`@AGENTS.md`).
 
 - Base de datos: **Supabase** (configurado vía MCP). El esquema de referencia vive en el proyecto externo `07-db-Schema` — se implementa tabla por tabla vía specs (la raíz `daycares` ya está implementada); los enlaces y datos de las pantallas siguen siendo mock. Credenciales en `.env` (`SUPABASE_DB_PASSWORD`, ver `.env.example`; `.env` no se commitea).
+- **Acceso a la base de datos desde la app**: SIEMPRE con los paquetes oficiales de Supabase para Next.js — `@supabase/supabase-js` + `@supabase/ssr` (instalados con pnpm). Nunca con drivers SQL directos (`pg`, `postgres`) ni ORMs desde la aplicación.
+  - Cliente server: `createClient` de `utils/supabase/server.ts` (Server Components, Route Handlers, Server Actions).
+  - Cliente browser: `createClient` de `utils/supabase/client.ts` (Client Components).
+  - Proxy (antes middleware): el helper de `utils/supabase/proxy.ts` se usa desde `proxy.ts` en la raíz — **`middleware.ts` está deprecado en Next 16**, usar siempre `proxy.ts` con export `proxy`.
+  - Variables de entorno: `NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (ver `.env.example`).
 - Navegación interna **siempre con** `next/link`, no con `<a>`.
 - Comunicación con el usuario en **español**.
 
