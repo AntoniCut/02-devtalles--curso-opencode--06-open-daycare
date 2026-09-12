@@ -50,9 +50,9 @@ const KidsBrowser = ({ kids }: KidsBrowserProps): ReactElement => {
         />
       </div>
 
-      {/*  -----  encabezado de la sala con contador de resultados  -----  */}
+      {/*  -----  encabezado del listado con contador de resultados  ----- */}
       <div className="flex items-center gap-3 mb-3.5">
-        <span className="text-[12.5px] font-extrabold tracking-[.8px] text-[#3F362E]">SALA SOLES</span>
+        <span className="text-[12.5px] font-extrabold tracking-[.8px] text-[#3F362E]">NIÑOS</span>
         <span className="text-[13px] text-[#A89A8B]">{filteredKids.length} niños</span>
         <span className="flex-1 h-px bg-[#E7DAC8]" />
       </div>

@@ -8,8 +8,11 @@ import type { Metadata } from "next";
 import type { ReactElement } from "react";
 import Sidebar from "@/components/sidebar";
 import KidsBrowser from "@/components/kids-browser";
-import { kids } from "@/lib/kids";
+import { mapDbChildToKid } from "@/lib/kids";
+import type { Kid } from "@/lib/kids";
 import { getAuthenticatedProfile } from "@/lib/auth";
+import { createClient } from "@/utils/supabase/server";
+import { cookies } from "next/headers";
 
 /** - `metadata de la página de niños` */
 export const metadata: Metadata = {
@@ -31,6 +34,26 @@ const plusIcon: ReactElement = (
  */
 const KidsPage = async (): Promise<ReactElement> => {
   const profile = await getAuthenticatedProfile();
+  const cookieStore = await cookies();
+  const supabase = createClient(cookieStore);
+
+  //  -----  niños reales de la DB (join con rooms para el nombre de la sala)  -----
+  const { data: children } = await supabase
+    .from("children")
+    .select("id, room_id, full_name, birth_date, enrolled_at, medical_notes, allergy_tags, rooms(name)")
+    .order("full_name");
+  const kids: Kid[] = (children ?? []).map((child) =>
+    mapDbChildToKid({
+      id: child.id,
+      room_id: child.room_id,
+      full_name: child.full_name,
+      birth_date: child.birth_date,
+      enrolled_at: child.enrolled_at,
+      medical_notes: child.medical_notes,
+      allergy_tags: child.allergy_tags,
+      room_name: child.rooms?.[0]?.name ?? "",
+    }),
+  );
   return (
     <div className="flex min-h-screen bg-[#F6ECDF]">
       <Sidebar user={profile} />
