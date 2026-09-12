@@ -92,19 +92,20 @@ Convención del esquema de referencia: PK `id uuid` (mismo UUID que Supabase Aut
 4. Crear el usuario staff de prueba vía `supabase_execute_sql`: insert en `auth.users` + `auth.identities` con el `raw_user_meta_data` del spec; verificar que el trigger `on_auth_user_created` creó la fila en `public.users`.
 5. Verificar: `supabase_list_tables` (tabla `users` con sus 10 columnas y 1 fila), `supabase_list_migrations` (`create_users` registrado), `supabase_get_advisors` (sin avisos nuevos) y SELECT del perfil (`role = staff`, `daycare_id` correcto, `status = active` por default).
 6. Confirmar con SQL de prueba que el hash de la contraseña valida con `Test1234!` y que un `UPDATE` sobre `public.users` refresca `updated_at`.
+7. (Corrección de la verificación) Crear y aplicar migración `add_users_daycare_id_index` (`supabase/migrations/20260912113449_add_users_daycare_id_index.sql`) con `create index if not exists users_daycare_id_idx on public.users (daycare_id);` — el advisor de performance reportó `unindexed_foreign_keys` sobre `users_daycare_id_fkey` y la best practice de Supabase exige indexar el lado FK de un JOIN.
 
 ## Acceptance criteria
 
-- [ ] Existe `supabase/migrations/YYYYMMDDHHMMSS_create_users.sql` con enums, DDL, RLS, trigger `updated_at`, función `handle_new_user` y trigger `on_auth_user_created`.
-- [ ] `supabase_list_tables` muestra `public.users` con columnas `id`, `daycare_id`, `role`, `status`, `full_name`, `avatar_url`, `notify_on_post`, `daily_summary_enabled`, `created_at`, `updated_at`.
-- [ ] `role` solo acepta `staff`/`parent`/`admin` y `status` solo `pending`/`active` (enums aplicados).
-- [ ] `rls_enabled` es `true` para `users`.
-- [ ] `supabase_list_migrations` incluye `create_users`.
-- [ ] Existe el usuario `staff@opendaycare.com` en `auth.users` con fila en `auth.identities` y email confirmado.
-- [ ] El trigger creó automáticamente la fila en `public.users` con `full_name = 'Antonio Cutillas'`, `role = 'staff'`, `status = 'active'` y el `daycare_id` de "Guardería Sala Soles".
-- [ ] La contraseña `Test1234!` valida contra el hash bcrypt almacenado.
-- [ ] Hacer `UPDATE` sobre la fila de `users` cambia su `updated_at`.
-- [ ] `supabase_get_advisors` no reporta avisos nuevos sobre `users`.
+- [x] Existe `supabase/migrations/YYYYMMDDHHMMSS_create_users.sql` con enums, DDL, RLS, trigger `updated_at`, función `handle_new_user` y trigger `on_auth_user_created`.
+- [x] `supabase_list_tables` muestra `public.users` con columnas `id`, `daycare_id`, `role`, `status`, `full_name`, `avatar_url`, `notify_on_post`, `daily_summary_enabled`, `created_at`, `updated_at`.
+- [x] `role` solo acepta `staff`/`parent`/`admin` y `status` solo `pending`/`active` (enums aplicados).
+- [x] `rls_enabled` es `true` para `users`.
+- [x] `supabase_list_migrations` incluye `create_users`.
+- [x] Existe el usuario `staff@opendaycare.com` en `auth.users` con fila en `auth.identities` y email confirmado.
+- [x] El trigger creó automáticamente la fila en `public.users` con `full_name = 'Antonio Cutillas'`, `role = 'staff'`, `status = 'active'` y el `daycare_id` de "Guardería Sala Soles".
+- [x] La contraseña `Test1234!` valida contra el hash bcrypt almacenado.
+- [x] Hacer `UPDATE` sobre la fila de `users` cambia su `updated_at`.
+- [x] `supabase_get_advisors` no reporta avisos nuevos sobre `users`.
 
 ## Decisions
 
@@ -117,6 +118,7 @@ Convención del esquema de referencia: PK `id uuid` (mismo UUID que Supabase Aut
 - **Sí:** FK `id → auth.users(id) ON DELETE CASCADE` sin `gen_random_uuid()`. El UUID lo emite Supabase Auth; borrar el usuario auth borra su perfil.
 - **No:** insertar el perfil de `users` a mano para el seed. El trigger debe demostrar que funciona — insertarlo a mano ocultaría un fallo del trigger.
 - **No:** policies de RLS ahora. Sin el modelo de auth integrado en la app no hay a quién dar acceso.
+- **Sí (post-verificación):** conservar la migración `add_users_daycare_id_index` aunque salga del alcance original. El advisor de performance de Supabase la exigió (`unindexed_foreign_keys`) y es la best practice oficial: indexar el lado FK de un JOIN. Decisión del usuario.
 
 ## Risks
 
