@@ -8,6 +8,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactElement } from "react";
+import { logout } from "@/app/(auth)/login/actions";
 
 /** - `usuario conectado mostrado por el sidebar (viene del server via props)` */
 export interface SidebarUser {
@@ -152,13 +153,15 @@ const Sidebar = ({ user }: { user: SidebarUser }): ReactElement => {
             <div className="font-extrabold text-sm text-[#3F362E]">{user.name}</div>
             <div className="text-xs text-[#A89A8B]">{user.role}</div>
           </div>
-          <Link
-            href="/login"
-            title="Cerrar sesión"
-            className="flex-none w-8 h-8 rounded-[10px] bg-[#F6ECDF] text-[#94887B] flex items-center justify-center"
-          >
-            {logoutIcon}
-          </Link>
+          <form action={logout}>
+            <button
+              type="submit"
+              title="Cerrar sesión"
+              className="flex-none w-8 h-8 rounded-[10px] bg-[#F6ECDF] text-[#94887B] flex items-center justify-center"
+            >
+              {logoutIcon}
+            </button>
+          </form>
         </div>
       </div>
     </aside>

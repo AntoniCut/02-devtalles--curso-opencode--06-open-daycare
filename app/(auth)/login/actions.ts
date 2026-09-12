@@ -49,3 +49,19 @@ export const login = async (_prevState: LoginState, formData: FormData): Promise
   //  -----  redirect fuera del try para no tragar su error  -----
   redirect(target);
 };
+
+/**
+ * --------------------------------
+ * -----  `logout()`  -----
+ * --------------------------------
+ * - Server Action de cierre de sesión: invalida la sesión en Supabase Auth,
+ * - borra las cookies y devuelve a `/login`.
+ */
+export const logout = async (): Promise<void> => {
+  const cookieStore = await cookies();
+  const supabase = createClient(cookieStore);
+
+  await supabase.auth.signOut();
+
+  redirect("/login");
+};
