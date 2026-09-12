@@ -5,11 +5,18 @@
 */
 "use client";
 
-import { useState } from "react";
-import type { ChangeEvent, ReactElement, SubmitEvent } from "react";
+import { useState, useActionState } from "react";
+import type { ChangeEvent, ReactElement } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { classrooms } from "@/lib/kids";
+import { useFormStatus } from "react-dom";
+import { addKid } from "@/app/agregar-nino/actions";
+import type { AddKidState } from "@/app/agregar-nino/actions";
+
+/** - `sala real de la tabla rooms (select de agregar niño)` */
+export interface RoomOption {
+  id: string;
+  name: string;
+}
 
 /** - `icono chevron del select de sala` */
 const chevronIcon: ReactElement = (
@@ -107,18 +114,38 @@ const maskBirthDate = (raw: string): string => {
 
 /**
  * --------------------------------
+ * -----  `SubmitButton()`  -----
+ * --------------------------------
+ * - Botón Guardar con estado de carga vía useFormStatus (debe ser hijo del form).
+ */
+const SubmitButton = (): ReactElement => {
+  const { pending } = useFormStatus();
+  return (
+    <button
+      type="submit"
+      disabled={pending}
+      className="cursor-pointer text-[15px] font-extrabold text-[#D9583C] disabled:opacity-50 disabled:cursor-not-allowed"
+    >
+      {pending ? "Guardando…" : "Guardar"}
+    </button>
+  );
+};
+
+/**
+ * --------------------------------
  * -----  `AddKidForm()`  -----
  * --------------------------------
  * - Formulario para agregar un niño: header Cancelar/Guardar y campos del mockup.
+ * - Guardar inserta en la DB vía Server Action; muestra loading y error inline.
  */
-const AddKidForm = (): ReactElement => {
-  const router = useRouter();
+const AddKidForm = ({ rooms }: { rooms: RoomOption[] }): ReactElement => {
   const [name, setName] = useState<string>("");
   const [birthDate, setBirthDate] = useState<string>("");
   const [classroom, setClassroom] = useState<string>("");
   const [allergies, setAllergies] = useState<string>("");
   const [notes, setNotes] = useState<string>("");
   const [errors, setErrors] = useState<FormErrors>({});
+  const [state, formAction] = useActionState<AddKidState, FormData>(addKid, { error: null });
 
   /**
    * -------------------------------------------------
@@ -163,16 +190,15 @@ const AddKidForm = (): ReactElement => {
    * ------------------------------------
    * -----  `handleSubmit(event)`  -----
    * ------------------------------------
-   * - Valida el formulario; si es válido navega a la lista de niños.
+   * - Valida el formulario; si es válido lo envía a la Server Action (insert en DB).
    */
-  const handleSubmit = (event: SubmitEvent<HTMLFormElement>): void => {
-    event.preventDefault();
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>): void => {
     const nextErrors = validateForm(name, birthDate, classroom);
     setErrors(nextErrors);
 
-    //  -----  formulario válido: navegar a /kids sin persistir (mock)  -----
-    if (Object.keys(nextErrors).length === 0) {
-      router.push("/kids");
+    //  -----  formulario inválido: no enviar  -----
+    if (Object.keys(nextErrors).length > 0) {
+      event.preventDefault();
     }
   };
 
@@ -181,14 +207,21 @@ const AddKidForm = (): ReactElement => {
 
   return (
     <form
+      action={formAction}
       onSubmit={handleSubmit}
       className="w-full max-w-[520px] bg-[#FBF4EC] border border-[#ECE0D0] rounded-[24px] shadow-[0_20px_50px_-24px_rgba(63,54,46,.35)] overflow-hidden"
     >
+      {/*  -----  hidden inputs para la Server Action  -----  */}
+      <input type="hidden" name="fullName" value={name} />
+      <input type="hidden" name="birthDate" value={birthDate} />
+      <input type="hidden" name="roomId" value={classroom} />
+      <input type="hidden" name="allergies" value={allergies} />
+
       {/*  -----  header: cancelar, título y guardar  -----  */}
       <div className="flex items-center justify-between py-5 px-[26px] border-b border-[#ECE0D0]">
         <Link href="/kids" className="text-[15px] font-bold text-[#94887B]">Cancelar</Link>
         <span className="font-display font-semibold text-[18px] text-[#3F362E]">Agregar niño</span>
-        <button type="submit" className="cursor-pointer text-[15px] font-extrabold text-[#D9583C]">Guardar</button>
+        <SubmitButton />
       </div>
 
       {/*  -----  campos del formulario  -----  */}
@@ -245,8 +278,8 @@ const AddKidForm = (): ReactElement => {
                 className={selectClasses}
               >
                 <option value="" disabled hidden>Seleccionar sala…</option>
-                {classrooms.map((room) => (
-                  <option key={room} value={room}>{room}</option>
+                {rooms.map((room) => (
+                  <option key={room.id} value={room.id}>{room.name}</option>
                 ))}
               </select>
               <span className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">{chevronIcon}</span>
@@ -279,6 +312,11 @@ const AddKidForm = (): ReactElement => {
             className={`${fieldStyles(false)} min-h-[90px] resize-y leading-[1.5]`}
           />
         </div>
+
+        {/*  -----  error del servidor (fallo del insert)  -----  */}
+        {state.error && (
+          <p className="mt-4 text-[12.5px] font-bold text-[#D9583C]" role="alert">{state.error}</p>
+        )}
       </div>
     </form>
   );
