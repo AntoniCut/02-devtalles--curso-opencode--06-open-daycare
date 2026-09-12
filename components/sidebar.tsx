@@ -8,7 +8,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactElement } from "react";
-import { currentUser } from "@/lib/feed";
+
+/** - `usuario conectado mostrado por el sidebar (viene del server via props)` */
+export interface SidebarUser {
+  name: string;
+  initials: string;
+  role: string;
+}
 
 /** - `ítem del menú lateral` */
 interface NavItem {
@@ -93,7 +99,7 @@ const navItemInactiveClass = "text-[#6E6359] font-semibold";
  * -----------------------------
  * - Barra lateral compartida de las pantallas de maestra.
  */
-const Sidebar = (): ReactElement => {
+const Sidebar = ({ user }: { user: SidebarUser }): ReactElement => {
   const pathname = usePathname();
 
   return (
@@ -140,11 +146,11 @@ const Sidebar = (): ReactElement => {
       <div className="border-t border-[#ECE0D0] pt-3.5 mt-2.5">
         <div className="flex items-center gap-2.75 px-2 py-1.5">
           <div className="w-9.5 h-9.5 rounded-full bg-[#F2937A] text-white font-display font-semibold text-base flex items-center justify-center flex-none">
-            {currentUser.initials}
+            {user.initials}
           </div>
           <div className="flex-1 min-w-0">
-            <div className="font-extrabold text-sm text-[#3F362E]">{currentUser.name}</div>
-            <div className="text-xs text-[#A89A8B]">{currentUser.role}</div>
+            <div className="font-extrabold text-sm text-[#3F362E]">{user.name}</div>
+            <div className="text-xs text-[#A89A8B]">{user.role}</div>
           </div>
           <Link
             href="/login"

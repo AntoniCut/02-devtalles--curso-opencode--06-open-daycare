@@ -7,8 +7,8 @@ import Link from "next/link";
 import type { ReactElement } from "react";
 import Sidebar from "@/components/sidebar";
 import PostCard from "@/components/post-card";
-import { currentUser, classroom, posts } from "@/lib/feed";
-import { getAuthenticatedUser } from "@/lib/auth";
+import { classroom, posts } from "@/lib/feed";
+import { getAuthenticatedProfile } from "@/lib/auth";
 
 /** - `icono cámara del composer` */
 const cameraIcon: ReactElement = (
@@ -25,12 +25,12 @@ const cameraIcon: ReactElement = (
  * - Home del feed de maestra: sidebar, saludo, composer y publicaciones del día.
  */
 const Home = async (): Promise<ReactElement> => {
-  await getAuthenticatedUser();
-  const firstName: string = currentUser.name.split(" ")[0];
+  const profile = await getAuthenticatedProfile();
+  const firstName: string = profile.name.split(" ")[0];
 
   return (
     <div className="flex min-h-screen bg-[#F6ECDF]">
-      <Sidebar />
+      <Sidebar user={profile} />
       <main className="flex-1 min-w-0 h-screen overflow-y-auto">
         <div className="max-w-[760px] w-full mx-auto px-10 pt-8.5 pb-20">
           {/*  -----  saludo de la sala  -----  */}
@@ -46,7 +46,7 @@ const Home = async (): Promise<ReactElement> => {
             className="flex items-center gap-3.5 bg-[#FFFDF9] border border-[#ECE0D0] rounded-[18px] py-3.5 px-4.5 mb-6 shadow-[0_4px_14px_-10px_rgba(120,90,60,.4)]"
           >
             <div className="w-10 h-10 rounded-full bg-[#F2937A] text-white font-display font-semibold text-base flex items-center justify-center flex-none">
-              {currentUser.initials}
+              {profile.initials}
             </div>
             <span className="flex-1 text-[#A89A8B] text-[15px]">Compartí un momento…</span>
             <span className="w-9.5 h-9.5 rounded-xl bg-[#FBE3D8] text-[#E0654A] flex items-center justify-center">
