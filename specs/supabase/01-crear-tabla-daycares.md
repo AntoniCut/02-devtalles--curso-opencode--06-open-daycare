@@ -70,14 +70,14 @@ Convención del esquema de referencia: PK `id uuid` con `gen_random_uuid()`, tim
 
 ## Acceptance criteria
 
-- [ ] Ya no existe `supabase/migrations/20260910202723_create_daycares.sql` en el repo.
-- [ ] Existe un nuevo archivo en `supabase/migrations/` con DDL, `enable row level security`, trigger y 4 seeds.
-- [ ] `supabase_list_tables` muestra `public.daycares` con columnas `id`, `name`, `address`, `created_at`, `updated_at`.
-- [ ] La tabla contiene exactamente 4 filas y una es "Guardería Sala Soles".
-- [ ] Hacer `UPDATE` sobre una fila cambia su `updated_at`.
-- [ ] `rls_enabled` es `true` para `daycares`.
-- [ ] `supabase_list_migrations` incluye `create_daycares`.
-- [ ] `supabase_get_advisors` no reporta avisos nuevos sobre `daycares`.
+- [x] Ya no existe `supabase/migrations/20260910202723_create_daycares.sql` en el repo.
+- [x] Existe un nuevo archivo en `supabase/migrations/` con DDL, `enable row level security`, trigger y 4 seeds.
+- [x] `supabase_list_tables` muestra `public.daycares` con columnas `id`, `name`, `address`, `created_at`, `updated_at`.
+- [x] La tabla contiene exactamente 4 filas y una es "Guardería Sala Soles".
+- [x] Hacer `UPDATE` sobre una fila cambia su `updated_at`.
+- [x] `rls_enabled` es `true` para `daycares`.
+- [x] `supabase_list_migrations` incluye `create_daycares`.
+- [x] `supabase_get_advisors` no reporta avisos nuevos sobre `daycares`.
 
 ## Decisions
 
