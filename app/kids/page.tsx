@@ -8,7 +8,7 @@ import type { Metadata } from "next";
 import type { ReactElement } from "react";
 import Sidebar from "@/components/sidebar";
 import KidsBrowser from "@/components/kids-browser";
-import { mapDbChildToKid } from "@/lib/kids";
+import { mapDbChildToKid, roomNameFrom } from "@/lib/kids";
 import type { Kid } from "@/lib/kids";
 import { getAuthenticatedProfile } from "@/lib/auth";
 import { createClient } from "@/utils/supabase/server";
@@ -51,7 +51,7 @@ const KidsPage = async (): Promise<ReactElement> => {
       enrolled_at: child.enrolled_at,
       medical_notes: child.medical_notes,
       allergy_tags: child.allergy_tags,
-      room_name: child.rooms?.[0]?.name ?? "",
+      room_name: roomNameFrom(child.rooms),
     }),
   );
   return (

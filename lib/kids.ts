@@ -252,6 +252,20 @@ export const avatarFor = (fullName: string): { background: string; color: string
 };
 
 /**
+ * --------------------------------------------------
+ * -----  `roomNameFrom(rooms)`  -----
+ * --------------------------------------------------
+ * - Extrae el nombre de la sala del embed de PostgREST
+ * - (many-to-one → objeto; por si viene como array, cubre ambos).
+ */
+export const roomNameFrom = (rooms: unknown): string => {
+  if (Array.isArray(rooms)) {
+    return (rooms[0] as { name?: string } | undefined)?.name ?? "";
+  }
+  return (rooms as { name?: string } | null)?.name ?? "";
+};
+
+/**
  * ------------------------------------------------------
  * -----  `mapDbChildToKid(child)`  -----
  * ------------------------------------------------------

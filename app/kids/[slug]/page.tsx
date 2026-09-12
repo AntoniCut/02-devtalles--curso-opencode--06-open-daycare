@@ -9,7 +9,7 @@ import { notFound } from "next/navigation";
 import type { ReactElement } from "react";
 import { cookies } from "next/headers";
 import Sidebar from "@/components/sidebar";
-import { mapDbChildToKid } from "@/lib/kids";
+import { mapDbChildToKid, roomNameFrom } from "@/lib/kids";
 import type { Kid, LinkedParent } from "@/lib/kids";
 import { getAuthenticatedProfile } from "@/lib/auth";
 import { createClient } from "@/utils/supabase/server";
@@ -48,7 +48,7 @@ const fetchKids = async (): Promise<Kid[]> => {
       enrolled_at: child.enrolled_at,
       medical_notes: child.medical_notes,
       allergy_tags: child.allergy_tags,
-      room_name: child.rooms?.[0]?.name ?? "",
+      room_name: roomNameFrom(child.rooms),
     }),
   );
 };
