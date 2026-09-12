@@ -10,7 +10,13 @@ import { type NextRequest, NextResponse } from "next/server";
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
-export const createClient = async (request: NextRequest) => {
+/** - `cliente de Supabase para el proxy junto con la respuesta que porta las cookies` */
+interface ProxyClient {
+  supabase: ReturnType<typeof createServerClient>;
+  response: NextResponse;
+}
+
+export const createClient = (request: NextRequest): ProxyClient => {
   // Create an unmodified response
   let supabaseResponse = NextResponse.next({
     request: {
@@ -39,8 +45,5 @@ export const createClient = async (request: NextRequest) => {
     },
   );
 
-  // Refresh session before route handlers run
-  await supabase.auth.getClaims();
-
-  return supabaseResponse
+  return { supabase, response: supabaseResponse };
 };

@@ -6,6 +6,7 @@
 import type { Metadata } from "next";
 import type { ReactElement } from "react";
 import CreatePostForm from "@/components/create-post-form";
+import { getAuthenticatedUser } from "@/lib/auth";
 
 /** - `metadata de la página nueva publicación` */
 export const metadata: Metadata = {
@@ -18,7 +19,8 @@ export const metadata: Metadata = {
  * --------------------------------------
  * - Página standalone para crear una publicación: tarjeta centrada sobre el fondo del mockup.
  */
-const CrearPublicacionPage = (): ReactElement => {
+const CrearPublicacionPage = async (): Promise<ReactElement> => {
+  await getAuthenticatedUser("/crear-publicacion");
   return (
     <div className="min-h-screen flex items-start justify-center py-10 px-6 bg-[#F6ECDF]">
       <CreatePostForm />
