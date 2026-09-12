@@ -1,6 +1,6 @@
 # SPEC 08 — Persistir niños: `/agregar-nino` → tabla `children` y lectura real en `/kids`
 
-> **Estado:** Aprobado
+> **Estado:** Implementado
 > **Depende de:** SPEC 04, SPEC 07, SPEC SUPABASE 03, SPEC SUPABASE 04
 > **Fecha:** 2026-09-12
 > **Objetivo:** Guardar los niños del formulario `/agregar-nino` en la tabla `children` de Supabase (con policies RLS) y que `/kids` y `/kids/[slug]` lean los niños reales, con seed de los 8 del mock.
@@ -57,16 +57,16 @@ const mapDbChildToKid = (child, roomName): Kid => ({
 
 ## Acceptance criteria
 
-- [ ] Las policies existen y un usuario autenticado puede leer `children`/`rooms` e insertar en `children`; anónimo no.
-- [ ] `children` contiene los 8 niños del mock con fechas, alergias y notas mapeadas.
-- [ ] `/kids` lista los 9+ niños de la DB (8 seed + nuevos) con contador real y etiqueta "NIÑOS".
-- [ ] Pulsar un niño nuevo (y los seeded) abre su perfil con datos correctos (edad calculada, sala, ingreso).
-- [ ] El select de salas muestra las salas reales de la DB (Soles, Estrellas, Luna).
-- [ ] Guardar un niño válido lo inserta en `children` y redirige a `/kids` donde aparece.
-- [ ] "Guardar" muestra estado de carga; un fallo de insert muestra error inline sin perder el estilo.
-- [ ] La validación actual (requeridos + máscara + fecha real) sigue igual.
-- [ ] `/crear-publicacion` sigue funcionando (chips del mock intactos).
-- [ ] `pnpm lint` y `pnpm build` sin errores; consola limpia.
+- [x] Las policies existen y un usuario autenticado puede leer `children`/`rooms` e insertar en `children`; anónimo no.
+- [x] `children` contiene los 8 niños del mock con fechas, alergias y notas mapeadas.
+- [x] `/kids` lista los 9+ niños de la DB (8 seed + nuevos) con contador real y etiqueta "NIÑOS".
+- [x] Pulsar un niño nuevo (y los seeded) abre su perfil con datos correctos (edad calculada, sala, ingreso).
+- [x] El select de salas muestra las salas reales de la DB (Soles, Estrellas, Luna).
+- [x] Guardar un niño válido lo inserta en `children` y redirige a `/kids` donde aparece.
+- [x] "Guardar" muestra estado de carga; un fallo de insert muestra error inline sin perder el estilo.
+- [x] La validación actual (requeridos + máscara + fecha real) sigue igual.
+- [x] `/crear-publicacion` sigue funcionando (chips del mock intactos).
+- [x] `pnpm lint` y `pnpm build` sin errores; consola limpia.
 
 ## Decisions
 
