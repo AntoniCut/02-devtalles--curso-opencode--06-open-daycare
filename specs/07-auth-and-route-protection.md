@@ -1,6 +1,6 @@
 # SPEC 07 — Autenticación email/password y protección de rutas
 
-> **Estado:** Approved
+> **Estado:** Implementado
 > **Depende de:** SPEC 03, SPEC SUPABASE 02
 > **Fecha:** 2026-09-12
 > **Objetivo:** Conectar el login `/login` con Supabase Auth (`signInWithPassword`) y proteger todas las rutas de la app redirigiendo a `/login` cuando no hay sesión, con doble capa (proxy + páginas server).
@@ -39,13 +39,13 @@ No introduce tablas nuevas. Reutiliza `auth.users` y `public.users` de SPEC SUPA
 
 ## Acceptance criteria
 
-- [ ] Visitar `/` sin sesión redirige a `/login` (proxy).
-- [ ] `staff@opendaycare.com` / `Test1234!` inicia sesión y aterriza en `/`.
-- [ ] Credenciales inválidas muestran mensaje de error en el formulario sin perder el estilo del mockup.
-- [ ] Usuario autenticado que visita `/login` es redirigido a `/`.
-- [ ] Tras logout, volver a `/` redirige a `/login`.
-- [ ] `/activate` sigue accesible sin sesión.
-- [ ] `pnpm lint` y `pnpm build` sin errores; consola sin errores.
+- [x] Visitar `/` sin sesión redirige a `/login` (proxy).
+- [x] `staff@opendaycare.com` / `Test1234!` inicia sesión y aterriza en `/`.
+- [x] Credenciales inválidas muestran mensaje de error en el formulario sin perder el estilo del mockup.
+- [x] Usuario autenticado que visita `/login` es redirigido a `/`.
+- [x] Tras logout, volver a `/` redirige a `/login`.
+- [x] `/activate` sigue accesible sin sesión.
+- [x] `pnpm lint` y `pnpm build` sin errores; consola sin errores.
 
 ## Decisions
 
