@@ -5,8 +5,15 @@
 */
 "use client";
 
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import type { ReactElement } from "react";
+
+/** - `id mínimo de Pokémon disponible en la PokéAPI` */
+const MIN_POKEMON_ID = 1;
+
+/** - `id máximo de Pokémon disponible en la PokéAPI` */
+const MAX_POKEMON_ID = 1025;
 
 /** - `datos mínimos del Pokémon que se muestran en pantalla` */
 interface PokemonInfo {
@@ -67,7 +74,7 @@ const fetchPokemon = async (id: number): Promise<PokemonInfo> => {
 const PokemonCard = (): ReactElement => {
 
     /** - `id del Pokémon actual` */
-    const [pokemonId, setPokemonId] = useState<number>(1);
+    const [pokemonId, setPokemonId] = useState<number>(MIN_POKEMON_ID);
 
     /** - `datos del Pokémon actual` */
     const [pokemon, setPokemon] = useState<PokemonInfo | null>(null);
@@ -78,11 +85,6 @@ const PokemonCard = (): ReactElement => {
     //  -----  cargar el Pokémon cada vez que cambia el id  -----
     useEffect((): (() => void) | undefined => {
         let cancelled = false;
-
-        //  -----  marcar carga de forma asíncrona para evitar cascada de renders  -----
-        Promise.resolve().then((): void => {
-            if (!cancelled) setStatus("loading");
-        });
 
         fetchPokemon(pokemonId)
             .then((data: PokemonInfo): void => {
@@ -106,20 +108,22 @@ const PokemonCard = (): ReactElement => {
      * ---------------------------
      * -----  `goToNext()`  ------
      * ---------------------------
-     * - Avanza al siguiente Pokémon.
+     * - Avanza al siguiente Pokémon y marca el estado de carga.
      */
     const goToNext = (): void => {
-        setPokemonId((current: number): number => Math.min(current + 1, 1025));
+        setStatus("loading");
+        setPokemonId((current: number): number => Math.min(current + 1, MAX_POKEMON_ID));
     };
 
     /**
      * ---------------------------
      * -----  `goToPrev()`  ------
      * ---------------------------
-     * - Regresa al Pokémon anterior.
+     * - Regresa al Pokémon anterior y marca el estado de carga.
      */
     const goToPrev = (): void => {
-        setPokemonId((current: number): number => Math.max(current - 1, 1));
+        setStatus("loading");
+        setPokemonId((current: number): number => Math.max(current - 1, MIN_POKEMON_ID));
     };
 
     return (
@@ -127,17 +131,21 @@ const PokemonCard = (): ReactElement => {
             <h2 className="text-lg font-bold text-[#4A3F35] capitalize">Pokémon actual</h2>
 
             {/*  -----  contenido según el estado de la petición  ----- */}
-            {status === "loading" && <p className="text-[#A89A8B]">Cargando Pokémon…</p>}
+            {status === "loading" && (
+                <p role="status" className="text-[#A89A8B]">
+                    Cargando Pokémon…
+                </p>
+            )}
 
             {status === "error" && (
-                <p className="text-sm font-semibold text-[#D9684A]">
+                <p role="alert" className="text-sm font-semibold text-[#D9684A]">
                     No se pudo cargar el Pokémon. Inténtalo de nuevo.
                 </p>
             )}
 
             {status === "success" && pokemon !== null && (
                 <>
-                    <img
+                    <Image
                         src={pokemon.imageUrl}
                         alt={`Sprite de ${pokemon.name}`}
                         width={160}
@@ -154,7 +162,7 @@ const PokemonCard = (): ReactElement => {
                 <button
                     type="button"
                     onClick={goToPrev}
-                    disabled={pokemonId <= 1}
+                    disabled={pokemonId <= MIN_POKEMON_ID}
                     className="rounded-lg bg-[#FBD8CC] px-4 py-2 text-sm font-semibold text-[#D9684A] cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                     ← Anterior
@@ -162,7 +170,7 @@ const PokemonCard = (): ReactElement => {
                 <button
                     type="button"
                     onClick={goToNext}
-                    disabled={pokemonId >= 1025}
+                    disabled={pokemonId >= MAX_POKEMON_ID}
                     className="rounded-lg bg-[#FBD8CC] px-4 py-2 text-sm font-semibold text-[#D9684A] cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                     Siguiente →

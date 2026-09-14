@@ -41,11 +41,12 @@ const Counter = (): ReactElement => {
 
     return (
         <section className="flex flex-col items-center gap-4 rounded-xl border border-[#EADDCE] bg-white p-6">
-            <p className="text-4xl font-bold text-[#4A3F35]">{count}</p>
+            <p role="status" className="text-4xl font-bold text-[#4A3F35]">{count}</p>
             <div className="flex gap-3">
                 <button
                     type="button"
                     onClick={decrement}
+                    aria-label="Decrementar contador"
                     className="rounded-lg bg-[#FBD8CC] px-4 py-2 text-sm font-semibold text-[#D9684A] cursor-pointer"
                 >
                     -
@@ -53,6 +54,7 @@ const Counter = (): ReactElement => {
                 <button
                     type="button"
                     onClick={increment}
+                    aria-label="Incrementar contador"
                     className="rounded-lg bg-[#FBD8CC] px-4 py-2 text-sm font-semibold text-[#D9684A] cursor-pointer"
                 >
                     +
