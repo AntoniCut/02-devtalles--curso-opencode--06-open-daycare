@@ -5,10 +5,12 @@
 */
 "use client";
 
-import { useState } from "react";
+import { useState, useActionState } from "react";
 import type { ChangeEvent, ReactElement, SubmitEvent } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useFormStatus } from "react-dom";
+import { sendInvitation } from "@/app/vincular-padre/actions";
+import type { SendInvitationState } from "@/app/vincular-padre/actions";
 
 /** - `parentesco del padre/madre vinculado` */
 type Relation = "Mamá" | "Papá" | "Tutor/a";
@@ -53,6 +55,7 @@ interface FormErrors {
 
 /** - `datos del niño y código que recibe el formulario desde la página server` */
 interface LinkParentFormProps {
+  childId: string;
   childName: string;
   childFirstName: string;
   childSlug: string;
@@ -101,19 +104,39 @@ const pillStyles = (selected: boolean): string => `flex-1 py-[11px] rounded-full
 
 /**
  * ------------------------------------
+ * -----  `SubmitButton()`  -----
+ * ------------------------------------
+ * - CTA Enviar invitación con estado de carga vía useFormStatus (hijo del form).
+ */
+const SubmitButton = (): ReactElement => {
+  const { pending } = useFormStatus();
+  return (
+    <button
+      type="submit"
+      disabled={pending}
+      className="flex w-full items-center justify-center gap-[9px] rounded-[14px] bg-[linear-gradient(180deg,#F4977E,#EE8164)] py-[14px] text-[15.5px] font-extrabold text-white shadow-[0_10px_22px_-8px_rgba(238,129,100,.7)] cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+    >
+      {sendIcon}
+      {pending ? "Enviando…" : "Enviar invitación"}
+    </button>
+  );
+};
+
+/**
+ * ------------------------------------
  * -----  `LinkParentForm(props)`  -----
  * ------------------------------------
  * - Formulario para vincular un padre al niño: header con cierre, banner informativo,
  *   campos nombre/email con validación, pills de parentesco y tarjeta del código
- *   (niño real y código generados server-side).
+ *   (niño real y código generados server-side). El submit llama a la Server Action
+ *   que inserta la invitación y envía el email con Resend.
  */
-const LinkParentForm = ({ childName, childFirstName, childSlug, invitationCode }: LinkParentFormProps): ReactElement => {
-  const router = useRouter();
+const LinkParentForm = ({ childId, childName, childFirstName, childSlug, invitationCode }: LinkParentFormProps): ReactElement => {
   const [name, setName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [relation, setRelation] = useState<Relation>("Mamá");
   const [errors, setErrors] = useState<FormErrors>({});
-
+  const [state, formAction] = useActionState<SendInvitationState, FormData>(sendInvitation, { error: null });
   /**
    * -------------------------------------
    * -----  `handleRelation(item)`  -----
@@ -164,25 +187,30 @@ const LinkParentForm = ({ childName, childFirstName, childSlug, invitationCode }
    * ------------------------------------
    * -----  `handleSubmit(event)`  -----
    * ------------------------------------
-   * - Valida el formulario; si es válido navega al perfil del niño.
+   * - Valida el formulario en el cliente; si es válido lo deja pasar a la
+   *   Server Action (insert en DB + email con Resend).
    */
   const handleSubmit = (event: SubmitEvent<HTMLFormElement>): void => {
-    event.preventDefault();
     const nextErrors = validateForm(name, email);
     setErrors(nextErrors);
 
-    //  -----  formulario válido: navegar al perfil sin persistir (paso 4 conectará la Server Action)  -----
-    if (Object.keys(nextErrors).length === 0) {
-      router.push(`/kids/${childSlug}`);
+    //  -----  formulario inválido: no enviar  -----
+    if (Object.keys(nextErrors).length > 0) {
+      event.preventDefault();
     }
   };
 
   return (
     <form
+      action={formAction}
       onSubmit={handleSubmit}
       noValidate
       className="w-full max-w-[480px] bg-[#FBF4EC] border border-[#ECE0D0] rounded-[24px] shadow-[0_20px_50px_-24px_rgba(63,54,46,.35)] overflow-hidden"
     >
+      {/*  -----  hidden inputs para la Server Action  -----  */}
+      <input type="hidden" name="childId" value={childId} />
+      <input type="hidden" name="code" value={invitationCode} />
+      <input type="hidden" name="relation" value={relation} />
       {/*  -----  header: título, subtítulo y cierre  -----  */}
       <div className="flex items-center justify-between py-5 px-[26px] border-b border-[#ECE0D0]">
         <div>
@@ -207,6 +235,7 @@ const LinkParentForm = ({ childName, childFirstName, childSlug, invitationCode }
           <label htmlFor="name" className={`${labelClasses} mb-2`}>NOMBRE DEL PADRE/MADRE</label>
           <input
             id="name"
+            name="name"
             type="text"
             value={name}
             onChange={handleNameChange}
@@ -223,6 +252,7 @@ const LinkParentForm = ({ childName, childFirstName, childSlug, invitationCode }
           <label htmlFor="email" className={`${labelClasses} mb-2`}>EMAIL</label>
           <input
             id="email"
+            name="email"
             type="email"
             value={email}
             onChange={handleEmailChange}
@@ -259,11 +289,13 @@ const LinkParentForm = ({ childName, childFirstName, childSlug, invitationCode }
           <p className="text-[13px] text-[#A88526] mt-[6px]">Vence en 7 días</p>
         </div>
 
-        {/*  -----  CTA enviar invitación  -----  */}
-        <button type="submit" className="flex w-full items-center justify-center gap-[9px] rounded-[14px] bg-[linear-gradient(180deg,#F4977E,#EE8164)] py-[14px] text-[15.5px] font-extrabold text-white shadow-[0_10px_22px_-8px_rgba(238,129,100,.7)] cursor-pointer">
-          {sendIcon}
-          Enviar invitación
-        </button>
+        {/*  -----  CTA enviar invitación (estado loading con useFormStatus)  -----  */}
+        <SubmitButton />
+
+        {/*  -----  error del servidor (fallo del insert o del envío)  -----  */}
+        {state.error && (
+          <p className="mt-4 text-[12.5px] font-bold text-[#D9583C]" role="alert">{state.error}</p>
+        )}
       </div>
     </form>
   );

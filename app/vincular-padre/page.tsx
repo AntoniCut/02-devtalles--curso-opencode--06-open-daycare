@@ -10,29 +10,12 @@ import type { ReactElement } from "react";
 import LinkParentForm from "@/components/link-parent-form";
 import { getAuthenticatedUser } from "@/lib/auth";
 import { slugify } from "@/lib/kids";
+import { generateInvitationCode } from "@/lib/invitation-code";
 import { createClient } from "@/utils/supabase/server";
 
 /** - `metadata de la página vincular padre` */
 export const metadata: Metadata = {
   title: "Vincular padre · OpenDayCare",
-};
-
-/** - `alfabeto del código de invitación (sin 0/O/1/I para evitar confusiones)` */
-const CODE_ALPHABET = "23456789ABCDEFGHJKMNPQRSTUVWXYZ";
-
-/** - `longitud del código de invitación (ej. 7K4P9)` */
-const CODE_LENGTH = 5;
-
-/**
- * ----------------------------------------
- * -----  `generateInvitationCode()`  -----
- * ----------------------------------------
- * - Código aleatorio de 5 caracteres criptográficamente seguro.
- */
-const generateInvitationCode = (): string => {
-  const bytes = new Uint8Array(CODE_LENGTH);
-  crypto.getRandomValues(bytes);
-  return Array.from(bytes, (byte) => CODE_ALPHABET[byte % CODE_ALPHABET.length]).join("");
 };
 
 /** - `props de la página (searchParams asíncrono en Next 16)` */
@@ -80,6 +63,7 @@ const VincularPadrePage = async (props: VincularPadrePageProps): Promise<ReactEl
   return (
     <div className="min-h-screen flex items-start justify-center py-10 px-6 bg-[#F6ECDF]">
       <LinkParentForm
+        childId={child.id}
         childName={childName}
         childFirstName={childFirstName}
         childSlug={childSlug}
