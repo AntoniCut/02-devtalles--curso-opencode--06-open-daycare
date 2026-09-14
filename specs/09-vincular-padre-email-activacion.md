@@ -1,6 +1,6 @@
 # SPEC 09 — Vincular padre: invitación con email (Resend) y activación de cuenta
 
-> **Estado:** Aprobado
+> **Estado:** Implementado
 > **Depende de:** SPEC 05, SPEC 07, SPEC 08, SPEC SUPABASE 02, SPEC SUPABASE 04
 > **Fecha:** 2026-09-14
 > **Objetivo:** Convertir `/vincular-padre` en dinámica persistiendo invitaciones en la tabla `invitations` y enviándolas por email con Resend desde Next.js, y que `/activate` registre al padre con el código creando su cuenta, su perfil en `users` (rol `parent`) y el vínculo en `parent_children`.
