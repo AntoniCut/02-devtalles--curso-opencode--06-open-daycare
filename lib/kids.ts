@@ -37,6 +37,7 @@ export interface KidTag {
 
 /** - `niño de la sala` */
 export interface Kid {
+  id?: string; // id de la fila en DB (vacío en el mock de lib/kids.ts)
   slug: string;
   name: string;
   age: string;
@@ -265,14 +266,50 @@ export const roomNameFrom = (rooms: unknown): string => {
   return (rooms as { name?: string } | null)?.name ?? "";
 };
 
+/** - `fila del RPC get_child_parents (vínculo activo o invitación pendiente)` */
+export interface ChildParentRow {
+  child_id: string;
+  parent_name: string;
+  relationship: "father" | "mother" | "guardian";
+  status: "active" | "pending";
+}
+
+/** - `etiquetas UI de relationship_type` */
+const RELATION_LABELS: Record<ChildParentRow["relationship"], string> = {
+  father: "Papá",
+  mother: "Mamá",
+  guardian: "Tutor/a",
+};
+
+/**
+ * ------------------------------------------------
+ * -----  `parentsForChild(childId, rows)`  -----
+ * ------------------------------------------------
+ * - Los padres vinculados (ACTIVA) y las invitaciones pendientes (PENDIENTE)
+ *   de un niño, mapeados al modelo LinkedParent de la UI; activos primero.
+ */
+export const parentsForChild = (childId: string, rows: ChildParentRow[]): LinkedParent[] =>
+  rows
+    .filter((row) => row.child_id === childId)
+    .sort((a, b) => (a.status === b.status ? 0 : a.status === "active" ? -1 : 1))
+    .map((row) => ({
+      name: row.parent_name,
+      relation: RELATION_LABELS[row.relationship],
+      status: row.status,
+      initial: row.parent_name.trim().charAt(0).toUpperCase(),
+      background: avatarFor(row.parent_name).background,
+      color: "#FFFFFF",
+    }));
+
 /**
  * ------------------------------------------------------
  * -----  `mapDbChildToKid(child)`  -----
  * ------------------------------------------------------
  * - Mapea una fila de children (join rooms) al modelo Kid de la UI.
- * - Los padres no existen en DB (SPEC 05): siempre parents: [].
+ * - Los padres vienen del RPC get_child_parents (SPEC 09).
  */
-export const mapDbChildToKid = (child: ChildRow): Kid => ({
+export const mapDbChildToKid = (child: ChildRow, parents: LinkedParent[] = []): Kid => ({
+  id: child.id,
   slug: slugify(child.full_name),
   name: child.full_name,
   age: ageFromBirthDate(child.birth_date),
@@ -284,5 +321,5 @@ export const mapDbChildToKid = (child: ChildRow): Kid => ({
   birthDate: formatDateEs(child.birth_date, true),
   classroom: child.room_name,
   entry: child.enrolled_at ? formatDateEs(child.enrolled_at, false) : "—",
-  parents: [],
+  parents,
 });
