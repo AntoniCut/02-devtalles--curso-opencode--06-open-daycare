@@ -9,8 +9,8 @@ import { notFound } from "next/navigation";
 import type { ReactElement } from "react";
 import { cookies } from "next/headers";
 import Sidebar from "@/components/sidebar";
-import { mapDbChildToKid, roomNameFrom } from "@/lib/kids";
-import type { Kid, LinkedParent } from "@/lib/kids";
+import { mapDbChildToKid, roomNameFrom, parentsForChild } from "@/lib/kids";
+import type { Kid, ChildParentRow, LinkedParent } from "@/lib/kids";
 import { getAuthenticatedProfile } from "@/lib/auth";
 import { createClient } from "@/utils/supabase/server";
 
@@ -39,17 +39,24 @@ const fetchKids = async (): Promise<Kid[]> => {
     .from("children")
     .select("id, room_id, full_name, birth_date, enrolled_at, medical_notes, allergy_tags, rooms(name)")
     .order("full_name");
+
+  //  -----  padres vinculados e invitaciones pendientes por niño (RPC SPEC 09)  -----
+  const { data: parentRows } = await supabase.rpc("get_child_parents");
+
   return (children ?? []).map((child) =>
-    mapDbChildToKid({
-      id: child.id,
-      room_id: child.room_id,
-      full_name: child.full_name,
-      birth_date: child.birth_date,
-      enrolled_at: child.enrolled_at,
-      medical_notes: child.medical_notes,
-      allergy_tags: child.allergy_tags,
-      room_name: roomNameFrom(child.rooms),
-    }),
+    mapDbChildToKid(
+      {
+        id: child.id,
+        room_id: child.room_id,
+        full_name: child.full_name,
+        birth_date: child.birth_date,
+        enrolled_at: child.enrolled_at,
+        medical_notes: child.medical_notes,
+        allergy_tags: child.allergy_tags,
+        room_name: roomNameFrom(child.rooms),
+      },
+      parentsForChild(child.id, (parentRows ?? []) as ChildParentRow[]),
+    ),
   );
 };
 

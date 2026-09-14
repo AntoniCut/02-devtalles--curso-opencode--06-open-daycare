@@ -102,6 +102,8 @@ Variables de entorno (`.env`, ya esbozadas en `.env.example`): `RESEND_API_KEY`,
 - [x] Contraseña vacía → error inline y no se crea la cuenta.
 - [x] El estilo de `/activate` es idéntico al mockup (tarjeta, inputs, checkbox, CTA).
 - [x] `pnpm lint` y `pnpm build` sin errores; consola sin errores ni warnings de hidratación.
+- [x] (Addendum) El perfil del niño muestra padres vinculados (badge ACTIVA) e invitaciones pendientes (badge PENDIENTE, "invitación enviada"); la lista `/kids` muestra "N padres vinculados" / "sin padres vinculados" según datos reales.
+- [x] (Addendum) El botón "Vincular otro padre" del perfil lleva a `/vincular-padre?kid=<id>` del niño.
 
 ## Decisions
 
@@ -118,6 +120,18 @@ Variables de entorno (`.env`, ya esbozadas en `.env.example`): `RESEND_API_KEY`,
 - **No:** cron de expiración de invitaciones — el estado `expired` se evalúa comparando `expires_at` al validar; automatizarlo es otro spec.
 - **No:** normalizar `relationship` en tablas propias — el enum `relationship_type` del esquema de referencia cubre el caso.
 
+## Addendum — Cambios surgidos durante la implementación
+
+Los 16 criterios originales se verificaron con el agente verificador (16/16). Durante la implementación surgieron las siguientes piezas necesarias, no previstas en el plan original, aplicadas y verificadas sobre la misma rama:
+
+1. **Migración `add_invitations_insert_delete_policies`** — el spec solo listaba SELECT/UPDATE en `invitations`; sin policy INSERT el staff no puede crear invitaciones y sin DELETE no se puede revertir el insert cuando Resend falla. Se añaden ambas.
+2. **Dependencia `@react-email/render`** — `resend` v6 exige el paquete para renderizar el template React (`react:` prop); sin él el envío lanza error 500.
+3. **Función `get_invitation_preview(p_code)`** (migraciones `create_get_invitation_preview` + `add_daycare_id_to_invitation_preview`) — SECURITY DEFINER para mostrar la tarjeta real de la invitación en `/activate` sin sesión (RLS de `children` bloquea al anon); devuelve también `daycare_id` para la metadata del `signUp`. Solo expone nombres si el código exacto coincide con una invitación pendiente no expirada.
+4. **Fix del botón "Vincular otro padre"** — el link del perfil (`app/kids/[slug]/page.tsx`) apuntaba a `/vincular-padre` sin `?kid=` y la página dinámica rebotaba a `/kids`; ahora lleva `?kid=<id>` y el modelo `Kid` incorpora `id` (opcional para no tocar el mock de SPEC 06).
+5. **Función `get_child_parents()` + UI de padres vinculados/pendientes** — el perfil mostraba siempre "sin padres vinculados" (SPEC 08 dejaba `parents: []` fijo). Nueva función SECURITY DEFINER que une vínculos activos (`parent_children`+`users`) e invitaciones `pending` no expiradas, y `lib/kids.ts` (`parentsForChild()`) los pinta en el perfil (badges ACTIVA/PENDIENTE) y en la lista (`N padres vinculados`). Solicitado explícitamente por el usuario (comportamiento del curso); solo expone nombres y granted a `authenticated`.
+
+Nota de limpieza: los artefactos de prueba (usuario `verif.spec09@example.com`, invitaciones `4HD5M`/`SPEC9`/`974YS`) se eliminaron tras la verificación.
+
 ## Risks
 
 | Riesgo | Mitigación |
@@ -131,8 +145,8 @@ Variables de entorno (`.env`, ya esbozadas en `.env.example`): `RESEND_API_KEY`,
 ## What is **not** in this spec
 
 - Feed del padre `/parent-feed`, login del padre recién creado.
-- Reenvío/revoque/listado de invitaciones y expiración automática.
-- Policies multi-tenant finas y rate limiting del endpoint de activación.
+- Reenvío/revoque de invitaciones, expiración automática por cron y rate limiting de activación.
+- Policies multi-tenant finas (por `daycare_id`).
 - Responsive móvil/tablet y modo oscuro.
 
-Cada uno de esos, si aterriza, va en su propio spec.
+Cada uno de esos, si aterriza, va en su propio spec. (La visualización de padres vinculados/invitaciones pendientes, marcada aquí como out-of-scope al inicio, se implementó como addendum por solicitud del usuario — ver sección Addendum.)
