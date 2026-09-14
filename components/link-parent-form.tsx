@@ -51,6 +51,14 @@ interface FormErrors {
   email?: string;
 }
 
+/** - `datos del niño y código que recibe el formulario desde la página server` */
+interface LinkParentFormProps {
+  childName: string;
+  childFirstName: string;
+  childSlug: string;
+  invitationCode: string;
+}
+
 /**
  * -------------------------------------
  * -----  `fieldStyles(hasError)`  -----
@@ -93,12 +101,13 @@ const pillStyles = (selected: boolean): string => `flex-1 py-[11px] rounded-full
 
 /**
  * ------------------------------------
- * -----  `LinkParentForm()`  -----
+ * -----  `LinkParentForm(props)`  -----
  * ------------------------------------
  * - Formulario para vincular un padre al niño: header con cierre, banner informativo,
- *   campos nombre/email con validación, pills de parentesco y tarjeta del código.
+ *   campos nombre/email con validación, pills de parentesco y tarjeta del código
+ *   (niño real y código generados server-side).
  */
-const LinkParentForm = (): ReactElement => {
+const LinkParentForm = ({ childName, childFirstName, childSlug, invitationCode }: LinkParentFormProps): ReactElement => {
   const router = useRouter();
   const [name, setName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
@@ -162,9 +171,9 @@ const LinkParentForm = (): ReactElement => {
     const nextErrors = validateForm(name, email);
     setErrors(nextErrors);
 
-    //  -----  formulario válido: navegar al perfil sin persistir (mock)  -----
+    //  -----  formulario válido: navegar al perfil sin persistir (paso 4 conectará la Server Action)  -----
     if (Object.keys(nextErrors).length === 0) {
-      router.push("/kids/mateo-fernandez");
+      router.push(`/kids/${childSlug}`);
     }
   };
 
@@ -178,9 +187,9 @@ const LinkParentForm = (): ReactElement => {
       <div className="flex items-center justify-between py-5 px-[26px] border-b border-[#ECE0D0]">
         <div>
           <div className="font-display font-semibold text-[18px] text-[#3F362E]">Vincular padre</div>
-          <div className="text-[13px] text-[#A89A8B]">a Mateo Fernández</div>
+          <div className="text-[13px] text-[#A89A8B]">a {childName}</div>
         </div>
-        <Link href="/kids/mateo-fernandez" aria-label="Cerrar" className="flex h-[34px] w-[34px] items-center justify-center rounded-[10px] bg-[#F0E6D8] text-[#94887B]">
+        <Link href={`/kids/${childSlug}`} aria-label="Cerrar" className="flex h-[34px] w-[34px] items-center justify-center rounded-[10px] bg-[#F0E6D8] text-[#94887B]">
           {closeIcon}
         </Link>
       </div>
@@ -190,7 +199,7 @@ const LinkParentForm = (): ReactElement => {
         {/*  -----  banner informativo azul  -----  */}
         <div className="flex gap-[11px] rounded-[14px] bg-[#E3ECFB] px-4 py-[13px] mb-5">
           <span className="pointer-events-none mt-px flex-none">{infoIcon}</span>
-          <p className="text-[13.5px] text-[#3F5694] leading-[1.45]">Le enviaremos un correo con un código para que active su cuenta. Solo verá el feed de Mateo.</p>
+          <p className="text-[13.5px] text-[#3F5694] leading-[1.45]">Le enviaremos un correo con un código para que active su cuenta. Solo verá el feed de {childFirstName}.</p>
         </div>
 
         {/*  -----  nombre del padre/madre  -----  */}
@@ -246,7 +255,7 @@ const LinkParentForm = (): ReactElement => {
         {/*  -----  tarjeta del código de invitación  -----  */}
         <div className="rounded-[16px] border-[1.5px] border-dashed border-[#E6D08A] bg-[#FBF1D6] px-[18px] py-[18px] text-center mb-5">
           <div className="block text-[12px] font-extrabold tracking-[.7px] text-[#A88526] mb-2">CÓDIGO DE INVITACIÓN</div>
-          <div className="font-display font-semibold text-[34px] tracking-[7px] text-[#8A7234]">7K4P9</div>
+          <div className="font-display font-semibold text-[34px] tracking-[7px] text-[#8A7234]">{invitationCode}</div>
           <p className="text-[13px] text-[#A88526] mt-[6px]">Vence en 7 días</p>
         </div>
 
