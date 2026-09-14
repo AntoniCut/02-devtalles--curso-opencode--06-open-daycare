@@ -37,6 +37,7 @@ export interface KidTag {
 
 /** - `niño de la sala` */
 export interface Kid {
+  id?: string; // id de la fila en DB (vacío en el mock de lib/kids.ts)
   slug: string;
   name: string;
   age: string;
@@ -273,6 +274,7 @@ export const roomNameFrom = (rooms: unknown): string => {
  * - Los padres no existen en DB (SPEC 05): siempre parents: [].
  */
 export const mapDbChildToKid = (child: ChildRow): Kid => ({
+  id: child.id,
   slug: slugify(child.full_name),
   name: child.full_name,
   age: ageFromBirthDate(child.birth_date),

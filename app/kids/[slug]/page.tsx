@@ -232,7 +232,7 @@ const KidProfilePage = async (props: PageProps<"/kids/[slug]">): Promise<ReactEl
                   ))}
 
                   {/*  -----  vincular otro padre  -----  */}
-                  <Link href="/vincular-padre" className="flex items-center gap-3 pt-2">
+                  <Link href={`/vincular-padre?kid=${kid.id}`} className="flex items-center gap-3 pt-2">
                     <span className="w-10 h-10 rounded-full border-[1.5px] border-dashed border-[#D8CBBA] flex items-center justify-center text-[#B0A290] flex-none">
                       {plusIcon}
                     </span>

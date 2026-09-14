@@ -86,22 +86,22 @@ Variables de entorno (`.env`, ya esbozadas en `.env.example`): `RESEND_API_KEY`,
 
 ## Acceptance criteria
 
-- [ ] `supabase_list_tables` muestra `invitations` y `parent_children` con las columnas del esquema; los enums `relationship_type` e `invitation_status` existen.
-- [ ] `invitations` y `parent_children` tienen RLS habilitado; anon puede hacer SELECT en `invitations` (y no INSERT/UPDATE); authenticated puede SELECT/UPDATE `invitations` y SELECT/INSERT `parent_children`; anon no puede tocar `parent_children`.
-- [ ] `supabase_list_migrations` incluye la migración y `supabase_get_advisors` no reporta avisos nuevos.
-- [ ] `/vincular-padre?kid=<uuid>` muestra el nombre real del niño en el subtítulo y el botón X lleva a su perfil `/kids/[slug]`.
-- [ ] `/vincular-padre` sin `?kid=` o con id inexistente redirige a `/kids`.
-- [ ] La tarjeta muestra un código real de 5 caracteres (estilo del mockup intacto) y "Vence en 7 días".
-- [ ] Enviar el formulario válido inserta una fila en `invitations` (`status: pending`, `expires_at` = +7 días, `invited_by` = usuario autenticado) y redirige a `/kids/[slug]`.
-- [ ] El envío dispara un email de Resend al destinatario con el código, el nombre del niño y el vencimiento.
-- [ ] Submit vacío o email inválido mantiene los errores de SPEC 05 ("Campo requerido" / "Email inválido") y no inserta ni envía nada.
-- [ ] Un fallo del insert o del envío muestra error inline sin perder el estilo y sin navegar.
-- [ ] `/activate` con código+email válidos y contraseña crea la cuenta en `auth.users`, el perfil en `public.users` (rol `parent`, `daycare_id` del niño vía metadata) y redirige a `/`.
-- [ ] Tras activar existen: fila en `parent_children` (parent_id, child_id, relationship correcto) y la invitación pasa a `accepted` con `accepted_at`.
-- [ ] Código inexistente, expirado, ya usado, o email que no coincide → error inline "Código de invitación inválido o expirado" y no se crea ninguna cuenta.
-- [ ] Contraseña vacía → error inline y no se crea la cuenta.
-- [ ] El estilo de `/activate` es idéntico al mockup (tarjeta, inputs, checkbox, CTA).
-- [ ] `pnpm lint` y `pnpm build` sin errores; consola sin errores ni warnings de hidratación.
+- [x] `supabase_list_tables` muestra `invitations` y `parent_children` con las columnas del esquema; los enums `relationship_type` e `invitation_status` existen.
+- [x] `invitations` y `parent_children` tienen RLS habilitado; anon puede hacer SELECT en `invitations` (y no INSERT/UPDATE); authenticated puede SELECT/UPDATE `invitations` y SELECT/INSERT `parent_children`; anon no puede tocar `parent_children`.
+- [x] `supabase_list_migrations` incluye la migración y `supabase_get_advisors` no reporta avisos nuevos.
+- [x] `/vincular-padre?kid=<uuid>` muestra el nombre real del niño en el subtítulo y el botón X lleva a su perfil `/kids/[slug]`.
+- [x] `/vincular-padre` sin `?kid=` o con id inexistente redirige a `/kids`.
+- [x] La tarjeta muestra un código real de 5 caracteres (estilo del mockup intacto) y "Vence en 7 días".
+- [x] Enviar el formulario válido inserta una fila en `invitations` (`status: pending`, `expires_at` = +7 días, `invited_by` = usuario autenticado) y redirige a `/kids/[slug]`.
+- [x] El envío dispara un email de Resend al destinatario con el código, el nombre del niño y el vencimiento.
+- [x] Submit vacío o email inválido mantiene los errores de SPEC 05 ("Campo requerido" / "Email inválido") y no inserta ni envía nada.
+- [x] Un fallo del insert o del envío muestra error inline sin perder el estilo y sin navegar.
+- [x] `/activate` con código+email válidos y contraseña crea la cuenta en `auth.users`, el perfil en `public.users` (rol `parent`, `daycare_id` del niño vía metadata) y redirige a `/`.
+- [x] Tras activar existen: fila en `parent_children` (parent_id, child_id, relationship correcto) y la invitación pasa a `accepted` con `accepted_at`.
+- [x] Código inexistente, expirado, ya usado, o email que no coincide → error inline "Código de invitación inválido o expirado" y no se crea ninguna cuenta.
+- [x] Contraseña vacía → error inline y no se crea la cuenta.
+- [x] El estilo de `/activate` es idéntico al mockup (tarjeta, inputs, checkbox, CTA).
+- [x] `pnpm lint` y `pnpm build` sin errores; consola sin errores ni warnings de hidratación.
 
 ## Decisions
 
