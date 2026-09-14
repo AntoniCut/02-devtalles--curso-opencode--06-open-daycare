@@ -1,6 +1,6 @@
 # SPEC SUPABASE 03 — Crear tabla `rooms`
 
-> **Estado:** Aprovado
+> **Estado:** Implementado
 > **Depende de:** SPEC SUPABASE 01
 > **Fecha:** 2026-09-12
 > **Objetivo:** Crear la tabla `public.rooms` (tabla 3 del esquema de referencia 07-db-Schema) con FK a `daycares`, RLS habilitado, trigger `updated_at` reutilizando `set_updated_at()`, índice de la FK y 3 salas seed de "Guardería Sala Soles".
