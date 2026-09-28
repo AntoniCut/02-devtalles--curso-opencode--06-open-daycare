@@ -84,6 +84,7 @@ const PokemonCard = (): ReactElement => {
 
     //  -----  cargar el Pokémon cada vez que cambia el id  -----
     useEffect((): (() => void) | undefined => {
+        
         let cancelled = false;
 
         fetchPokemon(pokemonId)
@@ -102,6 +103,7 @@ const PokemonCard = (): ReactElement => {
         return (): void => {
             cancelled = true;
         };
+        
     }, [pokemonId]);
 
     /**
