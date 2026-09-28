@@ -24,8 +24,14 @@ export async function proxy(request: NextRequest) {
     (path) => pathname === path || pathname.startsWith(`${path}/`),
   );
 
+  // Server Action POST requests must never be redirected here: the action
+  // client expects `text/x-component` and would break on an HTML redirect
+  // response ("An unexpected response was received from the server.").
+  // The action itself handles its own redirects after running.
+  const isServerAction = request.headers.has("next-action");
+
   // Authenticated user hitting /login → back to the app (validated ?next= or /)
-  if (isAuthenticated && pathname === "/login") {
+  if (!isServerAction && isAuthenticated && pathname === "/login") {
     const url = request.nextUrl.clone();
     const next = url.searchParams.get("next") ?? "";
     url.searchParams.delete("next");
@@ -33,7 +39,7 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  if (!isPublicPath && !isAuthenticated) {
+  if (!isServerAction && !isPublicPath && !isAuthenticated) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     url.search = "";
