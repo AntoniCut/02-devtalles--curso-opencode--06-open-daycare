@@ -88,7 +88,7 @@ Variables de entorno (`.env`, ya esbozadas en `.env.example`): `RESEND_API_KEY`,
 
 - [x] `supabase_list_tables` muestra `invitations` y `parent_children` con las columnas del esquema; los enums `relationship_type` e `invitation_status` existen.
 - [x] `invitations` y `parent_children` tienen RLS habilitado; anon puede hacer SELECT en `invitations` (y no INSERT/UPDATE); authenticated puede SELECT/UPDATE `invitations` y SELECT/INSERT `parent_children`; anon no puede tocar `parent_children`.
-- [x] `supabase_list_migrations` incluye la migración y `supabase_get_advisors` no reporta avisos nuevos.
+- [ ] `supabase_list_migrations` incluye la migración y `supabase_get_advisors` no reporta avisos nuevos.
 - [x] `/vincular-padre?kid=<uuid>` muestra el nombre real del niño en el subtítulo y el botón X lleva a su perfil `/kids/[slug]`.
 - [x] `/vincular-padre` sin `?kid=` o con id inexistente redirige a `/kids`.
 - [x] La tarjeta muestra un código real de 5 caracteres (estilo del mockup intacto) y "Vence en 7 días".
