@@ -41,7 +41,7 @@ export const login = async (_prevState: LoginState, formData: FormData): Promise
   const { error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
-    return { error: "Email o contraseña incorrectos." };
+    return { error: "Email o contraseña incorrectos. Revisá los datos e intentá de nuevo." };
   }
 
   const target = next && isInternalPath(next) ? next : DEFAULT_REDIRECT;
