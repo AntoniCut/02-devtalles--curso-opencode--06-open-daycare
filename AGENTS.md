@@ -63,6 +63,15 @@ Las skills del proyecto viven en `.agents/skills/` (`spec`, `spec-impl`, `supaba
 
 
 
+## Accesibilidad (WCAG 2.2 AA)
+
+- Estándar de referencia: **WCAG 2.2 nivel AA**, incluidos los criterios nuevos de 2.2 (2.4.11 Focus Not Obscured, 2.5.7 Dragging Movements, 2.5.8 Target Size, 3.2.6 Consistent Help, 3.3.7 Redundant Entry, 3.3.8 Accessible Authentication).
+- **Agente accessibility-checker** (`.opencode/agent/accessibility-checker.md`): subagente que audita los archivos que se le indiquen (revisión estática + verificación en runtime con Playwright: snapshot de accesibilidad, teclado, contraste con estilos computados, target size, reflow, reduced motion), corrige todos los hallazgos —incluidos los cambios de contraste/color— y reporta en español con el criterio WCAG de cada hallazgo. No usa axe-core y nunca commitea.
+- Invocación: `/accessibility-checker <archivo>` o pidiendo al subagente `accessibility-checker` que revise los archivos indicados.
+- Si una corrección altera el aspecto respecto al mockup, el agente lo marca explícitamente en el informe (la accesibilidad tiene prioridad sobre el pixel-perfect).
+
+
+
 ## Skills de Supabase
 
 - **supabase**: cargar SIEMPRE ante cualquier tarea con Supabase (DB, Auth, Edge Functions, Realtime, Storage, cliente `supabase-js`/`@supabase/ssr` en Next.js, RLS, migraciones, debugging, logs).
