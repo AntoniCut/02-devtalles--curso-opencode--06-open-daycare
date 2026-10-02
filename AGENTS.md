@@ -91,6 +91,8 @@ Cada vez que se manipule la base de datos (crear/alterar/dropear tablas, columna
 
 **Agente db-migrator** (`.opencode/agent/db-migrator.md`): subagente que asegura que todo cambio de esquema exista como migración versionada en `supabase/migrations/` y la aplica al remoto con `supabase_apply_migration`; audita drift repo↔remoto y verifica con `supabase_list_migrations`/`supabase_list_tables`/`supabase_get_advisors`. Carga siempre las skills `supabase` y `supabase-postgres-best-practices`. Nunca commitea ni aplica DDL ad-hoc.
 
+**Agente db-security-auditor** (`.opencode/agent/db-security-auditor.md`): subagente que audita la seguridad de Supabase/Postgres (RLS, policies, roles, grants, funciones `SECURITY DEFINER`, advisors) priorizando fugas de datos entre niños, padres, staff y guarderías. Verifica el acceso real con tests de impersonación de roles en SQL (transacciones con `set local role` + `request.jwt.claims`, siempre con rollback), revisa también las queries de la app (`app/`, `utils/`) y corrige creando migraciones versionadas que aplica al remoto. Carga siempre las skills `supabase` y `supabase-postgres-best-practices`. Nunca commitea. Invocación: `/db-security-auditor <tablas|funciones|spec>` (sin argumentos = auditoría completa).
+
 Las specs de base de datos viven en `specs/supabase/`.
 
 
