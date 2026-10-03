@@ -55,6 +55,15 @@ const kidsIcon: ReactElement = (
   </svg>
 );
 
+/** - `icono pokémon del menú` */
+const pokeballIcon: ReactElement = (
+  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="9" />
+    <path d="M3 12h6M15 12h6" />
+    <circle cx="12" cy="12" r="3" />
+  </svg>
+);
+
 /** - `icono avisos del menú` */
 const bellIcon: ReactElement = (
   <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -81,6 +90,7 @@ const logoutIcon: ReactElement = (
 const navItems: NavItem[] = [
   { label: "Feed", href: "/", icon: homeIcon },
   { label: "Niños", href: "/kids", icon: kidsIcon },
+  { label: "Pokémon", href: "/pokemon", icon: pokeballIcon },
   { label: "Avisos", href: "/avisos", icon: bellIcon },
   { label: "Mi cuenta", href: "/mi-cuenta", icon: userIcon },
 ];
