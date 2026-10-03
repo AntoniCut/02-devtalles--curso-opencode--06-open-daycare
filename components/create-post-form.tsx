@@ -11,25 +11,14 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { postTypeOptions } from "@/lib/feed";
 import type { CreatePostTypeId } from "@/lib/feed";
-import { kids } from "@/lib/kids";
+import { firstName } from "@/lib/posts";
+import type { PostChildAvatar } from "@/lib/posts";
 
-/** - `chip de destinatario individual: los 3 primeros niños de la sala (mockup)` */
-interface RecipientOption {
-  slug: string;
-  name: string;
-  initial: string;
-  background: string;
-  color: string;
+/** - `props del formulario de nueva publicación` */
+interface CreatePostFormProps {
+  recipients: PostChildAvatar[];
+  canAddressWholeRoom: boolean;
 }
-
-/** - `destinatarios individuales derivados de lib/kids.ts (los 3 del mockup)` */
-const recipientOptions: RecipientOption[] = kids.slice(0, 3).map((kid) => ({
-  slug: kid.slug,
-  name: kid.name.split(" ")[0],
-  initial: kid.initial,
-  background: kid.background,
-  color: kid.color,
-}));
 
 /** - `icono cámara del tile de foto subida` */
 const cameraIcon: ReactElement = (
@@ -112,9 +101,9 @@ const typeChipStyles = (selected: boolean): string => `rounded-full border-[1.5p
  * - Formulario de nueva publicación: header Cancelar/Publicar, selección de
  *   destinatarios y de tipo, descripción y tiles de fotos estáticos.
  */
-const CreatePostForm = (): ReactElement => {
+const CreatePostForm = ({ recipients, canAddressWholeRoom }: CreatePostFormProps): ReactElement => {
   const router = useRouter();
-  const [recipients, setRecipients] = useState<string[]>(["mateo-fernandez"]);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [wholeClass, setWholeClass] = useState<boolean>(false);
   const [typeId, setTypeId] = useState<CreatePostTypeId | null>(null);
   const [description, setDescription] = useState<string>(MOCK_DESCRIPTION);
@@ -131,13 +120,13 @@ const CreatePostForm = (): ReactElement => {
   };
 
   /**
-   * ---------------------------------------------------
-   * -----  `handleRecipientToggle(slug)`  -----
-   * ---------------------------------------------------
+   * ----------------------------------------
+   * -----  `handleRecipientToggle(id)`  -----
+   * ----------------------------------------
    * - Agrega o quita un niño de la selección y deselecciona "Toda la sala".
    */
-  const handleRecipientToggle = (slug: string): void => {
-    setRecipients((current) => (current.includes(slug) ? current.filter((item) => item !== slug) : [...current, slug]));
+  const handleRecipientToggle = (id: string): void => {
+    setSelectedIds((current) => (current.includes(id) ? current.filter((item) => item !== id) : [...current, id]));
     setWholeClass(false);
   };
 
@@ -149,7 +138,7 @@ const CreatePostForm = (): ReactElement => {
    */
   const handleWholeClass = (): void => {
     setWholeClass(true);
-    setRecipients([]);
+    setSelectedIds([]);
   };
 
   /**
@@ -199,15 +188,15 @@ const CreatePostForm = (): ReactElement => {
         <div className="mb-[22px]">
           <div className={`${sectionLabelClasses} mb-[10px]`}>PARA</div>
           <div className="flex flex-wrap gap-[9px]">
-            {recipientOptions.map((recipient) => {
-              const isSelected: boolean = recipients.includes(recipient.slug);
+            {recipients.map((recipient) => {
+              const isSelected: boolean = selectedIds.includes(recipient.id);
 
               return (
                 <button
-                  key={recipient.slug}
+                  key={recipient.id}
                   type="button"
                   aria-pressed={isSelected}
-                  onClick={() => handleRecipientToggle(recipient.slug)}
+                  onClick={() => handleRecipientToggle(recipient.id)}
                   className={recipientChipStyles(isSelected)}
                 >
                   <span
@@ -216,18 +205,20 @@ const CreatePostForm = (): ReactElement => {
                   >
                     {recipient.initial}
                   </span>
-                  {recipient.name}
+                  {firstName(recipient.name)}
                 </button>
               );
             })}
-            <button
-              type="button"
-              aria-pressed={wholeClass}
-              onClick={handleWholeClass}
-              className={wholeClassChipStyles(wholeClass)}
-            >
-              Toda la sala
-            </button>
+            {canAddressWholeRoom && (
+              <button
+                type="button"
+                aria-pressed={wholeClass}
+                onClick={handleWholeClass}
+                className={wholeClassChipStyles(wholeClass)}
+              >
+                Toda la sala
+              </button>
+            )}
           </div>
         </div>
 
