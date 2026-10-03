@@ -1,6 +1,6 @@
 # SPEC 10 — Publicaciones del staff: crear con fotos y feed real
 
-> **Estado:** Aprovado
+> **Estado:** Implemented
 > **Depende de:** SPEC 01, SPEC 06, SPEC 07, SPEC 08, SPEC SUPABASE 02, SPEC SUPABASE 03, SPEC SUPABASE 04
 > **Fecha:** 2026-10-03
 > **Objetivo:** Persistir en Supabase las publicaciones creadas en `/crear-publicacion` (con 0–4 fotos en Storage) y que `/` muestre el feed real de la sala.
