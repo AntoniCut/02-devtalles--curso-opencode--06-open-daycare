@@ -231,6 +231,23 @@ export const formatDaySeparator = (iso: string): string => {
 };
 
 /**
+ * ----------------------------
+ * -----  `formatToday()`  -----
+ * ----------------------------
+ * - Fecha de hoy en la zona de la guardería: "martes 17 jun".
+ */
+export const formatToday = (): string => {
+  const label: string = new Intl.DateTimeFormat("es-AR", {
+    timeZone: TIME_ZONE,
+    weekday: "long",
+    day: "numeric",
+    month: "short",
+  }).format(new Date());
+
+  return label.replace(",", "").replace(/\.$/, "");
+};
+
+/**
  * ---------------------------------------
  * -----  `groupPostsByDay(posts)`  -----
  * ---------------------------------------
