@@ -125,28 +125,28 @@ Convenciones: path de Storage `{daycare_id}/{uuid}.{ext}`; bucket `post-photos` 
 
 ## Acceptance criteria
 
-- [ ] `supabase_list_migrations` incluye la migración y `supabase_list_tables` muestra `posts`, `post_children`, `post_photos` con `users.room_id`; `supabase_get_advisors` no reporta avisos nuevos.
-- [ ] Un staff puede insertar una publicación solo con `author_id = auth.uid()` y su propio `daycare_id`; un padre no puede insertar (test de impersonación con rollback).
-- [ ] Un padre solo ve publicaciones etiquetadas a sus hijos y anuncios de la sala de sus hijos; un staff de otra sala no ve publicaciones ajenas (test de impersonación con rollback).
-- [ ] El bucket `post-photos` es privado; un staff puede subir solo bajo su `{daycare_id}/` y un usuario de otra guardería no puede leer el objeto.
-- [ ] `users.room_id` del staff de prueba apunta a Soles.
-- [ ] `/crear-publicacion` lista los niños activos de Soles sin preselección; "Toda la sala" deselecciona niños y viceversa.
-- [ ] Tipo y descripción requeridos (máx. 2000) muestran error inline; sin destinatario → error; tipo "Foto" sin imagen → error.
-- [ ] Fotos: se aceptan hasta 4 (5 MB, JPEG/PNG/WebP); un archivo inválido muestra error inline; se puede quitar, reordenar y agregar alt por foto.
-- [ ] Publicar sube las fotos recién al pulsar "Publicar", inserta `posts` + `post_photos`/`post_children` y redirige a `/` sin toast.
-- [ ] Publicación a niños guarda `post_children` con `room_id` null; "Toda la sala" guarda `room_id` de Soles sin `post_children`.
-- [ ] Con fotos y un niño etiquetado (o la sala) con `photo_consent = false`, la publicación se rechaza con error y no queda ninguna fila ni archivo.
-- [ ] Un usuario `parent` autenticado que entra a `/crear-publicacion` es redirigido a `/`.
-- [ ] `/` muestra las publicaciones reales ordenadas desc y agrupadas por día ("PUBLICADO HOY"/"AYER"/fecha) en TZ Argentina, con límite 50.
-- [ ] Lo publicado por el usuario dice "publicado por vos"; lo de otro staff muestra su nombre.
-- [ ] Multi-niño: título "Mateo +2", "Para: familia de Mateo y Sofía (+1 más)" y avatar del primer niño con color determinístico.
-- [ ] Anuncio de sala: "Anuncio general" y "Para: toda la sala".
-- [ ] El carrusel funciona con scroll + snap + puntos, sin auto-avance, navegable con teclado y swipe; las fotos no son clickeables.
-- [ ] Los contadores de likes/comentarios muestran 0 y "Me encanta"/"Comentar" no son interactivos; no hay links a `/foto` ni `/detalle-publicacion` ni botón "Editar".
-- [ ] Sin publicaciones, el feed muestra "Todavía no hay publicaciones" + CTA "Nueva publicación".
-- [ ] El header muestra el nombre real de la sala, el conteo real de niños activos y la fecha real.
-- [ ] El feed mantiene el estilo del mockup (`references/screenshots/feed.png`); las diferencias de fotos (carrusel), contadores (0) y empty state quedan documentadas como desviaciones intencionales.
-- [ ] `pnpm lint` y `pnpm build` sin errores; consola sin errores ni warnings de hidratación.
+- [x] `supabase_list_migrations` incluye la migración y `supabase_list_tables` muestra `posts`, `post_children`, `post_photos` con `users.room_id`; `supabase_get_advisors` no reporta avisos nuevos.
+- [x] Un staff puede insertar una publicación solo con `author_id = auth.uid()` y su propio `daycare_id`; un padre no puede insertar (test de impersonación con rollback).
+- [x] Un padre solo ve publicaciones etiquetadas a sus hijos y anuncios de la sala de sus hijos; un staff de otra sala no ve publicaciones ajenas (test de impersonación con rollback).
+- [x] El bucket `post-photos` es privado; un staff puede subir solo bajo su `{daycare_id}/` y un usuario de otra guardería no puede leer el objeto.
+- [x] `users.room_id` del staff de prueba apunta a Soles.
+- [x] `/crear-publicacion` lista los niños activos de Soles sin preselección; "Toda la sala" deselecciona niños y viceversa.
+- [x] Tipo y descripción requeridos (máx. 2000) muestran error inline; sin destinatario → error; tipo "Foto" sin imagen → error.
+- [x] Fotos: se aceptan hasta 4 (5 MB, JPEG/PNG/WebP); un archivo inválido muestra error inline; se puede quitar, reordenar y agregar alt por foto.
+- [x] Publicar sube las fotos recién al pulsar "Publicar", inserta `posts` + `post_photos`/`post_children` y redirige a `/` sin toast.
+- [x] Publicación a niños guarda `post_children` con `room_id` null; "Toda la sala" guarda `room_id` de Soles sin `post_children`.
+- [x] Con fotos y un niño etiquetado (o la sala) con `photo_consent = false`, la publicación se rechaza con error y no queda ninguna fila ni archivo.
+- [x] Un usuario `parent` autenticado que entra a `/crear-publicacion` es redirigido a `/`.
+- [x] `/` muestra las publicaciones reales ordenadas desc y agrupadas por día ("PUBLICADO HOY"/"AYER"/fecha) en TZ Argentina, con límite 50.
+- [x] Lo publicado por el usuario dice "publicado por vos"; lo de otro staff muestra su nombre.
+- [x] Multi-niño: título "Mateo +2", "Para: familia de Mateo y Sofía (+1 más)" y avatar del primer niño con color determinístico.
+- [x] Anuncio de sala: "Anuncio general" y "Para: toda la sala".
+- [x] El carrusel funciona con scroll + snap + puntos, sin auto-avance, navegable con teclado y swipe; las fotos no son clickeables.
+- [x] Los contadores de likes/comentarios muestran 0 y "Me encanta"/"Comentar" no son interactivos; no hay links a `/foto` ni `/detalle-publicacion` ni botón "Editar".
+- [x] Sin publicaciones, el feed muestra "Todavía no hay publicaciones" + CTA "Nueva publicación".
+- [x] El header muestra el nombre real de la sala, el conteo real de niños activos y la fecha real.
+- [x] El feed mantiene el estilo del mockup (`references/screenshots/feed.png`); las diferencias de fotos (carrusel), contadores (0) y empty state quedan documentadas como desviaciones intencionales.
+- [x] `pnpm lint` y `pnpm build` sin errores; consola sin errores ni warnings de hidratación.
 
 ## Decisions
 
