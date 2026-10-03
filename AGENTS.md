@@ -63,6 +63,15 @@ Las skills del proyecto viven en `.agents/skills/` (`spec`, `spec-impl`, `supaba
 
 
 
+## Accesibilidad (WCAG 2.2 AA)
+
+- Estándar de referencia: **WCAG 2.2 nivel AA**, incluidos los criterios nuevos de 2.2 (2.4.11 Focus Not Obscured, 2.5.7 Dragging Movements, 2.5.8 Target Size, 3.2.6 Consistent Help, 3.3.7 Redundant Entry, 3.3.8 Accessible Authentication).
+- **Agente accessibility-checker** (`.opencode/agent/accessibility-checker.md`): subagente que audita los archivos que se le indiquen (revisión estática + verificación en runtime con Playwright: snapshot de accesibilidad, teclado, contraste con estilos computados, target size, reflow, reduced motion), corrige todos los hallazgos —incluidos los cambios de contraste/color— y reporta en español con el criterio WCAG de cada hallazgo. No usa axe-core y nunca commitea.
+- Invocación: `/accessibility-checker <archivo>` o pidiendo al subagente `accessibility-checker` que revise los archivos indicados.
+- Si una corrección altera el aspecto respecto al mockup, el agente lo marca explícitamente en el informe (la accesibilidad tiene prioridad sobre el pixel-perfect).
+
+
+
 ## Skills de Supabase
 
 - **supabase**: cargar SIEMPRE ante cualquier tarea con Supabase (DB, Auth, Edge Functions, Realtime, Storage, cliente `supabase-js`/`@supabase/ssr` en Next.js, RLS, migraciones, debugging, logs).
@@ -79,6 +88,10 @@ Cada vez que se manipule la base de datos (crear/alterar/dropear tablas, columna
 3. Aplicar la migración al remoto con `supabase_apply_migration` (mismo SQL del archivo).
 4. Verificar con `supabase_list_migrations`, `supabase_list_tables` y `supabase_get_advisors`.
 5. `supabase_execute_sql` solo para lecturas, pruebas o verificación — no para cambios de esquema.
+
+**Agente db-migrator** (`.opencode/agent/db-migrator.md`): subagente que asegura que todo cambio de esquema exista como migración versionada en `supabase/migrations/` y la aplica al remoto con `supabase_apply_migration`; audita drift repo↔remoto y verifica con `supabase_list_migrations`/`supabase_list_tables`/`supabase_get_advisors`. Carga siempre las skills `supabase` y `supabase-postgres-best-practices`. Nunca commitea ni aplica DDL ad-hoc.
+
+**Agente db-security-auditor** (`.opencode/agent/db-security-auditor.md`): subagente que audita la seguridad de Supabase/Postgres (RLS, policies, roles, grants, funciones `SECURITY DEFINER`, advisors) priorizando fugas de datos entre niños, padres, staff y guarderías. Verifica el acceso real con tests de impersonación de roles en SQL (transacciones con `set local role` + `request.jwt.claims`, siempre con rollback), revisa también las queries de la app (`app/`, `utils/`) y corrige creando migraciones versionadas que aplica al remoto. Carga siempre las skills `supabase` y `supabase-postgres-best-practices`. Nunca commitea. Invocación: `/db-security-auditor <tablas|funciones|spec>` (sin argumentos = auditoría completa).
 
 Las specs de base de datos viven en `specs/supabase/`.
 

@@ -1,0 +1,43 @@
+name: DB Security Audit
+
+on:
+  schedule:
+    - cron: "0 20 * * 5" # viernes 22:00 Europe/Madrid en verano (UTC+2); en invierno son las 21:00
+  workflow_dispatch: {}
+  repository_dispatch:
+    types: [db-security-audit] # disparado por pg_cron
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Install opencode
+        run: |
+          curl -fsSL https://opencode.ai/install | bash
+          echo "$HOME/.opencode/bin" >> "$GITHUB_PATH"
+
+      - name: Run db-security-auditor
+        env:
+          OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          OPENCODE_DISABLE_AUTOUPDATE: "true"
+          OPENCODE_CONFIG_CONTENT: |
+            {
+              "mcp": {
+                "supabase": {
+                  "type": "remote",
+                  "url": "https://mcp.supabase.com/mcp?project_ref=rfunicjeleyzttwtlbyg&read_only=true&features=docs%2Caccount%2Cdatabase%2Cdebugging%2Cdevelopment%2Cfunctions%2Cbranching",
+                  "oauth": false,
+                  "enabled": true,
+                  "headers": {
+                    "Authorization": "Bearer {env:SUPABASE_ACCESS_TOKEN}"
+                  }
+                }
+              }
+            }
+        run: opencode run --command db-security-auditor

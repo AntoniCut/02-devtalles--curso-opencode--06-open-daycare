@@ -1,0 +1,1 @@
+revoke execute on function public.get_child_parents() from anon;

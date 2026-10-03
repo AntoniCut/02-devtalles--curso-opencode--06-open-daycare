@@ -3,10 +3,6 @@
   "editor.quickSuggestions": {
     "strings": "on"
   },
-  "files.associations": {
-    "*.css": "tailwindcss"
-  },
-  "tailwindCSS.experimental.configFile": "app/globals.css",
   "tailwindCSS.lint.suggestCanonicalClasses": "ignore",
   "tailwindCSS.lint.recommendedVariantOrder": "ignore",
   "tailwindCSS.lint.cssConflict": "ignore"

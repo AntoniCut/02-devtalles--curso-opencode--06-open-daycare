@@ -74,10 +74,11 @@ export const lookupInvitation = async (code: string): Promise<LookupInvitationRe
  * -----  `activateAccount(prev, formData)`  -----
  * ------------------------------------------
  * - Server Action que activa la cuenta del padre invitado: valida el código
- *   (existe, `pending`, no expirado) y la coincidencia de email, crea la cuenta
- *   con `signUp` (el trigger `handle_new_user` crea el perfil en `public.users`
- *   con rol `parent`), inserta el vínculo en `parent_children` y marca la
- *   invitación `accepted`. Al éxito redirige a `/`.
+ *   (existe, `pending`, no expirado) y la coincidencia de email con la vista
+ *   pública `get_invitation_preview`, crea la cuenta con `signUp` (el trigger
+ *   `handle_new_user` deriva daycare y rol de la invitación) y consume la
+ *   invitación con el RPC `accept_invitation`, que crea el vínculo en
+ *   `parent_children` y marca la invitación `accepted` de forma atómica.
  */
 export const activateAccount = async (_prevState: ActivateAccountState, formData: FormData): Promise<ActivateAccountState> => {
   const code = String(formData.get("code") ?? "").trim().toUpperCase();
@@ -100,36 +101,22 @@ export const activateAccount = async (_prevState: ActivateAccountState, formData
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
 
-  //  -----  la invitación debe existir, estar pendiente y no expirada  -----
-  const { data: invitation } = await supabase
-    .from("invitations")
-    .select("id, child_id, full_name, email, relationship, status, expires_at, accepted_at")
-    .eq("code", code)
-    .single();
-
-  const isPending =
-    invitation &&
-    invitation.status === "pending" &&
-    invitation.accepted_at === null &&
-    new Date(invitation.expires_at).getTime() > Date.now();
+  //  -----  la invitación debe existir, estar pendiente y no expirada (vista pública)  -----
+  const { data: preview } = await supabase.rpc("get_invitation_preview", { p_code: code });
+  const invitation: { invitation_email: string; invitation_full_name: string } | undefined = preview?.[0];
 
   //  -----  código inválido, expirado, usado o email no coincidente: error unificado  -----
-  if (!isPending || invitation.email !== email) {
+  if (!invitation || invitation.invitation_email.toLowerCase() !== email) {
     return { ...state, codeError: INVALID_CODE_ERROR };
   }
-
-  //  -----  daycare_id para el trigger handle_new_user (metadata del signup)  -----
-  const { data: preview } = await supabase.rpc("get_invitation_preview", { p_code: code });
-  const daycareId: string | undefined = preview?.[0]?.daycare_id;
 
   const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
     email,
     password,
     options: {
+      //  -----  solo display: el rol y el daycare los deriva el trigger de la invitación  -----
       data: {
-        daycare_id: daycareId,
-        role: "parent",
-        full_name: invitation.full_name,
+        full_name: invitation.invitation_full_name,
       },
     },
   });
@@ -142,27 +129,16 @@ export const activateAccount = async (_prevState: ActivateAccountState, formData
     return { ...state, passwordError: "No se pudo crear la cuenta. Probá otra contraseña." };
   }
 
-  const parentId: string | undefined = signUpData.user?.id;
-  if (!parentId) {
+  if (!signUpData.user) {
     return { ...state, codeError: "No se pudo crear la cuenta. Intentá de nuevo." };
   }
 
-  //  -----  vínculo padre ↔ niño (RLS: policy INSERT para authenticated)  -----
-  const { error: linkError } = await supabase.from("parent_children").insert({
-    parent_id: parentId,
-    child_id: invitation.child_id,
-    relationship: invitation.relationship,
-  });
+  //  -----  valida el código contra la sesión nueva, vincula al padre y consume la invitación  -----
+  const { error: acceptError } = await supabase.rpc("accept_invitation", { p_code: code });
 
-  if (linkError) {
+  if (acceptError) {
     return { ...state, codeError: "No se pudo vincular la cuenta. Intentá de nuevo." };
   }
-
-  //  -----  la invitación queda consumida  -----
-  await supabase
-    .from("invitations")
-    .update({ status: "accepted", accepted_at: new Date().toISOString() })
-    .eq("id", invitation.id);
 
   redirect("/");
 };
