@@ -5,11 +5,6 @@
 */
 import type { NextConfig } from "next";
 
-/** - `hostname del proyecto de Supabase para las URLs firmadas del bucket post-photos` */
-const supabaseHostname: string | null = process.env.NEXT_PUBLIC_SUPABASE_URL
-    ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).hostname
-    : null;
-
 const nextConfig: NextConfig = {
     images: {
         remotePatterns: [
@@ -18,15 +13,14 @@ const nextConfig: NextConfig = {
                 hostname: "raw.githubusercontent.com",
                 pathname: "/PokeAPI/sprites/**",
             },
-            ...(supabaseHostname
-                ? [
-                      {
-                          protocol: "https" as const,
-                          hostname: supabaseHostname,
-                          pathname: "/storage/v1/object/sign/post-photos/**",
-                      },
-                  ]
-                : []),
+            {
+                // URLs firmadas del bucket privado post-photos. Se usa un hostname glob
+                // en vez de process.env: Turbopack re-evalúa next.config.ts al reiniciar
+                // y las variables de .env no están garantizadas en esa re-evaluación.
+                protocol: "https",
+                hostname: "*.supabase.co",
+                pathname: "/storage/v1/object/sign/post-photos/**",
+            },
         ],
     },
 };
