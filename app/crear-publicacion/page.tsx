@@ -45,7 +45,7 @@ const CrearPublicacionPage = async (): Promise<ReactElement> => {
   //  -----  niños activos de la sala (o de toda la guardería si no tiene sala)  -----
   let childrenQuery = supabase
     .from("children")
-    .select("id, full_name, rooms!inner(daycare_id)")
+    .select("id, full_name, photo_consent, rooms!inner(daycare_id)")
     .eq("status", "active")
     .eq("rooms.daycare_id", profile.daycare_id)
     .order("full_name");
@@ -61,9 +61,20 @@ const CrearPublicacionPage = async (): Promise<ReactElement> => {
     (child: { id: string; full_name: string }) => childAvatarFor(child.id, child.full_name),
   );
 
+  /** - `ids de niños sin consentimiento de fotos (el cliente bloquea la subida)` */
+  const photoConsentBlockedIds: string[] = (children ?? [])
+    .filter((child: { photo_consent: boolean }) => child.photo_consent === false)
+    .map((child: { id: string }) => child.id);
+
   return (
     <div className="min-h-screen flex items-start justify-center py-10 px-6 bg-[#F6ECDF]">
-      <CreatePostForm recipients={recipients} canAddressWholeRoom={profile.room_id !== null} daycareId={profile.daycare_id} />
+      <CreatePostForm
+        recipients={recipients}
+        canAddressWholeRoom={profile.room_id !== null}
+        daycareId={profile.daycare_id}
+        photoConsentBlockedIds={photoConsentBlockedIds}
+        wholeRoomPhotoConsentBlocked={photoConsentBlockedIds.length > 0}
+      />
     </div>
   );
 };

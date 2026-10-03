@@ -25,6 +25,8 @@ interface CreatePostFormProps {
   recipients: PostChildAvatar[];
   canAddressWholeRoom: boolean;
   daycareId: string;
+  photoConsentBlockedIds: string[];
+  wholeRoomPhotoConsentBlocked: boolean;
 }
 
 /** - `foto adjunta en el formulario, antes de subirse a Storage` */
@@ -67,9 +69,9 @@ const photoControlClasses: string =
   "flex w-7 h-7 items-center justify-center rounded-full border-[1.5px] border-[#EADFD0] bg-[#FFFDF9] text-[#6E6359] font-bold text-[15px] leading-none cursor-pointer disabled:opacity-40 disabled:cursor-default";
 
 /**
- * -----------------------------------------------------------------------------------
- * -----  `validateForm(typeId, description, wholeClass, selectedIds, photos)`  -----
- * -----------------------------------------------------------------------------------
+ * --------------------------------------------------------------------------------------------------
+ * -----  `validateForm(typeId, description, wholeClass, selectedIds, photos, blockedIds, roomBlocked)`  -----
+ * --------------------------------------------------------------------------------------------------
  * - Valida los requeridos del formulario; devuelve los errores por campo.
  */
 const validateForm = (
@@ -78,6 +80,8 @@ const validateForm = (
   wholeClass: boolean,
   selectedIds: string[],
   photos: PhotoDraft[],
+  photoConsentBlockedIds: string[],
+  wholeRoomPhotoConsentBlocked: boolean,
 ): FormErrors => {
   const errors: FormErrors = {};
 
@@ -101,6 +105,15 @@ const validateForm = (
   //  -----  tipo "Foto": exige al menos una imagen  -----
   if (typeId === "photo" && photos.length === 0) {
     errors.photos = "Adjuntá al menos una foto";
+  }
+
+  //  -----  consentimiento de fotos: bloquea antes de subir a Storage  -----
+  if (photos.length > 0) {
+    if (wholeClass && wholeRoomPhotoConsentBlocked) {
+      errors.photos = "No se pueden publicar fotos: hay niños en la sala sin consentimiento de imagen";
+    } else if (!wholeClass && selectedIds.some((id) => photoConsentBlockedIds.includes(id))) {
+      errors.photos = "No se pueden publicar fotos de niños sin consentimiento de imagen";
+    }
   }
 
   return errors;
@@ -153,7 +166,13 @@ const typeChipStyles = (selected: boolean): string => `rounded-full border-[1.5p
  * - Formulario de nueva publicación: destinatarios y tipo reales, descripción,
  * - fotos con preview/alt/orden y subida directa a Storage al publicar.
  */
-const CreatePostForm = ({ recipients, canAddressWholeRoom, daycareId }: CreatePostFormProps): ReactElement => {
+const CreatePostForm = ({
+  recipients,
+  canAddressWholeRoom,
+  daycareId,
+  photoConsentBlockedIds,
+  wholeRoomPhotoConsentBlocked,
+}: CreatePostFormProps): ReactElement => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [wholeClass, setWholeClass] = useState<boolean>(false);
@@ -333,7 +352,15 @@ const CreatePostForm = ({ recipients, canAddressWholeRoom, daycareId }: CreatePo
    */
   const handleSubmit = async (event: SubmitEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault();
-    const nextErrors: FormErrors = validateForm(typeId, description, wholeClass, selectedIds, photos);
+    const nextErrors: FormErrors = validateForm(
+      typeId,
+      description,
+      wholeClass,
+      selectedIds,
+      photos,
+      photoConsentBlockedIds,
+      wholeRoomPhotoConsentBlocked,
+    );
     setErrors(nextErrors);
 
     //  -----  formulario inválido: no se envía nada  -----
