@@ -63,7 +63,7 @@ const CrearPublicacionPage = async (): Promise<ReactElement> => {
 
   return (
     <div className="min-h-screen flex items-start justify-center py-10 px-6 bg-[#F6ECDF]">
-      <CreatePostForm recipients={recipients} canAddressWholeRoom={profile.room_id !== null} />
+      <CreatePostForm recipients={recipients} canAddressWholeRoom={profile.room_id !== null} daycareId={profile.daycare_id} />
     </div>
   );
 };

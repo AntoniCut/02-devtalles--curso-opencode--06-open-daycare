@@ -12,6 +12,18 @@ const TIME_ZONE = "America/Argentina/Buenos_Aires";
 /** - `texto alternativo genérico cuando la foto no tiene descripción` */
 export const DEFAULT_PHOTO_ALT = "Foto de la publicación";
 
+/** - `máximo de fotos por publicación` */
+export const MAX_PHOTOS_PER_POST = 4;
+
+/** - `tamaño máximo por foto (5 MB)` */
+export const MAX_PHOTO_BYTES = 5 * 1024 * 1024;
+
+/** - `tipos de imagen permitidos en el composer (sin HEIC)` */
+export const ALLOWED_PHOTO_TYPES: string[] = ["image/jpeg", "image/png", "image/webp"];
+
+/** - `máximo de caracteres de la descripción` */
+export const MAX_BODY_LENGTH = 2000;
+
 /** - `tipo de publicación (enum post_type de la DB)` */
 export type PostType = "meal" | "nap" | "activity" | "achievement" | "mood" | "photo" | "announcement";
 
@@ -47,6 +59,14 @@ export interface PostChildAvatar {
 export interface FeedPostPhoto {
   path: string;
   url: string;
+  alt: string;
+  width: number | null;
+  height: number | null;
+}
+
+/** - `foto que el formulario envía al Server Action (antes de insertarse)` */
+export interface PostPhotoInput {
+  path: string;
   alt: string;
   width: number | null;
   height: number | null;

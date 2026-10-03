@@ -1,33 +1,56 @@
 /*
-    *  ------------------------------------------------------------------------  *
+    *  ---------------------------------------------------------------------  *
     *  -----  create-post-form.tsx  --  /components/create-post-form.tsx  -----  *
-    *  ------------------------------------------------------------------------  *
+    *  ---------------------------------------------------------------------  *
 */
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { ChangeEvent, ReactElement, SubmitEvent } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { postTypeOptions } from "@/lib/feed";
-import type { CreatePostTypeId } from "@/lib/feed";
-import { firstName } from "@/lib/posts";
-import type { PostChildAvatar } from "@/lib/posts";
+import { createPost } from "@/app/crear-publicacion/actions";
+import {
+  ALLOWED_PHOTO_TYPES,
+  MAX_BODY_LENGTH,
+  MAX_PHOTO_BYTES,
+  MAX_PHOTOS_PER_POST,
+  firstName,
+  postTypeOptions,
+} from "@/lib/posts";
+import type { PostChildAvatar, PostPhotoInput, PostType } from "@/lib/posts";
+import { createClient } from "@/utils/supabase/client";
 
 /** - `props del formulario de nueva publicación` */
 interface CreatePostFormProps {
   recipients: PostChildAvatar[];
   canAddressWholeRoom: boolean;
+  daycareId: string;
 }
 
-/** - `icono cámara del tile de foto subida` */
-const cameraIcon: ReactElement = (
-  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="3" y="3" width="18" height="18" rx="2" />
-    <circle cx="9" cy="9" r="2" />
-    <path d="m21 15-3.6-3.6a2 2 0 0 0-2.8 0L6 21" />
-  </svg>
-);
+/** - `foto adjunta en el formulario, antes de subirse a Storage` */
+interface PhotoDraft {
+  id: string;
+  file: File;
+  previewUrl: string;
+  alt: string;
+  width: number | null;
+  height: number | null;
+}
+
+/** - `errores de validación del formulario, por campo` */
+interface FormErrors {
+  typeId?: string; // "Elegí un tipo"
+  description?: string; // "Campo requerido"
+  recipients?: string; // "Elegí al menos un destinatario"
+  photos?: string; // límites o tipo "Foto" sin imagen
+}
+
+/** - `extensión de archivo por MIME permitido` */
+const PHOTO_EXTENSIONS: Record<string, string> = {
+  "image/jpeg": "jpg",
+  "image/png": "png",
+  "image/webp": "webp",
+};
 
 /** - `icono + del tile de agregar foto` */
 const plusIcon: ReactElement = (
@@ -36,37 +59,66 @@ const plusIcon: ReactElement = (
   </svg>
 );
 
-/** - `descripción precargada del mockup` */
-const MOCK_DESCRIPTION = "Pintamos con témperas esta mañana. Mateo eligió el azul para todo y se concentró un montón.";
-
 /** - `estilos de las etiquetas de sección` */
 const sectionLabelClasses: string = "text-[12px] font-extrabold tracking-[.7px] text-[#94887B]";
 
-/** - `errores de validación del formulario, por campo` */
-interface FormErrors {
-  typeId?: string; // "Elegí un tipo"
-  description?: string; // "Campo requerido"
-}
+/** - `estilos de los botones de quitar/reordenar foto` */
+const photoControlClasses: string =
+  "flex w-7 h-7 items-center justify-center rounded-full border-[1.5px] border-[#EADFD0] bg-[#FFFDF9] text-[#6E6359] font-bold text-[15px] leading-none cursor-pointer disabled:opacity-40 disabled:cursor-default";
 
 /**
- * ----------------------------------------------------
- * -----  `validateForm(typeId, description)`  -----
- * ----------------------------------------------------
+ * -----------------------------------------------------------------------------------
+ * -----  `validateForm(typeId, description, wholeClass, selectedIds, photos)`  -----
+ * -----------------------------------------------------------------------------------
  * - Valida los requeridos del formulario; devuelve los errores por campo.
  */
-const validateForm = (typeId: CreatePostTypeId | null, description: string): FormErrors => {
+const validateForm = (
+  typeId: PostType | null,
+  description: string,
+  wholeClass: boolean,
+  selectedIds: string[],
+  photos: PhotoDraft[],
+): FormErrors => {
   const errors: FormErrors = {};
 
   //  -----  tipo: requerido  -----
   if (typeId === null) {
     errors.typeId = "Elegí un tipo";
   }
-  //  -----  descripción: requerida  -----
+
+  //  -----  descripción: requerida y con máximo de caracteres  -----
   if (description.trim() === "") {
     errors.description = "Campo requerido";
+  } else if (description.trim().length > MAX_BODY_LENGTH) {
+    errors.description = `Máximo ${MAX_BODY_LENGTH} caracteres`;
   }
+
+  //  -----  destinatarios: al menos un niño o "Toda la sala"  -----
+  if (!wholeClass && selectedIds.length === 0) {
+    errors.recipients = "Elegí al menos un destinatario";
+  }
+
+  //  -----  tipo "Foto": exige al menos una imagen  -----
+  if (typeId === "photo" && photos.length === 0) {
+    errors.photos = "Adjuntá al menos una foto";
+  }
+
   return errors;
 };
+
+/**
+ * ----------------------------------------
+ * -----  `readImageSize(previewUrl)`  -----
+ * ----------------------------------------
+ * - Lee las dimensiones naturales de la imagen (para post_photos).
+ */
+const readImageSize = (previewUrl: string): Promise<{ width: number; height: number }> =>
+  new Promise((resolve) => {
+    const image = new Image();
+    image.onload = () => resolve({ width: image.naturalWidth, height: image.naturalHeight });
+    image.onerror = () => resolve({ width: 0, height: 0 });
+    image.src = previewUrl;
+  });
 
 /**
  * --------------------------------------------------
@@ -96,20 +148,28 @@ const typeChipStyles = (selected: boolean): string => `rounded-full border-[1.5p
 
 /**
  * -------------------------------------
- * -----  `CreatePostForm()`  -----
+ * -----  `CreatePostForm(props)`  -----
  * -------------------------------------
- * - Formulario de nueva publicación: header Cancelar/Publicar, selección de
- *   destinatarios y de tipo, descripción y tiles de fotos estáticos.
+ * - Formulario de nueva publicación: destinatarios y tipo reales, descripción,
+ * - fotos con preview/alt/orden y subida directa a Storage al publicar.
  */
-const CreatePostForm = ({ recipients, canAddressWholeRoom }: CreatePostFormProps): ReactElement => {
-  const router = useRouter();
+const CreatePostForm = ({ recipients, canAddressWholeRoom, daycareId }: CreatePostFormProps): ReactElement => {
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [wholeClass, setWholeClass] = useState<boolean>(false);
-  const [typeId, setTypeId] = useState<CreatePostTypeId | null>(null);
-  const [description, setDescription] = useState<string>(MOCK_DESCRIPTION);
+  const [typeId, setTypeId] = useState<PostType | null>(null);
+  const [description, setDescription] = useState<string>("");
+  const [photos, setPhotos] = useState<PhotoDraft[]>([]);
   const [errors, setErrors] = useState<FormErrors>({});
+  const [submitError, setSubmitError] = useState<string | undefined>(undefined);
+  const [submitting, setSubmitting] = useState<boolean>(false);
 
-  //  -----  descripción de la publicación  -----
+  /**
+   * ------------------------------------------------
+   * -----  `handleDescriptionChange(event)`  -----
+   * ------------------------------------------------
+   * - Actualiza la descripción y limpia su error al corregirla.
+   */
   const handleDescriptionChange = (event: ChangeEvent<HTMLTextAreaElement>): void => {
     setDescription(event.target.value);
 
@@ -128,6 +188,11 @@ const CreatePostForm = ({ recipients, canAddressWholeRoom }: CreatePostFormProps
   const handleRecipientToggle = (id: string): void => {
     setSelectedIds((current) => (current.includes(id) ? current.filter((item) => item !== id) : [...current, id]));
     setWholeClass(false);
+
+    //  -----  el error de destinatarios se limpia al elegir alguno  -----
+    if (errors.recipients) {
+      setErrors((current) => ({ ...current, recipients: undefined }));
+    }
   };
 
   /**
@@ -139,6 +204,11 @@ const CreatePostForm = ({ recipients, canAddressWholeRoom }: CreatePostFormProps
   const handleWholeClass = (): void => {
     setWholeClass(true);
     setSelectedIds([]);
+
+    //  -----  el error de destinatarios se limpia al elegir "Toda la sala"  -----
+    if (errors.recipients) {
+      setErrors((current) => ({ ...current, recipients: undefined }));
+    }
   };
 
   /**
@@ -147,7 +217,7 @@ const CreatePostForm = ({ recipients, canAddressWholeRoom }: CreatePostFormProps
    * ----------------------------------
    * - Marca el tipo de publicación elegido (selección única, sin toggle-off).
    */
-  const handleType = (id: CreatePostTypeId): void => {
+  const handleType = (id: PostType): void => {
     setTypeId(id);
 
     //  -----  el error del tipo se limpia al elegir uno  -----
@@ -157,19 +227,156 @@ const CreatePostForm = ({ recipients, canAddressWholeRoom }: CreatePostFormProps
   };
 
   /**
+   * ----------------------------------------------
+   * -----  `handleAddPhotos(event)`  -----
+   * ----------------------------------------------
+   * - Valida y adjunta las fotos elegidas (máx. 4, 5 MB, JPEG/PNG/WebP).
+   */
+  const handleAddPhotos = async (event: ChangeEvent<HTMLInputElement>): Promise<void> => {
+    const files: File[] = Array.from(event.target.files ?? []);
+    event.target.value = "";
+    if (files.length === 0) {
+      return;
+    }
+
+    //  -----  formato permitido (sin HEIC)  -----
+    if (files.some((file) => !ALLOWED_PHOTO_TYPES.includes(file.type))) {
+      setErrors((current) => ({ ...current, photos: "Solo se permiten imágenes JPEG, PNG o WebP" }));
+      return;
+    }
+
+    //  -----  tamaño máximo por foto  -----
+    if (files.some((file) => file.size > MAX_PHOTO_BYTES)) {
+      setErrors((current) => ({ ...current, photos: "Cada foto puede pesar hasta 5 MB" }));
+      return;
+    }
+
+    //  -----  máximo de fotos por publicación  -----
+    if (photos.length + files.length > MAX_PHOTOS_PER_POST) {
+      setErrors((current) => ({ ...current, photos: `Podés adjuntar hasta ${MAX_PHOTOS_PER_POST} fotos` }));
+      return;
+    }
+
+    const drafts: PhotoDraft[] = await Promise.all(
+      files.map(async (file) => {
+        const previewUrl: string = URL.createObjectURL(file);
+        const size = await readImageSize(previewUrl);
+
+        return {
+          id: crypto.randomUUID(),
+          file,
+          previewUrl,
+          alt: "",
+          width: size.width > 0 ? size.width : null,
+          height: size.height > 0 ? size.height : null,
+        };
+      }),
+    );
+
+    setPhotos((current) => [...current, ...drafts]);
+    setErrors((current) => ({ ...current, photos: undefined }));
+  };
+
+  /**
+   * -------------------------------------
+   * -----  `handleRemovePhoto(id)`  -----
+   * -------------------------------------
+   * - Quita una foto adjunta y libera su preview.
+   */
+  const handleRemovePhoto = (id: string): void => {
+    setPhotos((current) => {
+      const target: PhotoDraft | undefined = current.find((photo) => photo.id === id);
+
+      //  -----  liberar la URL del preview  -----
+      if (target) {
+        URL.revokeObjectURL(target.previewUrl);
+      }
+
+      return current.filter((photo) => photo.id !== id);
+    });
+  };
+
+  /**
+   * ----------------------------------------------
+   * -----  `handleMovePhoto(index, offset)`  -----
+   * ----------------------------------------------
+   * - Reordena una foto una posición a la izquierda (-1) o derecha (+1).
+   */
+  const handleMovePhoto = (index: number, offset: -1 | 1): void => {
+    setPhotos((current) => {
+      const target: number = index + offset;
+      if (target < 0 || target >= current.length) {
+        return current;
+      }
+
+      const next: PhotoDraft[] = [...current];
+      [next[index], next[target]] = [next[target], next[index]];
+      return next;
+    });
+  };
+
+  /**
+   * ---------------------------------------
+   * -----  `handleAltChange(id, alt)`  -----
+   * ---------------------------------------
+   * - Actualiza la descripción (alt) de una foto.
+   */
+  const handleAltChange = (id: string, alt: string): void => {
+    setPhotos((current) => current.map((photo) => (photo.id === id ? { ...photo, alt } : photo)));
+  };
+
+  /**
    * ------------------------------------
    * -----  `handleSubmit(event)`  -----
    * ------------------------------------
-   * - Valida el formulario; si es válido navega al feed sin persistir (mock).
+   * - Valida, sube las fotos a Storage y llama al Server Action de publicación.
    */
-  const handleSubmit = (event: SubmitEvent<HTMLFormElement>): void => {
+  const handleSubmit = async (event: SubmitEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault();
-    const nextErrors = validateForm(typeId, description);
+    const nextErrors: FormErrors = validateForm(typeId, description, wholeClass, selectedIds, photos);
     setErrors(nextErrors);
 
-    //  -----  formulario válido: navegar al feed sin persistir (mock)  -----
-    if (Object.keys(nextErrors).length === 0) {
-      router.push("/");
+    //  -----  formulario inválido: no se envía nada  -----
+    if (Object.keys(nextErrors).length > 0 || typeId === null) {
+      return;
+    }
+
+    setSubmitting(true);
+    setSubmitError(undefined);
+
+    //  -----  subida directa navegador → Storage (recién al publicar)  -----
+    const supabase = createClient();
+    const uploadedPhotos: PostPhotoInput[] = [];
+
+    for (const photo of photos) {
+      const path: string = `${daycareId}/${crypto.randomUUID()}.${PHOTO_EXTENSIONS[photo.file.type] ?? "jpg"}`;
+      const { error } = await supabase.storage.from("post-photos").upload(path, photo.file, {
+        contentType: photo.file.type,
+      });
+
+      //  -----  si falla una subida no se publica nada  -----
+      if (error) {
+        setSubmitting(false);
+        setSubmitError("No se pudieron subir las fotos. Intentá de nuevo.");
+        return;
+      }
+
+      uploadedPhotos.push({ path, alt: photo.alt.trim(), width: photo.width, height: photo.height });
+    }
+
+    const formData = new FormData();
+    formData.set("type", typeId);
+    formData.set("body", description.trim());
+    formData.set("wholeClass", wholeClass ? "true" : "false");
+    formData.set("childIds", JSON.stringify(wholeClass ? [] : selectedIds));
+    formData.set("photos", JSON.stringify(uploadedPhotos));
+
+    const result = await createPost(formData);
+
+    //  -----  error del Server Action: se muestra inline y no se navega  -----
+    if (result?.error) {
+      setSubmitting(false);
+      setSubmitError(result.error);
     }
   };
 
@@ -179,7 +386,13 @@ const CreatePostForm = ({ recipients, canAddressWholeRoom }: CreatePostFormProps
       <div className="flex items-center justify-between py-5 px-[26px] border-b border-[#ECE0D0]">
         <Link href="/" className="text-[#94887B] font-bold text-[15px]">Cancelar</Link>
         <div className="font-display font-semibold text-[18px] text-[#3F362E]">Nueva publicación</div>
-        <button type="submit" className="text-[#D9583C] font-extrabold text-[15px] cursor-pointer">Publicar</button>
+        <button
+          type="submit"
+          disabled={submitting}
+          className="text-[#D9583C] font-extrabold text-[15px] cursor-pointer disabled:opacity-60 disabled:cursor-default"
+        >
+          {submitting ? "Publicando…" : "Publicar"}
+        </button>
       </div>
 
       {/*  -----  cuerpo de la tarjeta  -----  */}
@@ -187,7 +400,7 @@ const CreatePostForm = ({ recipients, canAddressWholeRoom }: CreatePostFormProps
         {/*  -----  para: destinatarios de la publicación  -----  */}
         <div className="mb-[22px]">
           <div className={`${sectionLabelClasses} mb-[10px]`}>PARA</div>
-          <div className="flex flex-wrap gap-[9px]">
+          <div role="group" aria-label="Destinatarios" aria-describedby={errors.recipients ? "recipients-error" : undefined} className="flex flex-wrap gap-[9px]">
             {recipients.map((recipient) => {
               const isSelected: boolean = selectedIds.includes(recipient.id);
 
@@ -220,6 +433,7 @@ const CreatePostForm = ({ recipients, canAddressWholeRoom }: CreatePostFormProps
               </button>
             )}
           </div>
+          {errors.recipients && <p id="recipients-error" className="mt-1.5 text-[12.5px] font-bold text-[#D9583C]">{errors.recipients}</p>}
         </div>
 
         {/*  -----  tipo: selección única con anillo al clic  -----  */}
@@ -249,6 +463,7 @@ const CreatePostForm = ({ recipients, canAddressWholeRoom }: CreatePostFormProps
             id="description"
             value={description}
             onChange={handleDescriptionChange}
+            maxLength={MAX_BODY_LENGTH}
             placeholder="Contá cómo le fue hoy…"
             aria-invalid={Boolean(errors.description)}
             aria-describedby={errors.description ? "description-error" : undefined}
@@ -257,19 +472,90 @@ const CreatePostForm = ({ recipients, canAddressWholeRoom }: CreatePostFormProps
           {errors.description && <p id="description-error" className="mt-1.5 text-[12.5px] font-bold text-[#D9583C]">{errors.description}</p>}
         </div>
 
-        {/*  -----  fotos: tiles estáticos del mockup  -----  */}
+        {/*  -----  fotos: previews con alt, quitar y reordenar  -----  */}
         <div>
           <div className={`${sectionLabelClasses} mb-[10px]`}>FOTOS</div>
-          <div className="flex gap-3">
-            <div className="flex w-[96px] h-[96px] rounded-[14px] bg-[#F4ECE1] border border-[#ECE0D0] items-center justify-center text-[#CBB89F]">
-              {cameraIcon}
-            </div>
-            <div className="flex w-[96px] h-[96px] rounded-[14px] border-[1.5px] border-dashed border-[#DBCDBA] bg-[#F4ECE1] flex-col items-center justify-center gap-[6px] text-[#B0A290]">
-              {plusIcon}
-              <span className="text-[12px]">Agregar</span>
-            </div>
+          <div className="flex flex-wrap items-start gap-3" aria-describedby={errors.photos ? "photos-error" : undefined}>
+            {photos.map((photo, index) => (
+              <div key={photo.id} className="flex flex-col gap-1.5">
+                <img
+                  src={photo.previewUrl}
+                  alt={photo.alt.trim() !== "" ? photo.alt : `Vista previa de la foto ${index + 1}`}
+                  className="w-[96px] h-[96px] object-cover rounded-[14px] border border-[#ECE0D0] bg-[#F4ECE1]"
+                />
+                <div className="flex gap-1.5 justify-center">
+                  <button
+                    type="button"
+                    onClick={() => handleMovePhoto(index, -1)}
+                    disabled={index === 0}
+                    aria-label={`Mover foto ${index + 1} a la izquierda`}
+                    className={photoControlClasses}
+                  >
+                    ‹
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleMovePhoto(index, 1)}
+                    disabled={index === photos.length - 1}
+                    aria-label={`Mover foto ${index + 1} a la derecha`}
+                    className={photoControlClasses}
+                  >
+                    ›
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleRemovePhoto(photo.id)}
+                    aria-label={`Quitar foto ${index + 1}`}
+                    className={`${photoControlClasses} text-[#C5503A]`}
+                  >
+                    ×
+                  </button>
+                </div>
+              </div>
+            ))}
+
+            {photos.length < MAX_PHOTOS_PER_POST && (
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="flex w-[96px] h-[96px] rounded-[14px] border-[1.5px] border-dashed border-[#DBCDBA] bg-[#F4ECE1] flex-col items-center justify-center gap-[6px] text-[#B0A290] cursor-pointer"
+              >
+                {plusIcon}
+                <span className="text-[12px]">Agregar</span>
+              </button>
+            )}
           </div>
+
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept={ALLOWED_PHOTO_TYPES.join(",")}
+            multiple
+            onChange={handleAddPhotos}
+            className="sr-only"
+            aria-label="Agregar fotos"
+          />
+
+          {photos.length > 0 && (
+            <div className="mt-3 flex flex-col gap-2">
+              {photos.map((photo, index) => (
+                <input
+                  key={photo.id}
+                  value={photo.alt}
+                  onChange={(event) => handleAltChange(photo.id, event.target.value)}
+                  placeholder={`Descripción de la foto ${index + 1} (opcional)`}
+                  aria-label={`Descripción de la foto ${index + 1}`}
+                  className="w-full py-[10px] px-3.5 rounded-[12px] border-[1.5px] border-[#EADFD0] bg-white text-[14px] text-[#3F362E] outline-none placeholder:text-[#B6A99B]"
+                />
+              ))}
+            </div>
+          )}
+
+          {errors.photos && <p id="photos-error" className="mt-1.5 text-[12.5px] font-bold text-[#D9583C]">{errors.photos}</p>}
         </div>
+
+        {/*  -----  error del envío (subida o Server Action)  -----  */}
+        {submitError && <p role="alert" className="mt-4 text-[13px] font-bold text-[#D9583C]">{submitError}</p>}
       </div>
     </form>
   );
