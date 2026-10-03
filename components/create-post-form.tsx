@@ -7,6 +7,7 @@
 
 import { useRef, useState } from "react";
 import type { ChangeEvent, ReactElement, SubmitEvent } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { createPost } from "@/app/crear-publicacion/actions";
 import {
@@ -127,7 +128,7 @@ const validateForm = (
  */
 const readImageSize = (previewUrl: string): Promise<{ width: number; height: number }> =>
   new Promise((resolve) => {
-    const image = new Image();
+    const image = new window.Image();
     image.onload = () => resolve({ width: image.naturalWidth, height: image.naturalHeight });
     image.onerror = () => resolve({ width: 0, height: 0 });
     image.src = previewUrl;
@@ -505,9 +506,11 @@ const CreatePostForm = ({
           <div className="flex flex-wrap items-start gap-3" aria-describedby={errors.photos ? "photos-error" : undefined}>
             {photos.map((photo, index) => (
               <div key={photo.id} className="flex flex-col gap-1.5">
-                <img
+                <Image
                   src={photo.previewUrl}
                   alt={photo.alt.trim() !== "" ? photo.alt : `Vista previa de la foto ${index + 1}`}
+                  width={96}
+                  height={96}
                   className="w-[96px] h-[96px] object-cover rounded-[14px] border border-[#ECE0D0] bg-[#F4ECE1]"
                 />
                 <div className="flex gap-1.5 justify-center">
