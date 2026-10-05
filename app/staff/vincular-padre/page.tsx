@@ -1,7 +1,7 @@
 /*
-    *  --------------------------------------------------------  *
-    *  -----  page.tsx  --  /app/vincular-padre/page.tsx  -----  *
-    *  --------------------------------------------------------  *
+    *  --------------------------------------------------------------  *
+    *  -----  page.tsx  --  /app/staff/vincular-padre/page.tsx  -----  *
+    *  --------------------------------------------------------------  *
 */
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
@@ -29,17 +29,17 @@ interface VincularPadrePageProps {
  * ----------------------------------
  * - Página standalone para vincular un padre al niño (dinámica por ?kid=<uuid>):
  *   carga el niño real de la DB, genera el código de invitación y redirige a
- *   /kids si el niño no existe.
+ *   /staff/kids si el niño no existe.
  */
 const VincularPadrePage = async (props: VincularPadrePageProps): Promise<ReactElement> => {
-  await getAuthenticatedUser("/vincular-padre");
+  await getAuthenticatedUser("/staff/vincular-padre");
 
   const { kid: kidParam } = await props.searchParams;
   const kidId: string | undefined = Array.isArray(kidParam) ? kidParam[0] : kidParam;
 
   //  -----  sin ?kid= → volver a la lista de niños  -----
   if (!kidId) {
-    redirect("/kids");
+    redirect("/staff/kids");
   }
 
   const cookieStore = await cookies();
@@ -52,7 +52,7 @@ const VincularPadrePage = async (props: VincularPadrePageProps): Promise<ReactEl
 
   //  -----  id inexistente → volver a la lista de niños  -----
   if (!child) {
-    redirect("/kids");
+    redirect("/staff/kids");
   }
 
   const childName: string = child.full_name;

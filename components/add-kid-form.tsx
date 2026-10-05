@@ -9,8 +9,8 @@ import { useState, useActionState } from "react";
 import type { ChangeEvent, ReactElement } from "react";
 import Link from "next/link";
 import { useFormStatus } from "react-dom";
-import { addKid } from "@/app/agregar-nino/actions";
-import type { AddKidState } from "@/app/agregar-nino/actions";
+import { addKid } from "@/app/staff/agregar-nino/actions";
+import type { AddKidState } from "@/app/staff/agregar-nino/actions";
 
 /** - `sala real de la tabla rooms (select de agregar niño)` */
 export interface RoomOption {
@@ -219,7 +219,7 @@ const AddKidForm = ({ rooms }: { rooms: RoomOption[] }): ReactElement => {
 
       {/*  -----  header: cancelar, título y guardar  -----  */}
       <div className="flex items-center justify-between py-5 px-[26px] border-b border-[#ECE0D0]">
-        <Link href="/kids" className="text-[15px] font-bold text-[#94887B]">Cancelar</Link>
+        <Link href="/staff/kids" className="text-[15px] font-bold text-[#94887B]">Cancelar</Link>
         <span className="font-display font-semibold text-[18px] text-[#3F362E]">Agregar niño</span>
         <SubmitButton />
       </div>

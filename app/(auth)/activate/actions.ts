@@ -7,6 +7,8 @@
 
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { resolveUserRole } from "@/lib/auth";
+import { homeForRole } from "@/lib/roles";
 import { CODE_PATTERN } from "@/lib/invitation-code";
 import { createClient } from "@/utils/supabase/server";
 
@@ -140,5 +142,8 @@ export const activateAccount = async (_prevState: ActivateAccountState, formData
     return { ...state, codeError: "No se pudo vincular la cuenta. Intentá de nuevo." };
   }
 
-  redirect("/");
+  //  -----  el home lo define el rol real del usuario recién creado  -----
+  const role = await resolveUserRole(supabase, signUpData.user);
+
+  redirect(homeForRole(role));
 };

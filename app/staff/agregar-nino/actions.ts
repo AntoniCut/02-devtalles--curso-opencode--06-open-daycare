@@ -1,7 +1,7 @@
 /*
-    *  -------------------------------------------------------  *
-    *  -----  actions.ts  --  /app/agregar-nino/actions.ts  -----  *
-    *  -------------------------------------------------------  *
+    *  -------------------------------------------------------------  *
+    *  -----  actions.ts  --  /app/staff/agregar-nino/actions.ts  -----  *
+    *  -------------------------------------------------------------  *
 */
 "use server";
 
@@ -21,7 +21,7 @@ export interface AddKidState {
  * - Server Action que inserta el niño en `public.children` con el client server
  * - de Supabase (RLS: policy INSERT para authenticated).
  * - En error devuelve `AddKidState` para que el formulario lo muestre inline;
- * - al éxito redirige a `/kids`.
+ * - al éxito redirige a `/staff/kids`.
  */
 export const addKid = async (_prevState: AddKidState, formData: FormData): Promise<AddKidState> => {
   const fullName = String(formData.get("fullName") ?? "").trim();
@@ -60,5 +60,5 @@ export const addKid = async (_prevState: AddKidState, formData: FormData): Promi
     return { error: "No se pudo guardar el niño. Intentá de nuevo." };
   }
 
-  redirect("/kids");
+  redirect("/staff/kids");
 };

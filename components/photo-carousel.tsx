@@ -92,7 +92,7 @@ const PhotoCarousel = ({ photos }: PhotoCarouselProps): ReactElement => {
               aria-current={index === activeIndex ? "true" : undefined}
               className="flex w-6 h-6 items-center justify-center rounded-full cursor-pointer"
             >
-              <span className={`w-2 h-2 rounded-full ${index === activeIndex ? "bg-[#C5503A]" : "bg-[#DBCDBA]"}`} />
+              <span className={`w-2 h-2 rounded-full ${index === activeIndex ? "bg-[#C5503A]" : "bg-[#8A7C6D]"}`} />
             </button>
           ))}
         </div>

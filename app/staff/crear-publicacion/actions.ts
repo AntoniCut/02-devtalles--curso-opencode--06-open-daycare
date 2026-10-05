@@ -1,7 +1,7 @@
 /*
-    *  ---------------------------------------------------------------  *
-    *  -----  actions.ts  --  /app/crear-publicacion/actions.ts  -----  *
-    *  ---------------------------------------------------------------  *
+    *  -------------------------------------------------------------------------  *
+    *  -----  actions.ts  --  /app/staff/crear-publicacion/actions.ts  -----  *
+    *  -------------------------------------------------------------------------  *
 */
 "use server";
 
@@ -92,7 +92,7 @@ export const createPost = async (formData: FormData): Promise<{ error: string }>
 
   //  -----  solo staff/admin publican  -----
   if (!profile || (profile.role !== "staff" && profile.role !== "admin")) {
-    redirect("/");
+    redirect("/staff");
   }
 
   const type: string = String(formData.get("type") ?? "");
@@ -180,6 +180,6 @@ export const createPost = async (formData: FormData): Promise<{ error: string }>
     return { error: "No se pudo publicar. Intentá de nuevo." };
   }
 
-  revalidatePath("/");
-  redirect("/");
+  revalidatePath("/staff");
+  redirect("/staff");
 };

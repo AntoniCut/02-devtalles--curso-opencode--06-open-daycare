@@ -9,8 +9,8 @@ import { useState, useActionState } from "react";
 import type { ChangeEvent, ReactElement, SubmitEvent } from "react";
 import Link from "next/link";
 import { useFormStatus } from "react-dom";
-import { sendInvitation } from "@/app/vincular-padre/actions";
-import type { SendInvitationState } from "@/app/vincular-padre/actions";
+import { sendInvitation } from "@/app/staff/vincular-padre/actions";
+import type { SendInvitationState } from "@/app/staff/vincular-padre/actions";
 
 /** - `parentesco del padre/madre vinculado` */
 type Relation = "Mamá" | "Papá" | "Tutor/a";
@@ -217,7 +217,7 @@ const LinkParentForm = ({ childId, childName, childFirstName, childSlug, invitat
           <div className="font-display font-semibold text-[18px] text-[#3F362E]">Vincular padre</div>
           <div className="text-[13px] text-[#A89A8B]">a {childName}</div>
         </div>
-        <Link href={`/kids/${childSlug}`} aria-label="Cerrar" className="flex h-[34px] w-[34px] items-center justify-center rounded-[10px] bg-[#F0E6D8] text-[#94887B]">
+        <Link href={`/staff/kids/${childSlug}`} aria-label="Cerrar" className="flex h-[34px] w-[34px] items-center justify-center rounded-[10px] bg-[#F0E6D8] text-[#94887B]">
           {closeIcon}
         </Link>
       </div>

@@ -4,27 +4,10 @@
     *  ----------------------------------------------------------  *
 */
 import type { ReactElement } from "react";
+import { megaphoneIcon } from "@/components/feed-icons";
 import PhotoCarousel from "@/components/photo-carousel";
-import { formatPostTime, formatPostTitle, formatRecipientLabel } from "@/lib/posts";
-import type { FeedPost, PostType } from "@/lib/posts";
-
-/** - `configuración visual del badge según el tipo de publicación` */
-interface TypeBadge {
-    label: string;
-    color: string;
-    background: string;
-}
-
-/** - `badge por tipo de publicación (colores del mockup + paleta del composer)` */
-const badges: Record<PostType, TypeBadge> = {
-    meal: { label: "COMIDA", color: "#9A7B1E", background: "#F4DC8E" },
-    nap: { label: "SIESTA", color: "#7B5FC0", background: "#E7DCF6" },
-    activity: { label: "ACTIVIDAD", color: "#2E89A6", background: "#C7E7F1" },
-    achievement: { label: "LOGRO", color: "#3E9B6C", background: "#CFEBD8" },
-    mood: { label: "ÁNIMO", color: "#C56486", background: "#F9D2DE" },
-    photo: { label: "FOTO", color: "#D9684A", background: "#FBD8CC" },
-    announcement: { label: "ANUNCIO", color: "#4E72C8", background: "#CCD8F4" },
-};
+import { formatPostTime, formatPostTitle, formatRecipientLabel, postTypeBadges } from "@/lib/posts";
+import type { FeedPost } from "@/lib/posts";
 
 /** - `icono corazón de los likes` */
 const heartIcon: ReactElement = (
@@ -37,13 +20,6 @@ const heartIcon: ReactElement = (
 const commentIcon: ReactElement = (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8z" />
-    </svg>
-);
-
-/** - `icono altavoz del anuncio general` */
-const megaphoneIcon: ReactElement = (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="m3 11 18-5v12L3 14v-3zM11.6 16.8a3 3 0 1 1-5.8-1.6" />
     </svg>
 );
 
@@ -60,7 +36,7 @@ interface PostCardProps {
  * - contadores visuales (sin interacción hasta la spec de reacciones/comentarios).
  */
 const PostCard = ({ post }: PostCardProps): ReactElement => {
-    const badge = badges[post.type];
+    const badge = postTypeBadges[post.type];
     const firstChild = post.children[0];
 
     return (

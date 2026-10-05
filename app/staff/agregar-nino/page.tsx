@@ -1,7 +1,7 @@
 /*
-    *  -----------------------------------------------------  *
-    *  -----  page.tsx  --  /app/agregar-nino/page.tsx  -----  *
-    *  -----------------------------------------------------  *
+    *  -----------------------------------------------------------  *
+    *  -----  page.tsx  --  /app/staff/agregar-nino/page.tsx  -----  *
+    *  -----------------------------------------------------------  *
 */
 import type { Metadata } from "next";
 import type { ReactElement } from "react";
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
  * - Las salas del select salen de la tabla `rooms` de la DB.
  */
 const AgregarNinoPage = async (): Promise<ReactElement> => {
-  await getAuthenticatedUser("/agregar-nino");
+  await getAuthenticatedUser("/staff/agregar-nino");
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
   const { data: rooms } = await supabase.from("rooms").select("id, name").order("name");

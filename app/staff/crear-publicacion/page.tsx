@@ -1,7 +1,7 @@
 /*
-    *  -------------------------------------------------------------  *
-    *  -----  page.tsx  --  /app/crear-publicacion/page.tsx  -----  *
-    *  -------------------------------------------------------------  *
+    *  -------------------------------------------------------------------  *
+    *  -----  page.tsx  --  /app/staff/crear-publicacion/page.tsx  -----  *
+    *  -------------------------------------------------------------------  *
 */
 import type { Metadata } from "next";
 import type { ReactElement } from "react";
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
  * - activos de su sala (admin sin sala: toda la guardería) y los pasa al formulario.
  */
 const CrearPublicacionPage = async (): Promise<ReactElement> => {
-  const user = await getAuthenticatedUser("/crear-publicacion");
+  const user = await getAuthenticatedUser("/staff/crear-publicacion");
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
 
@@ -39,7 +39,7 @@ const CrearPublicacionPage = async (): Promise<ReactElement> => {
 
   //  -----  solo staff/admin publican; el resto vuelve al feed  -----
   if (!profile || (profile.role !== "staff" && profile.role !== "admin")) {
-    redirect("/");
+    redirect("/staff");
   }
 
   //  -----  niños activos de la sala (o de toda la guardería si no tiene sala)  -----

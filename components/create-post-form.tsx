@@ -9,7 +9,7 @@ import { useRef, useState } from "react";
 import type { ChangeEvent, ReactElement, SubmitEvent } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { createPost } from "@/app/crear-publicacion/actions";
+import { createPost } from "@/app/staff/crear-publicacion/actions";
 import {
   ALLOWED_PHOTO_TYPES,
   MAX_BODY_LENGTH,
@@ -412,7 +412,7 @@ const CreatePostForm = ({
     <form onSubmit={handleSubmit} noValidate className="w-full max-w-[580px] bg-[#FBF4EC] border border-[#ECE0D0] rounded-[24px] shadow-[0_20px_50px_-24px_rgba(63,54,46,.35)] overflow-hidden">
       {/*  -----  header: cancelar, título y publicar  -----  */}
       <div className="flex items-center justify-between py-5 px-[26px] border-b border-[#ECE0D0]">
-        <Link href="/" className="text-[#94887B] font-bold text-[15px]">Cancelar</Link>
+        <Link href="/staff" className="text-[#94887B] font-bold text-[15px]">Cancelar</Link>
         <div className="font-display font-semibold text-[18px] text-[#3F362E]">Nueva publicación</div>
         <button
           type="submit"

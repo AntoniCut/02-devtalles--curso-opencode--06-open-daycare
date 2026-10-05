@@ -6,11 +6,21 @@
 
 import { type NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/proxy";
-import { isInternalPath } from "@/lib/auth";
+import { homeForRole, isPathAllowedForRole, readRole } from "@/lib/roles";
+import type { UserRole } from "@/lib/roles";
 
 /** - `rutas públicas que no exigen sesión` */
 const PUBLIC_PATHS = ["/login", "/activate"];
 
+/**
+ * ------------------------------
+ * -----  `proxy(request)`  -----
+ * ------------------------------
+ * - Dispatcher de `/` por rol, guards de sección (`/staff/*` solo staff/admin,
+ * - `/familia/*` solo padres) y protección de sesión. El rol se lee de
+ * - `app_metadata.role` del token; si el token no lo trae, no bloquea aquí y la
+ * - capa de DB (layouts y páginas) resuelve el rol.
+ */
 export async function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
 
@@ -18,7 +28,12 @@ export async function proxy(request: NextRequest) {
 
   // Refresh session before routes run
   const { data } = await supabase.auth.getClaims();
-  const isAuthenticated = Boolean(data?.claims);
+  const claims = data?.claims;
+  const isAuthenticated = Boolean(claims);
+
+  //  -----  rol confiable del token (solo service role escribe app_metadata)  -----
+  const appMeta = claims?.app_metadata as { role?: unknown } | undefined;
+  const role: UserRole | null = readRole(appMeta?.role);
 
   const isPublicPath = PUBLIC_PATHS.some(
     (path) => pathname === path || pathname.startsWith(`${path}/`),
@@ -30,12 +45,11 @@ export async function proxy(request: NextRequest) {
   // The action itself handles its own redirects after running.
   const isServerAction = request.headers.has("next-action");
 
-  // Authenticated user hitting /login → back to the app (validated ?next= or /)
+  // Authenticated user hitting /login → role home (the action resolves ?next=)
   if (!isServerAction && isAuthenticated && pathname === "/login") {
     const url = request.nextUrl.clone();
-    const next = url.searchParams.get("next") ?? "";
-    url.searchParams.delete("next");
-    url.pathname = next && isInternalPath(next) ? next : "/";
+    url.pathname = role ? homeForRole(role) : "/";
+    url.search = "";
     return NextResponse.redirect(url);
   }
 
@@ -47,6 +61,28 @@ export async function proxy(request: NextRequest) {
     if (next !== "/") {
       url.searchParams.set("next", next);
     }
+    return NextResponse.redirect(url);
+  }
+
+  //  -----  dispatcher de la raíz: cada rol aterriza en su sección  -----
+  if (!isServerAction && isAuthenticated && pathname === "/" && role) {
+    const url = request.nextUrl.clone();
+    url.pathname = homeForRole(role);
+    url.search = "";
+    return NextResponse.redirect(url);
+  }
+
+  //  -----  guards de sección: un rol no navega la sección del otro  -----
+  if (
+    !isServerAction &&
+    isAuthenticated &&
+    role &&
+    !isPublicPath &&
+    !isPathAllowedForRole(pathname, role)
+  ) {
+    const url = request.nextUrl.clone();
+    url.pathname = homeForRole(role);
+    url.search = "";
     return NextResponse.redirect(url);
   }
 

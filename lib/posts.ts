@@ -46,6 +46,24 @@ export const postTypeOptions: PostTypeOption[] = [
   { id: "announcement", label: "Anuncio", background: "#CCD8F4", color: "#4E72C8" },
 ];
 
+/** - `configuración visual del badge de tipo de publicación` */
+export interface PostTypeBadge {
+  label: string;
+  color: string;
+  background: string;
+}
+
+/** - `badge por tipo de publicación (colores del mockup + paleta del composer)` */
+export const postTypeBadges: Record<PostType, PostTypeBadge> = {
+  meal: { label: "COMIDA", color: "#6B5214", background: "#F4DC8E" },
+  nap: { label: "SIESTA", color: "#5A3D9E", background: "#E7DCF6" },
+  activity: { label: "ACTIVIDAD", color: "#17607E", background: "#C7E7F1" },
+  achievement: { label: "LOGRO", color: "#256B47", background: "#CFEBD8" },
+  mood: { label: "ÁNIMO", color: "#A63A5E", background: "#F9D2DE" },
+  photo: { label: "FOTO", color: "#A94129", background: "#FBD8CC" },
+  announcement: { label: "ANUNCIO", color: "#2E4A93", background: "#CCD8F4" },
+};
+
 /** - `niño etiquetado en una publicación, con su avatar determinístico` */
 export interface PostChildAvatar {
   id: string;
@@ -85,10 +103,34 @@ export interface FeedPost {
   photos: FeedPostPhoto[];
 }
 
+/** - `niño etiquetado con su sala (feed de familia)` */
+export interface FamilyPostChild extends PostChildAvatar {
+  roomId: string | null;
+  roomName: string;
+}
+
+/** - `publicación del feed de familia: niños con sala y sala del anuncio` */
+export interface FamilyFeedPost extends Omit<FeedPost, "children"> {
+  children: FamilyPostChild[];
+  roomId: string | null; // sala del anuncio (null en publicaciones de niños)
+  roomName: string; // sala a mostrar en el card
+}
+
+/** - `niño del padre para los pills y el filtro del feed de familia` */
+export interface FamilyChild {
+  id: string;
+  name: string;
+  roomId: string | null;
+  roomName: string;
+  initial: string;
+  background: string;
+  color: string;
+}
+
 /** - `grupo de publicaciones de un mismo día en el feed` */
-export interface PostDayGroup {
+export interface PostDayGroup<T extends FeedPost = FeedPost> {
   label: string;
-  posts: FeedPost[];
+  posts: T[];
 }
 
 /**
@@ -200,9 +242,26 @@ const dayKey = (date: Date): string =>
 
 /**
  * ----------------------------------------
+ * -----  `weekdayDateLabel(date)`  -----
+ * ----------------------------------------
+ * - "martes 17 jun" en mayúsculas y sin puntos (zona horaria de la guardería).
+ */
+const weekdayDateLabel = (date: Date): string => {
+  const label: string = new Intl.DateTimeFormat("es-AR", {
+    timeZone: TIME_ZONE,
+    weekday: "long",
+    day: "numeric",
+    month: "short",
+  }).format(date);
+
+  return label.replace(",", "").replace(/\.$/, "").toUpperCase();
+};
+
+/**
+ * ----------------------------------------
  * -----  `formatDaySeparator(iso)`  -----
  * ----------------------------------------
- * - Separador del feed: "PUBLICADO HOY", "AYER" o "MARTES 17 JUN".
+ * - Separador del feed de staff: "PUBLICADO HOY", "AYER" o "MARTES 17 JUN".
  */
 export const formatDaySeparator = (iso: string): string => {
   const postKey: string = dayKey(new Date(iso));
@@ -220,14 +279,33 @@ export const formatDaySeparator = (iso: string): string => {
   }
 
   //  -----  fecha anterior: "martes 17 jun" en mayúsculas  -----
-  const label: string = new Intl.DateTimeFormat("es-AR", {
-    timeZone: TIME_ZONE,
-    weekday: "long",
-    day: "numeric",
-    month: "short",
-  }).format(new Date(iso));
+  return weekdayDateLabel(new Date(iso));
+};
 
-  return label.replace(",", "").replace(/\.$/, "").toUpperCase();
+/**
+ * ----------------------------------------------
+ * -----  `formatFamilyDaySeparator(iso)`  -----
+ * ----------------------------------------------
+ * - Separador del feed de familia: "HOY · MARTES 17 JUN", "AYER · …" o la fecha.
+ */
+export const formatFamilyDaySeparator = (iso: string): string => {
+  const postKey: string = dayKey(new Date(iso));
+  const now: Date = new Date();
+  const dateLabel: string = weekdayDateLabel(new Date(iso));
+
+  //  -----  misma fecha que hoy  -----
+  if (postKey === dayKey(now)) {
+    return `HOY · ${dateLabel}`;
+  }
+
+  //  -----  misma fecha que ayer  -----
+  const yesterday: Date = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+  if (postKey === dayKey(yesterday)) {
+    return `AYER · ${dateLabel}`;
+  }
+
+  //  -----  fecha anterior  -----
+  return dateLabel;
 };
 
 /**
@@ -248,15 +326,19 @@ export const formatToday = (): string => {
 };
 
 /**
- * ---------------------------------------
- * -----  `groupPostsByDay(posts)`  -----
- * ---------------------------------------
- * - Agrupa publicaciones consecutivas por día (el feed llega ordenado desc).
+ * ------------------------------------------------------
+ * -----  `groupPostsByDay(posts, separatorFor)`  -----
+ * ------------------------------------------------------
+ * - Agrupa publicaciones consecutivas por día (el feed llega ordenado desc) con
+ * - el formateador de separador indicado (staff por defecto, familia aparte).
  */
-export const groupPostsByDay = (posts: FeedPost[]): PostDayGroup[] =>
-  posts.reduce<PostDayGroup[]>((groups, post) => {
-    const label: string = formatDaySeparator(post.publishedAt);
-    const lastGroup: PostDayGroup | undefined = groups[groups.length - 1];
+export const groupPostsByDay = <T extends FeedPost>(
+  posts: T[],
+  separatorFor: (iso: string) => string = formatDaySeparator,
+): PostDayGroup<T>[] =>
+  posts.reduce<PostDayGroup<T>[]>((groups, post) => {
+    const label: string = separatorFor(post.publishedAt);
+    const lastGroup: PostDayGroup<T> | undefined = groups[groups.length - 1];
 
     //  -----  mismo día que el grupo anterior: se agrega ahí  -----
     if (lastGroup && lastGroup.label === label) {

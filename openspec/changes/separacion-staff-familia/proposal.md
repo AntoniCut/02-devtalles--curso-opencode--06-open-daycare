@@ -12,6 +12,7 @@ Hoy la app solo tiene el shell de staff: cualquier usuario autenticado (incluido
 - Guards de rol: padre en `/staff/*` → `/familia`; staff/admin en `/familia/*` → `/staff` (proxy con `app_metadata.role` + layouts con `public.users.role` como defensa en profundidad).
 - Layouts por audiencia: `app/staff/layout.tsx` (sidebar "Sala Soles" con botón "Nueva publicación") y `app/familia/layout.tsx` (sidebar "Familia", sin botón; usuario con parentesco, ej. "Mamá de Mateo").
 - Fuera de alcance: contadores de reacciones/comentarios (no existen las tablas), resumen del día, mi cuenta y detalle de publicación.
+- Migración `add_users_select_daycare_staff_policy`: los miembros de una guardería pueden leer los perfiles staff/admin de su guardería, para mostrar el nombre real de la maestra autora en el feed de familia (la RLS previa solo lo permitía a staff/admin y al propio usuario).
 
 ## Capabilities
 
@@ -31,4 +32,4 @@ Hoy la app solo tiene el shell de staff: cualquier usuario autenticado (incluido
 - `lib/`: `auth.ts` (rol confiable) y `posts.ts` (helpers del feed de familia).
 - `proxy.ts`: guards de rol.
 - Enlaces internos (~25 referencias en 15 archivos) actualizados al prefijo `/staff`.
-- Sin cambios de base de datos: la RLS ya filtra la visibilidad del padre.
+- Base de datos: una migración (policy RLS de lectura `users_select_daycare_staff`) para que el padre vea el nombre del staff que publica; el resto de la visibilidad ya la filtra la RLS existente.

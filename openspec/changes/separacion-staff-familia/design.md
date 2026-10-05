@@ -8,7 +8,7 @@ Ver `proposal.md` para la motivación. Estado actual relevante:
 - `proxy.ts` solo valida sesión; `app/(auth)/login/actions.ts` y `app/(auth)/activate/actions.ts` redirigen a `/`.
 - `lib/auth.ts` arma la etiqueta de rol desde `user_metadata.role` (editable por el usuario, no confiable).
 - `handle_new_user` escribe `public.users.role` desde `raw_app_meta_data.role` (solo service role) con default `parent`.
-- La RLS ya limita lo que ve un padre: posts etiquetados a sus hijos + anuncios de su sala, sus niños y sus vínculos en `parent_children`.
+- La RLS ya limita lo que ve un padre: posts etiquetados a sus hijos + anuncios de su sala, sus niños y sus vínculos en `parent_children`. No expone, en cambio, el perfil del staff que publica (`users_select_scoped` deja al padre solo su propia fila), por lo que el nombre de la maestra autora necesita una policy nueva (ver Decisión 7).
 
 ## Goals / Non-Goals
 
@@ -22,7 +22,7 @@ Ver `proposal.md` para la motivación. Estado actual relevante:
 - Contadores de reacciones/comentarios, resumen del día, mi cuenta, detalle de publicación y visor de foto (changes futuros).
 - Distinguir un panel de admin aparte: admin usa la sección de staff.
 - Redirects de URLs anteriores.
-- Cambios de esquema: no hay migraciones.
+- Cambios de esquema más allá de la policy de lectura del staff autora (Decisión 7).
 
 ## Decisions
 
@@ -71,6 +71,10 @@ Cada audiencia tiene su carpeta (`app/staff/`, `app/familia/`) y su `layout.tsx`
 
 Las rutas viejas no redirigen: 404. Todos los enlaces internos (~25 referencias en 15 archivos, incluidos actions con `redirect(...)`) se actualizan al prefijo `/staff`; los destinos futuros quedan dentro de su sección (`/staff/resumen-dia`, `/staff/avisos`, `/staff/mi-cuenta`, `/familia/resumen-dia`, `/familia/mi-cuenta`).
 
+### 7. Policy RLS para el nombre del staff autora (migración)
+
+El card de familia muestra "Maestra {nombre}", pero `users_select_scoped` no deja al padre leer la fila del staff autor (solo la propia), así que el embed `author:users(full_name)` llegaba `null` y el fallback mostraba "Maestra Staff". Se agrega la migración `add_users_select_daycare_staff_policy` con una policy de lectura permisiva acotada: `role in ('staff','admin') and daycare_id = private.current_user_daycare_id()`. Expone únicamente perfiles de staff/admin del propio daycare (nombre y avatar), nunca otros padres ni otros daycares. Se descartó un RPC `SECURITY DEFINER` a medida para no duplicar la lógica de visibilidad de las publicaciones.
+
 ## Risks / Trade-offs
 
 - [Claims desactualizados si cambia el rol en DB] → los layouts/páginas verifican contra `public.users`; el rol casi no cambia en la práctica.
@@ -81,18 +85,20 @@ Las rutas viejas no redirigen: 404. Todos los enlaces internos (~25 referencias 
 - [Duplicación entre sidebars] → shells chicos; iconos y piezas compartidas en módulos comunes.
 - [Filtro client-side carga todos los posts visibles] → mismo límite (50) que el feed staff; el volumen familiar es bajo.
 - [Cambio de URLs sin redirects] → decisión explícita; no hay usuarios externos y todos los enlaces internos se actualizan.
+- [Nombres de staff visibles para los padres] → la policy solo expone perfiles staff/admin del propio daycare (no otros padres ni otros daycares) y solo los campos de perfil (nombre, avatar); es información que la app ya muestra en los cards.
 
 ## Migration Plan
 
-Cambio solo de código, sin migraciones de datos:
+Cambio de código + una migración de esquema:
 
-1. Mover las páginas de staff a `app/staff/*` y actualizar enlaces y redirects.
-2. Crear `app/staff/layout.tsx`, `app/familia/layout.tsx` y los dos sidebars.
-3. Guards de rol en proxy + layouts, dispatcher de `/` y redirects de login/activación.
-4. Portar el feed de familia y la barra lateral con parentesco.
-5. Verificar: Playwright con usuarios staff y padre (cada rol solo su sección, redirects, feed real) + comparación visual contra `familia-feed.dc.html` y screenshots existentes + `pnpm lint` y `pnpm build`.
+1. `supabase migration new add_users_select_daycare_staff_policy` y aplicar la policy al remoto (sección 7).
+2. Mover las páginas de staff a `app/staff/*` y actualizar enlaces y redirects.
+3. Crear `app/staff/layout.tsx`, `app/familia/layout.tsx` y los dos sidebars.
+4. Guards de rol en proxy + layouts, dispatcher de `/` y redirects de login/activación.
+5. Portar el feed de familia y la barra lateral con parentesco.
+6. Verificar: Playwright con usuarios staff y padre (cada rol solo su sección, redirects, feed real) + comparación visual contra `familia-feed.dc.html` y screenshots existentes + `pnpm lint` y `pnpm build`.
 
-Rollback: revertir la rama del change; no hay datos ni esquema involucrados.
+Rollback: revertir la rama del change y dropear la policy (`drop policy "users_select_daycare_staff" on public.users`); no hay datos nuevos involucrados.
 
 ## Open Questions
 

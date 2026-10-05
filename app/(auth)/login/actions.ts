@@ -8,15 +8,13 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
-import { isInternalPath } from "@/lib/auth";
+import { resolveUserRole } from "@/lib/auth";
+import { resolvePostAuthPath } from "@/lib/roles";
 
 /** - `estado que devuelve la Server Action de login al formulario` */
 export interface LoginState {
   error: string | null;
 }
-
-/** - `ruta interna por defecto tras iniciar sesión` */
-const DEFAULT_REDIRECT = "/";
 
 /**
  * --------------------------------
@@ -24,7 +22,7 @@ const DEFAULT_REDIRECT = "/";
  * --------------------------------
  * - Server Action de inicio de sesión con email y contraseña contra Supabase Auth.
  * - En error devuelve `LoginState` para que el formulario lo muestre; al éxito
- *   redirige a `next` (si es ruta interna) o a `/`.
+ * - redirige al home del rol, respetando `next` solo dentro de su sección.
  */
 export const login = async (_prevState: LoginState, formData: FormData): Promise<LoginState> => {
   const email = String(formData.get("email") ?? "").trim();
@@ -38,13 +36,15 @@ export const login = async (_prevState: LoginState, formData: FormData): Promise
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
 
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
     return { error: "Email o contraseña incorrectos. Revisá los datos e intentá de nuevo." };
   }
 
-  const target = next && isInternalPath(next) ? next : DEFAULT_REDIRECT;
+  //  -----  el rol define el home; un next de la sección ajena se descarta  -----
+  const role = data.user ? await resolveUserRole(supabase, data.user) : null;
+  const target = resolvePostAuthPath(role, next || null);
 
   //  -----  redirect fuera del try para no tragar su error  -----
   redirect(target);

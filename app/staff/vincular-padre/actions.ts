@@ -1,7 +1,7 @@
 /*
-    *  -------------------------------------------------------  *
-    *  -----  actions.ts  --  /app/vincular-padre/actions.ts  -----  *
-    *  -------------------------------------------------------  *
+    *  -------------------------------------------------------------  *
+    *  -----  actions.ts  --  /app/staff/vincular-padre/actions.ts  -----  *
+    *  -------------------------------------------------------------  *
 */
 "use server";
 
@@ -11,7 +11,7 @@ import { Resend } from "resend";
 import { getAuthenticatedUser } from "@/lib/auth";
 import { slugify } from "@/lib/kids";
 import { CODE_PATTERN, generateInvitationCode } from "@/lib/invitation-code";
-import { InvitationEmail } from "@/app/vincular-padre/invitation-email";
+import { InvitationEmail } from "@/app/staff/vincular-padre/invitation-email";
 import { createClient } from "@/utils/supabase/server";
 
 /** - `estado que devuelve la Server Action de enviar invitación al formulario` */
@@ -60,7 +60,7 @@ export const sendInvitation = async (_prevState: SendInvitationState, formData: 
   }
   const relationship = RELATIONSHIP_MAP[relation] ?? "guardian";
 
-  const user = await getAuthenticatedUser("/vincular-padre");
+  const user = await getAuthenticatedUser("/staff/vincular-padre");
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
 
@@ -130,5 +130,5 @@ export const sendInvitation = async (_prevState: SendInvitationState, formData: 
     return { error: "No se pudo enviar el email. Intentá de nuevo." };
   }
 
-  redirect(`/kids/${slugify(child.full_name)}`);
+  redirect(`/staff/kids/${slugify(child.full_name)}`);
 };
