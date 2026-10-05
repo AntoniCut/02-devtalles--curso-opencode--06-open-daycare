@@ -1,6 +1,6 @@
 # OpenDayCare
 
-Aplicación de gestión para guarderías: feed de publicaciones por niño, invitaciones de padres y autenticación. Construida con **Next.js 16 (App Router, Turbopack)**, **React 19**, **Tailwind CSS 4** y **Supabase** (Auth + Postgres), con emails transaccionales vía **Resend**.
+Aplicación de gestión para guarderías con secciones por audiencia: `/staff/*` para el equipo de la guardería (feed, niños, invitaciones y publicaciones) y `/familia/*` para los padres (feed de sus hijos), con autenticación por rol y redirecciones automáticas. Construida con **Next.js 16 (App Router, Turbopack)**, **React 19**, **Tailwind CSS 4** y **Supabase** (Auth + Postgres), con emails transaccionales vía **Resend**.
 
 Las maquetas de referencia están en `references/pantallas/` (HTML) y los objetivos de comparación visual en `references/screenshots/`.
 
@@ -156,20 +156,34 @@ opencode mcp auth list   # estado de OAuth de los servidores que lo requieren
 
 3. Verificar con `supabase_list_migrations`, `supabase_list_tables` y los advisors de seguridad/performance.
 
+## Flujo de trabajo con specs
+
+El proyecto usa dos flujos de especificaciones (artefactos en español):
+
+- **Spec-driven clásico** (`specs/`): `/spec <descripción>` crea la spec en `Draft`; `/spec-imp NN-slug` la implementa en la rama `spec-NN-slug`.
+- **OpenSpec** (`openspec/`, workflow experimental): `/opsx-explore` → `/opsx-propose <idea>` (crea proposal, specs delta, design y tasks) → `/opsx-apply <change>` (implementa) → `/opsx-verify <change>` (verifica) → `/opsx-archive <change>` (sincroniza los specs principales en `openspec/specs/` y archiva en `openspec/changes/archive/`).
+- **Grilling** (metodología de Matt Pocock, `.agents/skills/grilling/`): `/grill-me <idea o plan>` ejecuta una entrevista implacable en rondas para stress-testear un plan **antes** de crear la spec o el proposal; el resultado alimenta ese artefacto.
+
 ## Estructura del proyecto
 
 ```
 app/                  Rutas del App Router
+  page.tsx            Dispatcher de `/` por rol (staff → /staff, padre → /familia)
   (auth)/login        Login (Supabase Auth)
   (auth)/activate     Activación de padres con código de invitación
-  kids/               Perfil y feed por niño
-  agregar-nino/       Alta de niños
-  vincular-padre/     Invitación de padres (email vía Resend)
-  crear-publicacion/  Creación de publicaciones
-lib/                  Helpers (auth, códigos de invitación, etc.)
+  staff/              Sección de guardería (shell con sidebar propio)
+    kids/             Lista y perfil por niño
+    agregar-nino/     Alta de niños
+    vincular-padre/   Invitación de padres (email vía Resend)
+    crear-publicacion/ Creación de publicaciones
+    pokemon/          Pantalla de Pokémon
+  familia/            Sección de familia (feed de los hijos del padre, sidebar propia)
+components/            UI (sidebars por audiencia, cards de feed, formularios)
+lib/                  Helpers (auth, roles, posts, invitaciones, etc.)
 utils/supabase/       Clientes oficiales de Supabase (server / browser / proxy)
 supabase/migrations/  Esquema de la base de datos (fuente de verdad)
-specs/                Especificaciones del flujo spec-driven
+specs/                Especificaciones del flujo spec-driven clásico (/spec, /spec-imp)
+openspec/             Workflow OpenSpec: changes activos, specs principales y archivo
 references/           Maquetas HTML y screenshots objetivo
 .agents/skills/       Skills de spec, implementación y Supabase
 ```
