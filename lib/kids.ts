@@ -282,6 +282,39 @@ const RELATION_LABELS: Record<ChildParentRow["relationship"], string> = {
 };
 
 /**
+ * ------------------------------------------------------------
+ * -----  `formatRelationshipLabel(relationship, names)`  -----
+ * ------------------------------------------------------------
+ * - Parentesco del sidebar de familia: "Mamá de Mateo", "Mamá de Mateo y Sofía"
+ * - (hasta dos nombres, el resto como "+N").
+ */
+export const formatRelationshipLabel = (
+  relationship: ChildParentRow["relationship"],
+  childNames: string[],
+): string => {
+  const label: string = RELATION_LABELS[relationship];
+  const firstNames: string[] = childNames.map((name) => name.trim().split(/\s+/)[0] ?? name);
+
+  //  -----  sin hijos vinculados: solo el parentesco  -----
+  if (firstNames.length === 0) {
+    return label;
+  }
+
+  //  -----  un hijo  -----
+  if (firstNames.length === 1) {
+    return `${label} de ${firstNames[0]}`;
+  }
+
+  //  -----  dos hijos  -----
+  if (firstNames.length === 2) {
+    return `${label} de ${firstNames[0]} y ${firstNames[1]}`;
+  }
+
+  //  -----  tres o más: los dos primeros + el resto  -----
+  return `${label} de ${firstNames[0]} y ${firstNames[1]} +${firstNames.length - 2}`;
+};
+
+/**
  * ------------------------------------------------
  * -----  `parentsForChild(childId, rows)`  -----
  * ------------------------------------------------

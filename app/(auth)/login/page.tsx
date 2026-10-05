@@ -10,7 +10,8 @@ import type { Metadata } from "next";
 import type { ReactElement } from "react";
 import LoginForm from "@/app/(auth)/login/login-form";
 import { createClient } from "@/utils/supabase/server";
-import { isInternalPath } from "@/lib/auth";
+import { resolveUserRole } from "@/lib/auth";
+import { resolvePostAuthPath } from "@/lib/roles";
 
 /** - `metadata de la página de login` */
 export const metadata: Metadata = {
@@ -41,12 +42,14 @@ const LoginPage = async ({
     const { next } = await searchParams;
     const nextPath: string | undefined = typeof next === "string" ? next : undefined;
 
-    // Defense in depth: with an active session, login is pointless → back to the app
+    // Defense in depth: with an active session, login is pointless → role home
+    // (a ?next= is honored only inside the user's own section)
     const cookieStore = await cookies();
     const supabase = createClient(cookieStore);
     const { data } = await supabase.auth.getUser();
     if (data.user) {
-        redirect(nextPath && isInternalPath(nextPath) ? nextPath : "/");
+        const role = await resolveUserRole(supabase, data.user);
+        redirect(resolvePostAuthPath(role, nextPath ?? null));
     }
 
     return (

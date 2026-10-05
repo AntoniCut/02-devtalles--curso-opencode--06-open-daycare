@@ -7,6 +7,8 @@
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { createClient } from "@/utils/supabase/server";
+import { ROLE_LABELS, readRole } from "@/lib/roles";
+import type { UserRole } from "@/lib/roles";
 
 /** - `usuario autenticado (claims de la sesión de Supabase Auth)` */
 export interface AuthenticatedUser {
@@ -41,32 +43,56 @@ export const getAuthenticatedUser = async (
 export interface AuthenticatedProfile extends AuthenticatedUser {
   name: string;
   initials: string;
-  role: string;
+  role: UserRole;
+  roleLabel: string;
 }
 
-/** - `etiquetas en español de los roles del enum user_role` */
-const ROLE_LABELS: Record<string, string> = {
-  staff: "Maestra",
-  parent: "Familia",
-  admin: "Administrador",
-};
+/** - `usuario mínimo para resolver el rol (auth.getUser / signIn / signUp)` */
+export interface RoleResolvableUser {
+  id: string;
+  app_metadata?: unknown;
+}
+
+/** - `cliente server de Supabase (el de utils/supabase/server)` */
+type ServerSupabaseClient = ReturnType<typeof createClient>;
 
 /**
- * ------------------------------------
- * -----  `isInternalPath()`  -----
- * ------------------------------------
- * - Solo se aceptan rutas internas como destino `next` (sin `//`, sin esquema).
+ * ---------------------------------------------------
+ * -----  `resolveUserRole(supabase, user)`  -----
+ * ---------------------------------------------------
+ * - Rol confiable: `app_metadata` del token (solo service role lo escribe) y,
+ * - si no viene, el respaldo `public.users.role`; nunca `user_metadata`.
  */
-export const isInternalPath = (path: string): boolean =>
-  path.startsWith("/") && !path.startsWith("//") && !path.includes(":");
+export const resolveUserRole = async (
+  supabase: ServerSupabaseClient,
+  user: RoleResolvableUser,
+): Promise<UserRole> => {
+  //  -----  rol del token: app_metadata (user_metadata no autoriza)  -----
+  const appMeta = user.app_metadata as { role?: unknown } | undefined;
+  const tokenRole: UserRole | null = readRole(appMeta?.role);
+
+  if (tokenRole) {
+    return tokenRole;
+  }
+
+  //  -----  respaldo confiable: public.users.role (la RLS permite el self-select)  -----
+  const { data: row } = await supabase
+    .from("users")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  //  -----  por defecto el rol menos privilegiado (mismo default de la DB)  -----
+  return readRole(row?.role) ?? "parent";
+};
 
 /**
  * ---------------------------------------------
  * -----  `getAuthenticatedProfile()`  -----
  * ---------------------------------------------
  * - Igual que `getAuthenticatedUser` pero devuelve los datos listos para la UI:
- * - nombre, iniciales y rol salen de `user_metadata` (los escribe el signup
- * - vía `raw_user_meta_data`); evita el SELECT a `public.users` bloqueado por RLS.
+ * - nombre y rol. El rol sale de `app_metadata` y, si el token no lo trae, del
+ * - respaldo confiable `public.users.role`.
  */
 export const getAuthenticatedProfile = async (
   nextPath?: string,
@@ -81,13 +107,14 @@ export const getAuthenticatedProfile = async (
     redirect(target);
   }
 
+  //  -----  rol confiable del usuario  -----
+  const role: UserRole = await resolveUserRole(supabase, data.user);
+
   const meta = data.user.user_metadata ?? {};
   const name: string =
     typeof meta.full_name === "string" && meta.full_name.trim()
       ? meta.full_name.trim()
       : data.user.email ?? "Usuario";
-  const role: string =
-    typeof meta.role === "string" ? ROLE_LABELS[meta.role] ?? meta.role : "Maestra";
 
   return {
     id: data.user.id,
@@ -95,5 +122,6 @@ export const getAuthenticatedProfile = async (
     name,
     initials: name.slice(0, 1).toUpperCase(),
     role,
+    roleLabel: ROLE_LABELS[role],
   };
 };
