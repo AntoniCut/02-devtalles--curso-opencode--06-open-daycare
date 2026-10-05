@@ -21,7 +21,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 Portar las maquetas HTML de `references/pantallas/*.dc.html` a rutas del App Router, manteniendo el estilo **idéntico**. `references/screenshots/*.png` son los objetivos de comparación visual. `CLAUDE.md` solo re-exporta este archivo (`@AGENTS.md`).
 
-- Base de datos: **Supabase** (configurado vía MCP). El esquema de referencia vive en el proyecto externo `07-db-Schema` — se implementa tabla por tabla vía specs (la raíz `daycares` ya está implementada); los enlaces y datos de las pantallas siguen siendo mock. Credenciales en `.env` (`SUPABASE_DB_PASSWORD`, ver `.env.example`; `.env` no se commitea).
+- Base de datos: **Supabase** (configurado vía MCP). El esquema de referencia vive en el proyecto externo `07-db-Schema` — se implementa tabla por tabla vía migraciones versionadas. Ya están implementadas: `daycares`, `users`, `rooms`, `children`, `invitations`, `parent_children`, `posts` (+ `post_children`, `post_photos` y el bucket `post-photos`); las pantallas de staff y familia consumen datos reales protegidos por RLS. Credenciales en `.env` (`SUPABASE_DB_PASSWORD`, ver `.env.example`; `.env` no se commitea).
 - **Acceso a la base de datos desde la app**: SIEMPRE con los paquetes oficiales de Supabase para Next.js — `@supabase/supabase-js` + `@supabase/ssr` (instalados con pnpm). Nunca con drivers SQL directos (`pg`, `postgres`) ni ORMs desde la aplicación.
   - Cliente server: `createClient` de `utils/supabase/server.ts` (Server Components, Route Handlers, Server Actions).
   - Cliente browser: `createClient` de `utils/supabase/client.ts` (Client Components).
@@ -62,6 +62,30 @@ Las skills del proyecto viven en `.agents/skills/` (`spec`, `spec-impl`, `supaba
 - **Agente verificador** (`.opencode/agent/spec-verifier.md`): subagente que verifica los criterios de aceptación de un spec, corrige el código de los criterios que fallan y marca los checkboxes del spec. Usa modelo con visión + Playwright (comparación contra `references/screenshots/`) + Context7. Nunca commitea ni toca la línea de Estado del spec — solo el checklist de "Acceptance criteria".
 
 
+
+## OpenSpec (workflow experimental)
+
+Comandos en `.opencode/commands/opsx-*.md` y skills en `.opencode/skills/openspec-*`. Convive con el flujo clásico de `specs/`; los artefactos de OpenSpec van en **español**. Sin `--store`, todo opera sobre el `openspec/` local del repo.
+
+- Estructura de `openspec/`:
+  - `config.yaml`: contexto del proyecto que guía los artefactos.
+  - `changes/<change>/`: artefactos del cambio activo — `proposal.md` (qué y por qué), `design.md` (cómo), `tasks.md` (checklist de implementación) y `specs/<capability>/spec.md` (delta con secciones `## ADDED/MODIFIED/REMOVED/RENAMED Requirements`).
+  - `changes/archive/YYYY-MM-DD-<change>/`: cambios archivados.
+  - `specs/<capability>/spec.md`: **specs principales** (fuente de verdad del comportamiento); se crean/actualizan al archivar, sin headers delta, con `### Requirement:` / `#### Scenario:`.
+- Flujo: `/opsx-explore` (explorar) → `/opsx-propose <idea>` (crea el change con todos los artefactos; **solo planifica, no toca código**) → `/opsx-apply <change>` (implementa tasks paso a paso) → `/opsx-update <change>` (revisar el plan) → `/opsx-verify <change>` (verificación advisory pre-archivo) → `/opsx-archive <change>` (sincroniza los deltas a los specs principales y mueve el change a `archive/`).
+- Verificación con el CLI: `openspec list --json`, `openspec status --change <change> --json`, `openspec validate --specs`.
+- Como en `spec-impl`, estos workflows **nunca commitean** — el commit es decisión del usuario.
+
+
+
+## Grilling (metodología de Matt Pocock)
+
+Skills en `.agents/skills/grilling/` (la metodología) y `.agents/skills/grill-me/` (alias que invoca `/grill-me` y dispara la skill `grilling`).
+
+- **Qué es**: una entrevista implacable para pulir un plan o diseño **antes** de escribir código, hasta llegar a un entendimiento compartido. Ideal para stress-testear una idea antes de `/spec` o `/opsx-propose`; el resultado alimenta la spec o el proposal.
+- **Cómo funciona**: se mapea el problema como un **árbol de diseño** (cada decisión abre las decisiones que dependen de ella) y se trabaja en **rondas**. En cada ronda se pregunta toda la **frontera** —las decisiones cuyos prerrequisitos ya están resueltos—, con preguntas numeradas y una respuesta recomendada por cada una. Las respuestas del usuario remodelan el árbol y desbloquean la siguiente ronda.
+- **Reglas**: los **hechos** los busca el agente (sub-agentes, filesystem, herramientas), nunca se le preguntan al usuario; las **decisiones** son del usuario y se esperan antes de avanzar. La sesión termina cuando la frontera está vacía —nada queda asumido en silencio— y el usuario confirma el entendimiento compartido.
+- **Invocación**: `/grill-me <idea o plan>` o pidiendo explícitamente "grill me" sobre una decisión.
 
 ## Accesibilidad (WCAG 2.2 AA)
 
