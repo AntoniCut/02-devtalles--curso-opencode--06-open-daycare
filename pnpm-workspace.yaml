@@ -1,3 +1,9 @@
+# Vercel reads this file as a monorepo manifest. pnpm 11 allows omitting
+# `packages` (only the root package is included), but Vercel then aborts
+# the deployment with "packages field missing or empty".
+packages:
+  - "."
+
 allowBuilds:
   sharp: false
   unrs-resolver: false
