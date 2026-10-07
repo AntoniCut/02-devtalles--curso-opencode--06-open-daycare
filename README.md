@@ -72,9 +72,9 @@ No hay tests ni formatter configurados.
 
 ### Datos del proyecto
 
-- **Project ref:** `rfunicjeleyzttwtlbyg`
-- **Project URL:** https://rfunicjeleyzttwtlbyg.supabase.co
-- **Dashboard:** https://supabase.com/dashboard/project/rfunicjeleyzttwtlbyg
+- **Project ref:** `mdoftqngmqmijmowqqak`
+- **Project URL:** https://mdoftqngmqmijmowqqak.supabase.co
+- **Dashboard:** https://supabase.com/dashboard/project/mdoftqngmqmijmowqqak
 
 ### Autenticar la CLI de Supabase
 
@@ -106,7 +106,7 @@ Abre el navegador para autorizar la CLI contra tu cuenta. El token se guarda loc
 Una vez autenticado, vincular la carpeta del repo con el proyecto remoto:
 
 ```bash
-supabase link --project-ref rfunicjeleyzttwtlbyg
+supabase link --project-ref mdoftqngmqmijmowqqak
 ```
 
 Pide la `SUPABASE_DB_PASSWORD`. Esto crea `supabase/config.toml` y `supabase/.temp/project_id` (no commitearlos si no quieres compartir el link).
@@ -116,7 +116,7 @@ Pide la `SUPABASE_DB_PASSWORD`. Esto crea `supabase/config.toml` y `supabase/.te
 El agente de IA de este repo no usa la CLI: se conecta al **MCP remoto de Supabase** configurado en `opencode.json`:
 
 ```
-https://mcp.supabase.com/mcp?project_ref=rfunicjeleyzttwtlbyg&read_only=false&features=docs,account,database,debugging,development,functions,branching
+https://mcp.supabase.com/mcp?project_ref=mdoftqngmqmijmowqqak&read_only=false&features=docs,account,database,debugging,development,functions,branching
 ```
 
 La autenticación del MCP es **OAuth en el navegador**: la primera vez que el editor conecta el servidor, Supabase pide autorizar tu cuenta. Cada miembro del equipo autoriza su propia sesión — no comparte token con la CLI ni con el access token del paso anterior.
