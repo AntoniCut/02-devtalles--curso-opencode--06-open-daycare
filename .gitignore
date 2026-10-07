@@ -45,3 +45,8 @@ next-env.d.ts
 prompts.txt
 
 .playwright-mcp/*
+
+# supabase (estado local de la CLI y backups de migración)
+supabase/config.toml
+supabase/.temp/
+supabase/.backups/

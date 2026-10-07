@@ -1,3 +1,4 @@
+
 # SPEC 10 — Publicaciones del staff: crear con fotos y feed real
 
 > **Estado:** Implemented
