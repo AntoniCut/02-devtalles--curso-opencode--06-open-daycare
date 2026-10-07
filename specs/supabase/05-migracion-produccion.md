@@ -24,6 +24,7 @@
 | Auth | 3 usuarios email+password |
 | Storage | bucket privado `post-photos` (5 MB, jpeg/png/webp), 13 objetos (~1.8 MB) |
 | Otros | sin edge functions, sin cron jobs, sin secretos en Vault |
+| Hosting producción | Vercel — proyecto `02-devtalles-curso-opencode-06-open-daycare`, branch `master`, dominio `02-devtalles-curso-opencode-06-open.vercel.app`; env vars en Vercel → Settings → Environment Variables |
 
 ## Fase 0 — Prerrequisitos (usuario)
 
@@ -69,7 +70,7 @@ psql "$NEW_DB_URL" --single-transaction --variable ON_ERROR_STOP=1 \
   --file "supabase/.backups/$(date +%Y%m%d)/auth_data.sql"
 ```
 
-Dashboard del proyecto nuevo (replicar del origen): Site URL, Redirect URLs, plantillas de email, leaked password protection, password policy, proveedor Email/password.
+Dashboard del proyecto nuevo (replicar del origen): Site URL, Redirect URLs (incluir el dominio de producción `02-devtalles-curso-opencode-06-open.vercel.app` y `http://localhost:3000` para desarrollo), plantillas de email, leaked password protection, password policy, proveedor Email/password.
 
 ## Fase 4 — Storage
 
@@ -104,9 +105,9 @@ Verificar 13/13 objetos y rutas `{daycare_id}/{uuid}.{ext}`. No insertar filas e
 
 1. Aviso de mantenimiento.
 2. Re-dump delta de `public` + `auth` e importar; reconfirmar conteos.
-3. Actualizar env vars en el hosting y redeploy.
+3. Actualizar env vars en Vercel (Settings → Environment Variables): `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `NEXT_PUBLIC_APP_BASE_URL` (dominio de producción); redeploy de `master`.
 4. Smoke test en producción (login, feed, foto).
-5. Rollback: repuntar env al proyecto viejo (intacto); el nuevo se descarta.
+5. Rollback: repuntar env vars al proyecto viejo (intacto) y redeploy; el nuevo se descarta.
 
 ## Criterios de aceptación
 
