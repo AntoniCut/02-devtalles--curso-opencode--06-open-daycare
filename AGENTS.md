@@ -21,7 +21,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 Portar las maquetas HTML de `references/pantallas/*.dc.html` a rutas del App Router, manteniendo el estilo **idéntico**. `references/screenshots/*.png` son los objetivos de comparación visual. `CLAUDE.md` solo re-exporta este archivo (`@AGENTS.md`).
 
-- Base de datos: **Supabase** (configurado vía MCP). El esquema de referencia vive en el proyecto externo `07-db-Schema` — se implementa tabla por tabla vía migraciones versionadas. Ya están implementadas: `daycares`, `users`, `rooms`, `children`, `invitations`, `parent_children`, `posts` (+ `post_children`, `post_photos` y el bucket `post-photos`); las pantallas de staff y familia consumen datos reales protegidos por RLS. Credenciales en `.env` (`SUPABASE_DB_PASSWORD`, ver `.env.example`; `.env` no se commitea).
+- Base de datos: **Supabase** (configurado vía MCP). El proyecto activo es **`OpenDayCare-Prod`** (ref `mdoftqngmqmijmowqqak`), migrado en producción el 2026-10-07 (ver `specs/supabase/05-migracion-produccion.md`); el proyecto viejo `rfunicjeleyzttwtlbyg` queda pausado como respaldo. El esquema de referencia vive en el proyecto externo `07-db-Schema` — se implementa tabla por tabla vía migraciones versionadas. Ya están implementadas: `daycares`, `users`, `rooms`, `children`, `invitations`, `parent_children`, `posts` (+ `post_children`, `post_photos` y el bucket `post-photos`); las pantallas de staff y familia consumen datos reales protegidos por RLS. Credenciales en `.env` (`SUPABASE_DB_PASSWORD`, ver `.env.example`; `.env` no se commitea).
 - **Acceso a la base de datos desde la app**: SIEMPRE con los paquetes oficiales de Supabase para Next.js — `@supabase/supabase-js` + `@supabase/ssr` (instalados con pnpm). Nunca con drivers SQL directos (`pg`, `postgres`) ni ORMs desde la aplicación.
   - Cliente server: `createClient` de `utils/supabase/server.ts` (Server Components, Route Handlers, Server Actions).
   - Cliente browser: `createClient` de `utils/supabase/client.ts` (Client Components).
@@ -36,7 +36,7 @@ Portar las maquetas HTML de `references/pantallas/*.dc.html` a rutas del App Rou
 
 - **Playwright**: screenshots, snapshots de accesibilidad y logs de consola tienen que guardarse en la carpeta `.playwright-mcp/` (está gitignored, excepto su contenido). El MCP está habilitado vía `opencode.json`.
 - **Context7**: usarlo para traer documentación actualizada de Next.js/React antes de escribir código — esta versión de Next 16 difiere de los datos de entrenamiento.
-- **Supabase**: acceso al proyecto (SQL, logs, advisors, tipos TypeScript, migraciones). Usar sus herramientas para inspeccionar tablas antes de cambios de esquema; las migraciones van directas al proyecto remoto, aplicarlas con cuidado.
+- **Supabase**: acceso al proyecto de producción (`OpenDayCare-Prod`) vía MCP (SQL, logs, advisors, tipos TypeScript, migraciones). Usar sus herramientas para inspeccionar tablas antes de cambios de esquema; las migraciones van directas al proyecto remoto, aplicarlas con cuidado. El MCP se autentica con `opencode mcp auth supabase` (OAuth por persona).
 
 
 
@@ -45,6 +45,10 @@ Portar las maquetas HTML de `references/pantallas/*.dc.html` a rutas del App Rou
 - **/spec**: Usaremos esta habilidad para crear las especificaciones.
 - **/spec-imp**: Usaremos esta skill para hacer las implementaciones.
 - Leer las skill globales sobre comentarios de código y de typescript.
+
+## Registro de prompts (`workflow/`)
+
+- `workflow/prompts.md` es la copia versionada de `prompts.txt` (gitignored): al añadir prompts nuevos en `prompts.txt`, sincronizar `workflow/prompts.md` redactando cualquier secreto (passwords, `service_role`, API keys).
 
 ## Reglas de código
 
