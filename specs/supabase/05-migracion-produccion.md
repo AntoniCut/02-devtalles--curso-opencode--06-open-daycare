@@ -1,6 +1,6 @@
 # SPEC SUPABASE 05 — Migración a un nuevo proyecto Supabase en producción
 
-> **Estado:** Implementado — migración completa; pendiente el corte en Vercel y la re-autenticación del MCP
+> **Estado:** Implementado — migración y corte en producción completados (2026-10-07); pendiente re-autenticar el MCP y mergear la rama a `master`
 > **Depende de:** —
 > **Fecha:** 2026-10-06 (ejecutado 2026-10-07)
 > **Objetivo:** Migrar el proyecto origen `rfunicjeleyzttwtlbyg` (open-daycare) al proyecto Supabase de producción `OpenDayCare-Prod` (`mdoftqngmqmijmowqqak`): esquema por replay de migraciones, datos `public`, usuarios de Auth (preservando contraseñas) y objetos del bucket `post-photos`, y actualizar la configuración del repo/app/tooling.
@@ -13,7 +13,8 @@
 - **Storage:** 13/13 objetos en las rutas correctas `{daycare_id}/{uuid}.{ext}`; signed URLs responden 200 desde la app.
 - **Advisors:** misma lista que el origen (3 avisos `SECURITY DEFINER` intencionales + leaked password protection + `multiple_permissive_policies`).
 - **E2E local:** login real `staff@opendaycare.com` → `/staff`, feed con datos y fotos del proyecto nuevo, 0 errores de consola; `pnpm lint` y `pnpm build` OK.
-- **Pendiente (usuario):** actualizar env vars en Vercel + redeploy (Fase 7) y `opencode mcp auth supabase`.
+- **Corte en producción:** completado 2026-10-07 — env vars de Vercel apuntando al proyecto nuevo, redeploy hecho; smoke test en `https://02-devtalles-curso-opencode-06-open.vercel.app` (login staff → `/staff`, feed con datos y fotos servidas desde `mdoftqngmqmijmowqqak`).
+- **Pendiente (usuario):** `opencode mcp auth supabase` y mergear `spec-05-migracion-produccion` a `master`.
 
 ## Decisiones acordadas
 
@@ -140,5 +141,5 @@ Verificado 13/13 con `supabase storage ls -r --experimental "ss:///post-photos"`
 - [x] Conteos de filas origen == destino en las 9 tablas `public` (verificado contra los dumps).
 - [x] Los 3 usuarios de Auth inician sesión con su contraseña original (hash idéntico + login API/E2E del staff).
 - [x] 13 objetos en `post-photos` con las mismas rutas; signed URLs funcionan desde la app.
-- [ ] App en producción apunta al proyecto nuevo y pasa smoke test (pendiente: env vars + redeploy en Vercel).
+- [x] App en producción apunta al proyecto nuevo y pasa smoke test (login staff, feed y fotos verificados el 2026-10-07).
 - [x] MCP (URL) y documentación del repo apuntan al proyecto nuevo (re-auth OAuth del MCP pendiente).
