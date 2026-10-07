@@ -290,3 +290,26 @@ opencode /home/antonydev/antonydev-desarrollos/02-devtalles-desarrollos/devtalle
 
 > Ocupamos migrar nuestra base de datos de Supabase actualmente a otra instancia de Supabase
 > en producción. ¿Qué puedo hacer?
+
+---
+
+## Base de datos en producción (Supabase)
+
+> password: \*\*\*\*REDACTADA\*\*\*\* (vive en el dashboard de Supabase; no se commitea)
+>
+> APIKeys:
+> service_role Secret ==> \*\*\*\*REDACTADA\*\*\*\*
+>
+> Proyecto en Vercel
+>
+> NEXT_PUBLIC_SUPABASE_URL=https://mdoftqngmqmijmowqqak.supabase.co
+> NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_1WSBHQBgKFe--SC_T8zhhw_dYzA138R (clave publicable: se expone al navegador por diseño)
+
+---
+
+> Vamos a hacer el volcado de nuestra base de datos de desarrollo con los usuarios, trigger o lever security, básicamente todo,
+> inclusive la data de la instancia actual que tú tienes acceso mediante un MCP a una instancia nueva en produccion.
+>
+> La instancia de producción es un green field. No hay absolutamente nada pero ya la tengo creada y aprovisionada.
+>
+> La instancia de produccion la vamos a hacer mediante el CLI de Supabase.

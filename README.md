@@ -40,10 +40,9 @@ Las maquetas de referencia están en `references/pantallas/` (HTML) y los objeti
 
    | Variable | Dónde obtenerla | Uso |
    | --- | --- | --- |
-   | `NEXT_PUBLIC_SUPABASE_URL` | Dashboard → Settings → API | Cliente de Supabase (`@supabase/ssr`) |
-   | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Dashboard → Settings → API (clave publishable) | Cliente de Supabase (`@supabase/ssr`) |
-   | `SUPABASE_DB_PASSWORD` | Dashboard → Settings → Database | Migraciones y acceso directo a Postgres |
-   | `SUPABASE_SERVICE_ROLE_KEY` | Dashboard → Settings → API | Tareas de servidor que saltan RLS |
+   | `NEXT_PUBLIC_SUPABASE_URL` | Dashboard → Project Settings → API Keys | Cliente de Supabase (`@supabase/ssr`) |
+   | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Dashboard → Project Settings → API Keys (clave publishable) | Cliente de Supabase (`@supabase/ssr`) |
+   | `SUPABASE_DB_PASSWORD` | Dashboard → Project Settings → Database | Migraciones y acceso directo a Postgres |
    | `RESEND_API_KEY` | [resend.com/api-keys](https://resend.com/api-keys) | Envío de emails de invitación |
    | `RESEND_FROM_EMAIL` | Remitente del email | En producción usar un dominio verificado; `onboarding@resend.dev` solo envía a tu propio correo |
    | `NEXT_PUBLIC_APP_BASE_URL` | — | URL base de la app (enlaces de activación) |
@@ -72,9 +71,11 @@ No hay tests ni formatter configurados.
 
 ### Datos del proyecto
 
+- **Proyecto:** `OpenDayCare-Prod` (producción) — migrado desde `rfunicjeleyzttwtlbyg` el 2026-10-07 (ver `specs/supabase/05-migracion-produccion.md`; el proyecto viejo queda pausado como respaldo).
 - **Project ref:** `mdoftqngmqmijmowqqak`
 - **Project URL:** https://mdoftqngmqmijmowqqak.supabase.co
 - **Dashboard:** https://supabase.com/dashboard/project/mdoftqngmqmijmowqqak
+- **Hosting:** Vercel — https://02-devtalles-curso-opencode-06-open.vercel.app
 
 ### Autenticar la CLI de Supabase
 
@@ -86,7 +87,7 @@ Cada miembro del equipo se autentica **individualmente** con su propia cuenta de
 supabase login
 ```
 
-Abre el navegador para autorizar la CLI contra tu cuenta. El token se guarda localmente en `~/.supabase/access-tokens`.
+Abre el navegador para autorizar la CLI contra tu cuenta. El token se guarda en el llavero del sistema (keyring); la configuración local del proyecto vive en `supabase/.temp/` (gitignored).
 
 **Opción B — Access token personal (CI o entornos headless):**
 
@@ -109,7 +110,7 @@ Una vez autenticado, vincular la carpeta del repo con el proyecto remoto:
 supabase link --project-ref mdoftqngmqmijmowqqak
 ```
 
-Pide la `SUPABASE_DB_PASSWORD`. Esto crea `supabase/config.toml` y `supabase/.temp/project_id` (no commitearlos si no quieres compartir el link).
+Pide la `SUPABASE_DB_PASSWORD`. La referencia y conexión del proyecto quedan en `supabase/.temp/` (gitignored); `supabase/config.toml` se crea con `supabase init` o manualmente si utilizas `supabase config diff`/`push` (también gitignored).
 
 ### MCP de Supabase (usado por el asistente IA)
 
@@ -185,6 +186,7 @@ supabase/migrations/  Esquema de la base de datos (fuente de verdad)
 specs/                Especificaciones del flujo spec-driven clásico (/spec, /spec-imp)
 openspec/             Workflow OpenSpec: changes activos, specs principales y archivo
 references/           Maquetas HTML y screenshots objetivo
+workflow/             Registro de prompts del desarrollo (`prompts.md`, copia redactada de `prompts.txt`)
 .agents/skills/       Skills de spec, implementación y Supabase
 ```
 
