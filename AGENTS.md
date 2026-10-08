@@ -107,6 +107,14 @@ Skills en `.agents/skills/grilling/` (la metodología) y `.agents/skills/grill-m
 
 
 
+## Base de datos — producción (regla dura)
+
+- La base de datos configurada en `.env` y en el MCP (`OpenDayCare-Prod`, ref `mdoftqngmqmijmowqqak`) es **producción**: **nunca** ejecutar escrituras contra ella (DDL, DML, migraciones, seeds, Auth, Storage) salvo que el usuario lo pida **explícitamente en ese momento**.
+- Ante cualquier tarea que requiera escribir en la base de datos: proponer el SQL o la migración y **pedir confirmación antes de aplicar**. Las lecturas de verificación (SQL de solo lectura) sí están permitidas.
+- Los datos de prueba viven documentados en `references/datos-prueba.md` y solo se aplican a un proyecto de **desarrollo**, nunca a producción.
+
+
+
 ## Base de datos — patrón de migraciones (siempre)
 
 Cada vez que se manipule la base de datos (crear/alterar/dropear tablas, columnas, índices, triggers, funciones, RLS, seeds) se usa SIEMPRE el patrón de migraciones — nunca SQL ad-hoc de cambios contra el remoto:
