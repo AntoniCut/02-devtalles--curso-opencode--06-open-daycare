@@ -21,7 +21,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 Portar las maquetas HTML de `references/pantallas/*.dc.html` a rutas del App Router, manteniendo el estilo **idéntico**. `references/screenshots/*.png` son los objetivos de comparación visual. `CLAUDE.md` solo re-exporta este archivo (`@AGENTS.md`).
 
-- Base de datos: **Supabase** (configurado vía MCP). El proyecto activo es **`OpenDayCare-Prod`** (ref `mdoftqngmqmijmowqqak`), migrado en producción el 2026-10-07 (ver `specs/supabase/05-migracion-produccion.md`); el proyecto viejo `rfunicjeleyzttwtlbyg` queda pausado como respaldo. El esquema de referencia vive en el proyecto externo `07-db-Schema` — se implementa tabla por tabla vía migraciones versionadas. Ya están implementadas: `daycares`, `users`, `rooms`, `children`, `invitations`, `parent_children`, `posts` (+ `post_children`, `post_photos` y el bucket `post-photos`); las pantallas de staff y familia consumen datos reales protegidos por RLS. Credenciales en `.env` (`SUPABASE_DB_PASSWORD`, ver `.env.example`; `.env` no se commitea).
+- Base de datos: **Supabase** con dos entornos (ver `specs/supabase/06-entorno-desarrollo.md`): **`OpenDayCare-Dev`** (ref `rfunicjeleyzttwtlbyg`) para desarrollo y **`OpenDayCare-Prod`** (ref `mdoftqngmqmijmowqqak`) para producción. `.env.local` apunta a Dev (Next.js lo prioriza en `pnpm dev`) y `.env` a Prod (Vercel usa sus propias env vars); `SUPABASE_DB_PASSWORD` vive en ambos (ver `.env.example`; ningún archivo `.env*` se commitea). El esquema de referencia vive en el proyecto externo `07-db-Schema` — se implementa tabla por tabla vía migraciones versionadas. Ya están implementadas: `daycares`, `users`, `rooms`, `children`, `invitations`, `parent_children`, `posts` (+ `post_children`, `post_photos` y el bucket `post-photos`); las pantallas de staff y familia consumen datos reales protegidos por RLS.
 - **Acceso a la base de datos desde la app**: SIEMPRE con los paquetes oficiales de Supabase para Next.js — `@supabase/supabase-js` + `@supabase/ssr` (instalados con pnpm). Nunca con drivers SQL directos (`pg`, `postgres`) ni ORMs desde la aplicación.
   - Cliente server: `createClient` de `utils/supabase/server.ts` (Server Components, Route Handlers, Server Actions).
   - Cliente browser: `createClient` de `utils/supabase/client.ts` (Client Components).
@@ -36,7 +36,7 @@ Portar las maquetas HTML de `references/pantallas/*.dc.html` a rutas del App Rou
 
 - **Playwright**: screenshots, snapshots de accesibilidad y logs de consola tienen que guardarse en la carpeta `.playwright-mcp/` (está gitignored, excepto su contenido). El MCP está habilitado vía `opencode.json`.
 - **Context7**: usarlo para traer documentación actualizada de Next.js/React antes de escribir código — esta versión de Next 16 difiere de los datos de entrenamiento.
-- **Supabase**: acceso al proyecto de producción (`OpenDayCare-Prod`) vía MCP (SQL, logs, advisors, tipos TypeScript, migraciones). Usar sus herramientas para inspeccionar tablas antes de cambios de esquema; las migraciones van directas al proyecto remoto, aplicarlas con cuidado. El MCP se autentica con `opencode mcp auth supabase` (OAuth por persona).
+- **Supabase**: el MCP está pinneado a `OpenDayCare-Prod` (SQL, logs, advisors, tipos TypeScript, migraciones). El día a día se trabaja contra **Dev** con la CLI linkeada (`supabase link --project-ref rfunicjeleyzttwtlbyg`) y `supabase db query --linked` / `supabase db push`. El MCP se autentica con `opencode mcp auth supabase` (OAuth por persona).
 
 
 
@@ -107,9 +107,16 @@ Skills en `.agents/skills/grilling/` (la metodología) y `.agents/skills/grill-m
 
 
 
+## Base de datos — entornos (dev → prod)
+
+- **Desarrollo:** `OpenDayCare-Dev` (ref `rfunicjeleyzttwtlbyg`). Mientras se desarrolla, la CLI va linkeada a Dev y `.env.local` apunta a Dev (`pnpm dev` lo prioriza).
+- **Producción:** `OpenDayCare-Prod` (ref `mdoftqngmqmijmowqqak`). `.env` local y env vars de Vercel apuntan acá.
+- **Flujo de migraciones:** crear el archivo (`supabase migration new`) → aplicar a Dev (`supabase db push` con la CLI linkeada a Dev) → verificar en Dev (migraciones, tablas, advisors, tests de impersonación con rollback y E2E) → aplicar a Prod al final **con aprobación explícita del usuario en ese momento**.
+- Los historiales de migraciones de Dev y Prod están alineados con los timestamps de los archivos del repo (ver `specs/supabase/06-entorno-desarrollo.md`); si `supabase migration list --linked` muestra drift, se resuelve con `supabase migration repair` antes de hacer `db push`.
+
 ## Base de datos — producción (regla dura)
 
-- La base de datos configurada en `.env` y en el MCP (`OpenDayCare-Prod`, ref `mdoftqngmqmijmowqqak`) es **producción**: **nunca** ejecutar escrituras contra ella (DDL, DML, migraciones, seeds, Auth, Storage) salvo que el usuario lo pida **explícitamente en ese momento**.
+- `OpenDayCare-Prod` (ref `mdoftqngmqmijmowqqak`; `.env`, Vercel y MCP) es **producción**: **nunca** ejecutar escrituras contra ella (DDL, DML, migraciones, seeds, Auth, Storage) salvo que el usuario lo pida **explícitamente en ese momento**.
 - Ante cualquier tarea que requiera escribir en la base de datos: proponer el SQL o la migración y **pedir confirmación antes de aplicar**. Las lecturas de verificación (SQL de solo lectura) sí están permitidas.
 - Los datos de prueba viven documentados en `references/datos-prueba.md` y solo se aplican a un proyecto de **desarrollo**, nunca a producción.
 
@@ -121,11 +128,12 @@ Cada vez que se manipule la base de datos (crear/alterar/dropear tablas, columna
 
 1. Cargar las skills `supabase` y `supabase-postgres-best-practices`.
 2. Crear el archivo con `supabase migration new <slug>` → `supabase/migrations/YYYYMMDDHHMMSS_<slug>.sql`, versionado en el repo (el repo es la fuente de verdad del esquema).
-3. Aplicar la migración al remoto con `supabase_apply_migration` (mismo SQL del archivo).
-4. Verificar con `supabase_list_migrations`, `supabase_list_tables` y `supabase_get_advisors`.
-5. `supabase_execute_sql` solo para lecturas, pruebas o verificación — no para cambios de esquema.
+3. Aplicar la migración primero a **Dev** (CLI linkeada a Dev: `supabase db push`).
+4. Verificar en Dev: `supabase migration list --linked`, tablas, advisors y tests de impersonación con rollback.
+5. Aplicar a **Prod** al final y **con aprobación explícita del usuario ese mismo momento** (MCP `supabase_apply_migration` o CLI `db push` contra Prod); verificar con `supabase_list_migrations`, `supabase_list_tables` y `supabase_get_advisors`.
+6. `supabase_execute_sql` / `supabase db query` solo para lecturas, pruebas o verificación — no para cambios de esquema.
 
-**Agente db-migrator** (`.opencode/agent/db-migrator.md`): subagente que asegura que todo cambio de esquema exista como migración versionada en `supabase/migrations/` y la aplica al remoto con `supabase_apply_migration`; audita drift repo↔remoto y verifica con `supabase_list_migrations`/`supabase_list_tables`/`supabase_get_advisors`. Carga siempre las skills `supabase` y `supabase-postgres-best-practices`. Nunca commitea ni aplica DDL ad-hoc.
+**Agente db-migrator** (`.opencode/agent/db-migrator.md`): subagente que asegura que todo cambio de esquema exista como migración versionada en `supabase/migrations/` y la aplica primero a Dev y luego a Prod (con aprobación explícita); audita drift repo↔remoto y verifica con `supabase_list_migrations`/`supabase_list_tables`/`supabase_get_advisors`. Carga siempre las skills `supabase` y `supabase-postgres-best-practices`. Nunca commitea ni aplica DDL ad-hoc.
 
 **Agente db-security-auditor** (`.opencode/agent/db-security-auditor.md`): subagente que audita la seguridad de Supabase/Postgres (RLS, policies, roles, grants, funciones `SECURITY DEFINER`, advisors) priorizando fugas de datos entre niños, padres, staff y guarderías. Verifica el acceso real con tests de impersonación de roles en SQL (transacciones con `set local role` + `request.jwt.claims`, siempre con rollback), revisa también las queries de la app (`app/`, `utils/`) y corrige creando migraciones versionadas que aplica al remoto. Carga siempre las skills `supabase` y `supabase-postgres-best-practices`. Nunca commitea. Invocación: `/db-security-auditor <tablas|funciones|spec>` (sin argumentos = auditoría completa).
 
