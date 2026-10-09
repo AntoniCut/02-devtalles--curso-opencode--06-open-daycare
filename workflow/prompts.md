@@ -313,3 +313,57 @@ opencode /home/antonydev/antonydev-desarrollos/02-devtalles-desarrollos/devtalle
 > La instancia de producción es un green field. No hay absolutamente nada pero ya la tengo creada y aprovisionada.
 >
 > La instancia de produccion la vamos a hacer mediante el CLI de Supabase.
+
+---
+
+> como utilizar la app
+>
+> Necesito que expliques como utilizar la app de opendaycare desde que abrimos la app
+> y todos los casos de usos posibles.
+>
+> Lo necesito para comprobar y revisar la app y asi testear que no hayan errores.
+>
+> Primero la voy a utilizar en desarrollo.
+
+---
+
+> Necesito mas datos de prueba para probar la app tanto de staff como de familia y con su contraseña.
+> Crealos en un archivo .md dentro de la carpeta references. Nunca tocar la Base de Datos de Producción.
+> Añadir regla en el @AGENTS.md
+
+---
+
+### spec/11-alta-miembros-equipo.md
+
+> /spec
+>
+> Alta de miembros del equipo (staff y admin) desde la app
+
+> /spec-impl 11-alta-miembros-equipo
+>
+> adelante. pero para produccion no hay que implementar primero en desarrollo ?
+>
+> segun esto el proyecto dev no esta pausado. yo lo que quiero es hacer la funcionalidad en desarrollo.
+>
+> ----- Decision -----------
+> Trabajar primero en Dev (`.env.local` + CLI linkeada a Dev) y pasar a Producción
+> al final con aprobación explícita.
+
+---
+
+### spec/supabase/06-entorno-desarrollo.md
+
+> /spec
+>
+> Entorno de desarrollo (OpenDayCare-Dev) y flujo dev → prod:
+>
+> - `.env.local` con las credenciales de Dev (guardadas en `supabase/.backups/20261006/.env.old`)
+>   y `.env` con las de Producción.
+> - CLI de Supabase linkeada a Dev durante el desarrollo.
+> - Migraciones y E2E primero en Dev; Producción al final con aprobación explícita.
+> - Verificar/restaurar en Dev los usuarios de prueba de `references/datos-prueba.md`.
+> - Actualizar `AGENTS.md` y el plan de SPEC 11 con el flujo dev → prod.
+
+---
+
+> Aprovado. añade la spec al prompts.txt, tambien para tener una secuencia de pasos del desarrollo de la app

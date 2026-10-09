@@ -14,13 +14,13 @@
 | `admin@opendaycare.com` | `Test1234!` | Carla Domínguez | admin | — | — | Feed de toda la guardería (Soles + Estrellas + Luna), publicar a cualquier niño, header con los 13 niños |
 | `madre.prueba@opendaycare.com` | `Test1234!` | María Prueba | parent | — | Mateo Fernández, Sofía Méndez | Feed multi-hijo y pills por hijo |
 | `padre.soles@opendaycare.com` | `Test1234!` | Pablo Herrera | parent | — | Tomás Díaz | Familia de Soles (ve el anuncio de la sala) |
-| `antonikut@gmail.com` | `Test1234!` | Gabriel Ballester | parent | — | Alba Ballester Cutillas | Familia de Soles con hijo propio |
+| `antonicut@gmail.com` | `Test1234!` | Gabriel Ballester | parent | — | Alba Ballester Cutillas | Familia de Soles con hijo propio |
 | `padre.estrellas@opendaycare.com` | `Test1234!` | Diego Torres | parent | — | Nicolás Gómez, Luis | Familia de Estrellas con contenido propio |
 | `madre.luna@opendaycare.com` | `Test1234!` | Ana Beltrán | parent | — | Pedro Jimenez | Familia de Luna |
 
 Notas:
 
-- `staff@opendaycare.com` y `antonikut@gmail.com` suelen existir ya en clones de datos de producción y su `app_metadata` puede no traer `role`; la app resuelve el rol desde `public.users` (fallback de `resolveUserRole`). El resto de cuentas lo trae en el token.
+- `staff@opendaycare.com` y `antonicut@gmail.com` suelen existir ya en clones de datos de producción y su `app_metadata` puede no traer `role`; la app resuelve el rol desde `public.users` (fallback de `resolveUserRole`). El resto de cuentas lo trae en el token.
 - El SQL del apéndice asigna `Test1234!` a las 8 cuentas, existan o no de antes (solo en el proyecto de desarrollo donde lo ejecutes).
 
 ## Contenido del seed
@@ -42,7 +42,7 @@ Feed esperado por cuenta (para validar RLS):
 | `admin@opendaycare.com` | 9: todas las de la guardería |
 | `madre.prueba@opendaycare.com` | 4: 2 de Mateo, siesta (Sofía) + anuncio de Soles |
 | `padre.soles@opendaycare.com` | 1: anuncio de Soles |
-| `antonikut@gmail.com` | 2: "Hola" (Alba) + anuncio de Soles |
+| `antonicut@gmail.com` | 2: "Hola" (Alba) + anuncio de Soles |
 | `padre.estrellas@opendaycare.com` | 2: actividad (Nicolás + Luis) + anuncio de Estrellas |
 | `madre.luna@opendaycare.com` | 1: logro de Pedro |
 
@@ -109,7 +109,7 @@ begin
       ('admin@opendaycare.com', 'Carla Domínguez', 'admin'),
       ('madre.prueba@opendaycare.com', 'María Prueba', 'parent'),
       ('padre.soles@opendaycare.com', 'Pablo Herrera', 'parent'),
-      ('antonikut@gmail.com', 'Gabriel Ballester', 'parent'),
+      ('antonicut@gmail.com', 'Gabriel Ballester', 'parent'),
       ('padre.estrellas@opendaycare.com', 'Diego Torres', 'parent'),
       ('madre.luna@opendaycare.com', 'Ana Beltrán', 'parent')
     ) as t(email, full_name, user_role)
@@ -177,7 +177,7 @@ begin
     'admin@opendaycare.com',
     'madre.prueba@opendaycare.com',
     'padre.soles@opendaycare.com',
-    'antonikut@gmail.com',
+    'antonicut@gmail.com',
     'padre.estrellas@opendaycare.com',
     'madre.luna@opendaycare.com'
   );
@@ -201,7 +201,7 @@ begin
   from (values
     ('madre.prueba@opendaycare.com', 'Mateo Fernández', 'mother'),
     ('madre.prueba@opendaycare.com', 'Sofía Méndez', 'mother'),
-    ('antonikut@gmail.com', 'Alba Ballester Cutillas', 'father'),
+    ('antonicut@gmail.com', 'Alba Ballester Cutillas', 'father'),
     ('padre.soles@opendaycare.com', 'Tomás Díaz', 'father'),
     ('padre.estrellas@opendaycare.com', 'Nicolás Gómez', 'father'),
     ('padre.estrellas@opendaycare.com', 'Luis', 'father'),
@@ -294,7 +294,7 @@ end $$;
 
 ## Limpieza (solo desarrollo)
 
-Borra las 5 cuentas nuevas del seed, el contenido y las invitaciones. Las cuentas base (`staff@`, `madre.prueba@`, `antonikut@gmail.com`) se dejan intactas (solo se les cambió la contraseña a `Test1234!`).
+Borra las 5 cuentas nuevas del seed, el contenido y las invitaciones. Las cuentas base (`staff@`, `madre.prueba@`, `antonicut@gmail.com`) se dejan intactas (solo se les cambió la contraseña a `Test1234!`).
 
 ```sql
 begin;
