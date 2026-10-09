@@ -17,14 +17,17 @@ import {
   plusIcon,
   pokeballIcon,
   sunIcon,
+  teamIcon,
   userIcon,
 } from "@/components/nav-icons";
+import type { UserRole } from "@/lib/roles";
 
 /** - `usuario conectado mostrado por el staff sidebar (viene del server via props)` */
 export interface StaffSidebarUser {
   name: string;
   initials: string;
   roleLabel: string;
+  role: UserRole; // 'admin' habilita el ítem Equipo
 }
 
 /** - `ítem del menú lateral` */
@@ -32,12 +35,14 @@ interface NavItem {
   label: string;
   href: string;
   icon: ReactElement;
+  adminOnly?: boolean; // solo visible para admin (Equipo)
 }
 
 /** - `entradas del menú lateral de guardería` */
 const navItems: NavItem[] = [
   { label: "Feed", href: "/staff", icon: homeIcon },
   { label: "Niños", href: "/staff/kids", icon: kidsIcon },
+  { label: "Equipo", href: "/staff/equipo", icon: teamIcon, adminOnly: true },
   { label: "Pokémon", href: "/staff/pokemon", icon: pokeballIcon },
   { label: "Avisos", href: "/staff/avisos", icon: bellIcon },
   { label: "Mi cuenta", href: "/staff/mi-cuenta", icon: userIcon },
@@ -61,6 +66,9 @@ const navItemInactiveClass = "text-[#6E6359] font-semibold";
  */
 const StaffSidebar = ({ user }: { user: StaffSidebarUser }): ReactElement => {
   const pathname = usePathname();
+
+  //  -----  los ítems adminOnly (Equipo) solo se muestran al admin  -----
+  const visibleNavItems: NavItem[] = navItems.filter((item) => !item.adminOnly || user.role === "admin");
 
   return (
     <aside className="w-full flex-none bg-[#FFFDF9] border-b border-[#ECE0D0] lg:border-b-0 lg:border-r lg:w-62 lg:sticky lg:top-0 lg:h-screen flex flex-col px-4 py-6">
@@ -86,7 +94,7 @@ const StaffSidebar = ({ user }: { user: StaffSidebarUser }): ReactElement => {
 
       {/*  -----  menú lateral  -----  */}
       <nav aria-label="Menú de guardería" className="flex flex-wrap lg:flex-col gap-1 flex-1">
-        {navItems.map((item) => {
+        {visibleNavItems.map((item) => {
           const isActive: boolean = item.href === "/staff" ? pathname === "/staff" : pathname.startsWith(item.href);
 
           return (
