@@ -37,6 +37,15 @@ export const kidsIcon: ReactElement = (
   </svg>
 );
 
+/** - `icono equipo del menú (credencial de miembro del staff)` */
+export const teamIcon: ReactElement = (
+  <svg aria-hidden="true" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="5" width="18" height="14" rx="2" />
+    <circle cx="9" cy="11" r="2" />
+    <path d="M6 16a3 3 0 0 1 6 0M14.5 10h4M14.5 13.5h4" />
+  </svg>
+);
+
 /** - `icono pokémon del menú` */
 export const pokeballIcon: ReactElement = (
   <svg aria-hidden="true" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
