@@ -37,6 +37,12 @@ export interface TeamMemberRow {
   expires_at: string | null;
 }
 
+/** - `sala seleccionable al invitar a un miembro del equipo` */
+export interface TeamRoomOption {
+  id: string;
+  name: string;
+}
+
 /** - `etiquetas de los badges de estado del listado` */
 export const TEAM_STATUS_LABELS: Record<TeamStatus, string> = {
   active: "ACTIVO",
