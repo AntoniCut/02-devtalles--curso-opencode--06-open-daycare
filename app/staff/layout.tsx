@@ -27,7 +27,7 @@ const StaffLayout = async ({ children }: LayoutProps<"/staff">): Promise<ReactEl
   return (
     <div className="flex min-h-screen flex-col bg-[#F6ECDF] lg:flex-row">
       <StaffSidebar
-        user={{ name: profile.name, initials: profile.initials, roleLabel: profile.roleLabel }}
+        user={{ name: profile.name, initials: profile.initials, roleLabel: profile.roleLabel, role: profile.role }}
       />
       <main className="flex-1 min-w-0 lg:h-screen lg:overflow-y-auto">{children}</main>
     </div>
