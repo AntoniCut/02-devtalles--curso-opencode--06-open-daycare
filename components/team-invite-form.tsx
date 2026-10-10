@@ -5,8 +5,11 @@
 */
 "use client";
 
-import { useState } from "react";
+import { useState, useActionState } from "react";
 import type { ChangeEvent, ReactElement, SubmitEvent } from "react";
+import { useFormStatus } from "react-dom";
+import { sendTeamInvitation } from "@/app/staff/equipo/actions";
+import type { SendTeamInvitationState } from "@/app/staff/equipo/actions";
 import { avatarFor } from "@/lib/kids";
 import { ROLE_LABELS } from "@/lib/roles";
 import { TEAM_STATUS_BADGES, TEAM_STATUS_LABELS, teamExpiresLabel, teamRoleLabel } from "@/lib/team";
@@ -119,6 +122,26 @@ const validateInvite = (name: string, email: string, role: TeamRole, roomId: str
 };
 
 /**
+ * ------------------------------
+ * -----  `SubmitButton()`  -----
+ * ------------------------------
+ * - CTA Enviar invitación con estado de carga vía useFormStatus (hijo del form).
+ */
+const SubmitButton = (): ReactElement => {
+  const { pending } = useFormStatus();
+  return (
+    <button
+      type="submit"
+      disabled={pending}
+      className="flex w-full items-center justify-center gap-[9px] rounded-[14px] bg-[linear-gradient(180deg,#F4977E,#EE8164)] py-[14px] text-[15.5px] font-extrabold text-white shadow-[0_10px_22px_-8px_rgba(238,129,100,.7)] cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+    >
+      {sendIcon}
+      {pending ? "Enviando…" : "Enviar invitación"}
+    </button>
+  );
+};
+
+/**
  * -------------------------------------
  * -----  `TeamInviteForm(props)`  -----
  * -------------------------------------
@@ -133,6 +156,7 @@ const TeamInviteForm = ({ members, rooms, invitationCode }: TeamInviteFormProps)
   const [role, setRole] = useState<TeamRole>("staff");
   const [roomId, setRoomId] = useState<string>("");
   const [errors, setErrors] = useState<InviteFormErrors>({});
+  const [state, formAction] = useActionState<SendTeamInvitationState, FormData>(sendTeamInvitation, { error: null });
 
   /**
    * --------------------------------
@@ -205,15 +229,17 @@ const TeamInviteForm = ({ members, rooms, invitationCode }: TeamInviteFormProps)
    * -----------------------------------
    * -----  `handleSubmit(event)`  -----
    * -----------------------------------
-   * - Valida el formulario en el cliente y evita navegar; el envío al servidor
-   * - se conecta con la Server Action de la invitación.
+   * - Valida el formulario en el cliente; si es válido lo deja pasar a la
+   * - Server Action (insert en DB + email con Resend).
    */
   const handleSubmit = (event: SubmitEvent<HTMLFormElement>): void => {
     const nextErrors = validateInvite(name, email, role, roomId);
     setErrors(nextErrors);
 
-    //  -----  evitar la navegación por defecto del submit  -----
-    event.preventDefault();
+    //  -----  formulario inválido: no enviar  -----
+    if (Object.keys(nextErrors).length > 0) {
+      event.preventDefault();
+    }
   };
 
   return (
@@ -243,6 +269,7 @@ const TeamInviteForm = ({ members, rooms, invitationCode }: TeamInviteFormProps)
       {isInviteOpen && (
         <form
           id="team-invite-card"
+          action={formAction}
           onSubmit={handleSubmit}
           noValidate
           className="w-full bg-[#FBF4EC] border border-[#ECE0D0] rounded-[24px] shadow-[0_20px_50px_-24px_rgba(63,54,46,.35)] overflow-hidden mb-6"
@@ -356,14 +383,13 @@ const TeamInviteForm = ({ members, rooms, invitationCode }: TeamInviteFormProps)
               <p className="text-[13px] text-[#A88526] mt-[6px]">Vence en 7 días</p>
             </div>
 
-            {/*  -----  CTA enviar invitación  -----  */}
-            <button
-              type="submit"
-              className="flex w-full items-center justify-center gap-[9px] rounded-[14px] bg-[linear-gradient(180deg,#F4977E,#EE8164)] py-[14px] text-[15.5px] font-extrabold text-white shadow-[0_10px_22px_-8px_rgba(238,129,100,.7)] cursor-pointer"
-            >
-              {sendIcon}
-              Enviar invitación
-            </button>
+            {/*  -----  CTA enviar invitación (estado loading con useFormStatus)  -----  */}
+            <SubmitButton />
+
+            {/*  -----  error del servidor (fallo del insert o del envío)  -----  */}
+            {state.error && (
+              <p className="mt-4 text-[12.5px] font-bold text-[#D9583C]" role="alert">{state.error}</p>
+            )}
           </div>
         </form>
       )}
