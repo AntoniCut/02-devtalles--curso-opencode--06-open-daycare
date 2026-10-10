@@ -13,6 +13,32 @@ import type { UserRole } from "@/lib/roles";
 const PUBLIC_PATHS = ["/login", "/activate"];
 
 /**
+ * ------------------------------------------------
+ * -----  `redirectWithSession(url, source)`  -----
+ * ------------------------------------------------
+ * - Devuelve un redirect con las cookies y los cache headers vigentes del proxy.
+ */
+const redirectWithSession = (url: URL, source: NextResponse): NextResponse => {
+  //  -----  respuesta de redirect base  -----
+  const redirectResponse = NextResponse.redirect(url);
+
+  //  -----  copiar las cookies vigentes (incluye las que dejó el refresh)  -----
+  source.cookies.getAll().forEach((cookie) => redirectResponse.cookies.set(cookie));
+
+  //  -----  copiar los cache headers que acompañan a las cookies de auth  -----
+  for (const header of ["cache-control", "expires", "pragma"]) {
+    //  -----  valor actual del header en la respuesta vigente  -----
+    const value = source.headers.get(header);
+
+    //  -----  setearlo solo si está presente  -----
+    if (value) redirectResponse.headers.set(header, value);
+  }
+
+  //  -----  devolver el redirect con la sesión propagada  -----
+  return redirectResponse;
+};
+
+/**
  * ------------------------------
  * -----  `proxy(request)`  -----
  * ------------------------------
@@ -53,7 +79,7 @@ export async function proxy(request: NextRequest) {
     if (next !== "/") {
       url.searchParams.set("next", next);
     }
-    return NextResponse.redirect(url);
+    return redirectWithSession(url, client.response);
   }
 
   //  -----  dispatcher de la raíz: cada rol aterriza en su sección  -----
@@ -61,7 +87,7 @@ export async function proxy(request: NextRequest) {
     const url = request.nextUrl.clone();
     url.pathname = homeForRole(role);
     url.search = "";
-    return NextResponse.redirect(url);
+    return redirectWithSession(url, client.response);
   }
 
   //  -----  guards de sección: un rol no navega la sección del otro  -----
@@ -75,7 +101,7 @@ export async function proxy(request: NextRequest) {
     const url = request.nextUrl.clone();
     url.pathname = homeForRole(role);
     url.search = "";
-    return NextResponse.redirect(url);
+    return redirectWithSession(url, client.response);
   }
 
   return client.response;
