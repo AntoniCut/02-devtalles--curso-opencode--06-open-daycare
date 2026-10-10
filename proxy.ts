@@ -45,14 +45,6 @@ export async function proxy(request: NextRequest) {
   // The action itself handles its own redirects after running.
   const isServerAction = request.headers.has("next-action");
 
-  // Authenticated user hitting /login → role home (the action resolves ?next=)
-  if (!isServerAction && isAuthenticated && pathname === "/login") {
-    const url = request.nextUrl.clone();
-    url.pathname = role ? homeForRole(role) : "/";
-    url.search = "";
-    return NextResponse.redirect(url);
-  }
-
   if (!isServerAction && !isPublicPath && !isAuthenticated) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";

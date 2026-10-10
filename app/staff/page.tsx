@@ -20,13 +20,6 @@ const cameraIcon: ReactElement = (
   </svg>
 );
 
-/** - `perfil del usuario para el header (rol, sala y guardería)` */
-interface ProfileRow {
-  role: "staff" | "parent" | "admin";
-  room_id: string | null;
-  daycare_id: string;
-}
-
 /**
  * -------------------------------------
  * -----  `authorNameFrom(author)`  -----
@@ -75,25 +68,12 @@ const Home = async (): Promise<ReactElement> => {
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
 
-  //  -----  perfil real: rol, sala y guardería  -----
-  const { data: profileData } = await supabase
-    .from("users")
-    .select("role, room_id, daycare_id")
-    .eq("id", profile.id)
-    .single();
-  const userProfile: ProfileRow | null = profileData;
-  const roomId: string | null = userProfile?.room_id ?? null;
-  const daycareId: string = userProfile?.daycare_id ?? "";
-
-  //  -----  nombre de la sala y de la guardería para el header  -----
-  let roomName: string = "";
-  if (roomId) {
-    const { data: room } = await supabase.from("rooms").select("name").eq("id", roomId).single();
-    roomName = room?.name ?? "";
-  }
-  const { data: daycare } = await supabase.from("daycares").select("name").eq("id", daycareId).single();
-  const daycareName: string = daycare?.name ?? "";
-  const headerLabel: string = roomName ? `GUARDERÍA · SALA ${roomName.toUpperCase()}` : daycareName.toUpperCase();
+  //  -----  sala y guardería del header: vienen del perfil cacheado  -----
+  const roomId: string | null = profile.roomId;
+  const daycareId: string = profile.daycareId ?? "";
+  const headerLabel: string = profile.roomName
+    ? `GUARDERÍA · SALA ${profile.roomName.toUpperCase()}`
+    : (profile.daycareName ?? "").toUpperCase();
 
   //  -----  conteo real de niños activos (sala del staff o guardería del admin)  -----
   let childrenCountQuery = supabase
@@ -104,14 +84,19 @@ const Home = async (): Promise<ReactElement> => {
   if (roomId) {
     childrenCountQuery = childrenCountQuery.eq("room_id", roomId);
   }
-  const { count: childrenCount } = await childrenCountQuery;
 
   //  -----  publicaciones visibles (RLS) con autor, niños etiquetados y fotos  -----
-  const { data: rows } = await supabase
+  const postsQuery = supabase
     .from("posts")
     .select("id, author_id, room_id, type, body, published_at, author:users!posts_author_id_fkey(full_name), post_children(children(id, full_name)), post_photos(path, alt, width, height, position)")
     .order("published_at", { ascending: false })
     .limit(50);
+
+  //  -----  conteo y publicaciones en paralelo (independientes entre sí)  -----
+  const [{ count: childrenCount }, { data: rows }] = await Promise.all([
+    childrenCountQuery,
+    postsQuery,
+  ]);
 
   //  -----  URLs firmadas de las fotos (bucket privado, 1 hora)  -----
   const photoPaths: string[] = (rows ?? []).flatMap((row) => (row.post_photos ?? []).map((photo) => photo.path));
