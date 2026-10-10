@@ -12,6 +12,7 @@ import { useFormStatus } from "react-dom";
 import { activateAccount, lookupInvitation } from "@/app/(auth)/activate/actions";
 import type { ActivateAccountState, InvitationPreview } from "@/app/(auth)/activate/actions";
 import { CODE_PATTERN } from "@/lib/invitation-code";
+import { teamRoleLabel } from "@/lib/team";
 
 /** - `icono check del checkbox de autorización` */
 const checkIcon: ReactElement = (
@@ -66,7 +67,7 @@ interface ActivateFormProps {
  * - Formulario de activación de cuenta invitada: tarjeta de invitación con los
  *   datos reales de la invitación, código, email, contraseña, checkbox de
  *   autorización y CTA. El submit llama a la Server Action que crea la cuenta,
- *   vincula al niño y consume la invitación.
+ *   vincula al padre o promueve el rol del equipo y consume la invitación.
  */
 const ActivateForm = ({ initialCode, initialEmail, initialPreview }: ActivateFormProps): ReactElement => {
     const [code, setCode] = useState<string>(initialCode);
@@ -80,7 +81,15 @@ const ActivateForm = ({ initialCode, initialEmail, initialPreview }: ActivateFor
         passwordError: null,
     });
 
-    const childInitial = preview ? preview.childName.slice(0, 1).toUpperCase() : "";
+    /** - `inicial del avatar de la tarjeta (niño o guardería)` */
+    const cardInitial: string = preview
+        ? (preview.kind === "parent" ? preview.childName : preview.daycareName).slice(0, 1).toUpperCase()
+        : "";
+
+    /** - `línea de rol y sala de la tarjeta de equipo ("Maestra · Sala Soles")` */
+    const teamRoleLine: string = preview && preview.kind === "team"
+        ? (preview.roomName ? `${teamRoleLabel(preview.role)} · Sala ${preview.roomName}` : teamRoleLabel(preview.role))
+        : "";
 
     /**
      * -----------------------------------------------------
@@ -156,7 +165,7 @@ const ActivateForm = ({ initialCode, initialEmail, initialPreview }: ActivateFor
         fetchPreview(value);
     };
 
-    //  -----  email del padre  -----
+    //  -----  email del invitado  -----
     const handleEmailChange = (event: ChangeEvent<HTMLInputElement>): void => {
         setEmail(event.target.value);
         clearErrorIfValid("email");
@@ -189,11 +198,25 @@ const ActivateForm = ({ initialCode, initialEmail, initialPreview }: ActivateFor
             {/*  -----  tarjeta de invitación (datos reales vía lookup)  -----  */}
             {preview && (
                 <div className="mb-[22px] flex items-center gap-[14px] rounded-[16px] border-[1.5px] border-[#EADFD0] bg-white px-4 py-[14px]">
-                    <div className="flex size-[44px] flex-none items-center justify-center rounded-full bg-[#A9D9E8] font-display font-semibold text-[19px] text-[#1F7A93]">{childInitial}</div>
-                    <div>
-                        <div className="text-[13px] text-[#94887B]">Te invitaron a seguir a</div>
-                        <div className="font-display font-semibold text-[17px] text-[#3F362E]">{preview.childName} · Sala {preview.roomName}</div>
-                    </div>
+                    {/*  -----  invitación de padre: niño y sala  -----  */}
+                    {preview.kind === "parent" ? (
+                        <>
+                            <div className="flex size-[44px] flex-none items-center justify-center rounded-full bg-[#A9D9E8] font-display font-semibold text-[19px] text-[#1F7A93]">{cardInitial}</div>
+                            <div>
+                                <div className="text-[13px] text-[#94887B]">Te invitaron a seguir a</div>
+                                <div className="font-display font-semibold text-[17px] text-[#3F362E]">{preview.childName} · Sala {preview.roomName}</div>
+                            </div>
+                        </>
+                    ) : (
+                        /*  -----  invitación de equipo: guardería, rol y sala  -----  */
+                        <>
+                            <div className="flex size-[44px] flex-none items-center justify-center rounded-full bg-[#CCD8F4] font-display font-semibold text-[19px] text-[#4E72C8]">{cardInitial}</div>
+                            <div>
+                                <div className="text-[13px] text-[#94887B]">Te invitaron al equipo de {preview.daycareName}</div>
+                                <div className="font-display font-semibold text-[17px] text-[#3F362E]">{teamRoleLine}</div>
+                            </div>
+                        </>
+                    )}
                 </div>
             )}
 
@@ -245,15 +268,17 @@ const ActivateForm = ({ initialCode, initialEmail, initialPreview }: ActivateFor
             />
             {(errors.password ?? state.passwordError) && <p id="activate-password-error" className="mb-[14px] -mt-[10px] text-[12.5px] font-bold text-[#D9583C]">{errors.password ?? state.passwordError}</p>}
 
-            {/*  -----  autorización de fotos (estática, marcada)  -----  */}
-            <label className="mb-6 flex cursor-pointer items-start gap-3 rounded-[14px] bg-[#FBF1D6] px-4 py-[14px]">
-                <span className="mt-px flex size-6 flex-none items-center justify-center rounded-lg bg-[#5FB97E]">
-                    {checkIcon}
-                </span>
-                <span className="text-[14px] leading-[1.45] text-[#8A7234]">
-                    Autorizo a la guardería a tomar y compartir fotos de mi hijo dentro de la app.
-                </span>
-            </label>
+            {/*  -----  autorización de fotos (solo invitaciones de padres)  -----  */}
+            {preview?.kind !== "team" && (
+                <label className="mb-6 flex cursor-pointer items-start gap-3 rounded-[14px] bg-[#FBF1D6] px-4 py-[14px]">
+                    <span className="mt-px flex size-6 flex-none items-center justify-center rounded-lg bg-[#5FB97E]">
+                        {checkIcon}
+                    </span>
+                    <span className="text-[14px] leading-[1.45] text-[#8A7234]">
+                        Autorizo a la guardería a tomar y compartir fotos de mi hijo dentro de la app.
+                    </span>
+                </label>
+            )}
 
             <SubmitButton />
 

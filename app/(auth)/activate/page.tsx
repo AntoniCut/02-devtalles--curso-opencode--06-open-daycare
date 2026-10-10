@@ -56,6 +56,19 @@ const ActivatePage = async (props: ActivatePageProps): Promise<ReactElement> => 
     }
   }
 
+  /** - `subtítulo según la invitación cargada (neutral si no hay tarjeta)` */
+  let subtitle = "Creá tu contraseña para activar tu cuenta.";
+
+  //  -----  invitación de padre: copy del mockup  -----
+  if (initialPreview?.kind === "parent") {
+    subtitle = "Te invitaron a seguir el día de tu hijo. Creá tu contraseña para activar la cuenta.";
+  }
+
+  //  -----  invitación de equipo: copy del flujo de staff  -----
+  if (initialPreview?.kind === "team") {
+    subtitle = "Te invitaron a unirte al equipo de la guardería. Creá tu contraseña para activar la cuenta.";
+  }
+
   return (
     <main className="flex min-h-screen items-center justify-center bg-[#FBF4EC] p-10">
       <div className="w-full max-w-[440px]">
@@ -66,9 +79,7 @@ const ActivatePage = async (props: ActivatePageProps): Promise<ReactElement> => 
 
         {/*  -----  titular y descripción  -----  */}
         <h1 className="mb-2 font-display font-semibold text-[32px] leading-[1.15] text-[#3F362E]">Bienvenida a OpenDayCare</h1>
-        <p className="mb-[26px] text-[15.5px] leading-[1.55] text-[#94887B]">
-          Te invitaron a seguir el día de tu hijo. Creá tu contraseña para activar la cuenta.
-        </p>
+        <p className="mb-[26px] text-[15.5px] leading-[1.55] text-[#94887B]">{subtitle}</p>
 
         <ActivateForm initialCode={initialCode} initialEmail={initialEmail} initialPreview={initialPreview} />
       </div>
