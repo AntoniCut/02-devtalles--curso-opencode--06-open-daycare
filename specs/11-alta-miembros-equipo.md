@@ -1,6 +1,6 @@
 # SPEC 11 — Alta de miembros del equipo (staff y admin) desde la app
 
-> **Estado:** Aprovado
+> **Estado:** Implementado
 > **Depende de:** SPEC 07, SPEC 09, SPEC 10
 > **Fecha:** 2026-10-08
 > **Objetivo:** Un admin invita por email a un nuevo miembro del equipo (staff o admin) y la persona activa su cuenta en `/activate` para entrar al panel de guardería con su rol y su sala.
