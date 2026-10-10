@@ -4,22 +4,15 @@
     *  -----------------------------------------------------  *
 */
 
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import type { ReactElement } from "react";
 import FamilySidebar from "@/components/family-sidebar";
 import type { FamilySidebarUser } from "@/components/family-sidebar";
 import { getAuthenticatedProfile } from "@/lib/auth";
+import { getFamilyLinks } from "@/lib/family";
+import type { FamilyLinkRow } from "@/lib/family";
 import { formatRelationshipLabel } from "@/lib/kids";
-import type { ChildParentRow } from "@/lib/kids";
 import { isStaffRole } from "@/lib/roles";
-import { createClient } from "@/utils/supabase/server";
-
-/** - `vínculo del padre con cada hijo (parent_children + children)` */
-interface FamilyLinkRow {
-  relationship: ChildParentRow["relationship"];
-  children: { full_name?: string } | Array<{ full_name?: string }> | null;
-}
 
 /**
  * -------------------------------------------------
@@ -52,16 +45,8 @@ const FamilyLayout = async ({ children }: LayoutProps<"/familia">): Promise<Reac
     redirect("/staff");
   }
 
-  const cookieStore = await cookies();
-  const supabase = createClient(cookieStore);
-
-  //  -----  hijos vinculados al padre (RLS: parent_children scoped)  -----
-  const { data: links } = await supabase
-    .from("parent_children")
-    .select("relationship, children(full_name)")
-    .eq("parent_id", profile.id)
-    .order("created_at");
-  const rows: FamilyLinkRow[] = links ?? [];
+  //  -----  vínculos del padre: helper cacheado compartido con la página  -----
+  const rows: FamilyLinkRow[] = await getFamilyLinks(profile.id);
   const childNames: string[] = childNamesFrom(rows);
 
   //  -----  parentesco del sidebar: "Mamá de Mateo" (o "Familia" sin hijos)  -----

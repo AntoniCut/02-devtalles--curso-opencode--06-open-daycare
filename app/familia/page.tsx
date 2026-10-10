@@ -9,6 +9,7 @@ import type { Metadata } from "next";
 import type { ReactElement } from "react";
 import FamilyFeed from "@/components/family-feed";
 import { getAuthenticatedProfile } from "@/lib/auth";
+import { getFamilyLinks } from "@/lib/family";
 import { roomNameFrom } from "@/lib/kids";
 import { childAvatarFor, firstName, photoAlt } from "@/lib/posts";
 import type {
@@ -70,15 +71,20 @@ const FamilyPage = async (): Promise<ReactElement> => {
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
 
-  //  -----  hijos vinculados al padre (RLS: parent_children scoped)  -----
-  const { data: linkRows } = await supabase
-    .from("parent_children")
-    .select("children(id, full_name, room_id, rooms(name))")
-    .eq("parent_id", profile.id)
-    .order("created_at");
+  //  -----  hijos vinculados y publicaciones en paralelo (independientes)  -----
+  const [linkRows, { data: rows }] = await Promise.all([
+    getFamilyLinks(profile.id),
+    supabase
+      .from("posts")
+      .select(
+        "id, author_id, room_id, type, body, published_at, author:users!posts_author_id_fkey(full_name), rooms(name), post_children(children(id, full_name, room_id, rooms(name))), post_photos(path, alt, width, height, position)",
+      )
+      .order("published_at", { ascending: false })
+      .limit(50),
+  ]);
 
-  const familyChildren: FamilyChild[] = (linkRows ?? []).flatMap((link) => {
-    const child = embeddedChild((link as { children: unknown }).children);
+  const familyChildren: FamilyChild[] = linkRows.flatMap((link) => {
+    const child = embeddedChild(link.children);
     if (!child) {
       return [];
     }
@@ -91,15 +97,6 @@ const FamilyPage = async (): Promise<ReactElement> => {
       },
     ];
   });
-
-  //  -----  publicaciones visibles (RLS) con autora, niños (con sala), sala y fotos  -----
-  const { data: rows } = await supabase
-    .from("posts")
-    .select(
-      "id, author_id, room_id, type, body, published_at, author:users!posts_author_id_fkey(full_name), rooms(name), post_children(children(id, full_name, room_id, rooms(name))), post_photos(path, alt, width, height, position)",
-    )
-    .order("published_at", { ascending: false })
-    .limit(50);
 
   //  -----  URLs firmadas de las fotos (bucket privado, 1 hora)  -----
   const photoRows = (rows ?? []).flatMap((row) => row.post_photos ?? []);
