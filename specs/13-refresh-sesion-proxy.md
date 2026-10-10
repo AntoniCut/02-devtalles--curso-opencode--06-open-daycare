@@ -1,6 +1,6 @@
 # SPEC 13 — Refresco de sesión del proxy: propagar las cookies nuevas al navegador
 
-> **Estado:** Aprovado
+> **Estado:** Implementado
 > **Depende de:** SPEC 07, SPEC 12
 > **Fecha:** 2026-10-10
 > **Objetivo:** Hacer que `proxy.ts` devuelva siempre la respuesta vigente del refresco de sesión de Supabase (hoy devuelve una copia previa) y que sus cookies y cache headers lleguen al navegador.
@@ -69,15 +69,15 @@ return client.response; // se lee DESPUÉS, nunca se destructura antes
 
 ## Acceptance criteria
 
-- [ ] Con `access_token` removido del cookie de sesión y `refresh_token` válido, la respuesta a `/staff` incluye `Set-Cookie` con la sesión nueva; hoy no incluye ninguno.
-- [ ] La respuesta con el refresco incluye `Cache-Control: private, no-cache, no-store, must-revalidate, max-age=0`, `Expires: 0` y `Pragma: no-cache`.
-- [ ] Después del refresco, una segunda request a `/staff` en la misma sesión no emite `Set-Cookie` de auth y el tiempo del proxy vuelve al rango fresco (~4–6 ms; baseline medido con token vencido: 90–294 ms).
-- [ ] Un redirect del proxy con refresco pendiente (`/` → home, guard de sección, `/login?next=` sin sesión) incluye en el 307 las cookies refrescadas y los cache headers.
-- [ ] Con sesión fresca, login, logout y guards sin cambios de comportamiento (staff → `/staff`, padre → `/familia`, no autenticado → `/login?next=`).
-- [ ] Un Server Action POST no es redirigido por el proxy (comportamiento actual) y, si refresca, su respuesta conserva las cookies nuevas.
-- [ ] No hay cambios en `utils/supabase/server.ts` ni en páginas/Server Actions.
-- [ ] `pnpm lint` y `pnpm build` sin errores; consola sin errores ni warnings nuevos.
-- [ ] No hay cambios en `supabase/migrations/`, RLS ni base de datos.
+- [x] Con `access_token` removido del cookie de sesión y `refresh_token` válido, la respuesta a `/staff` incluye `Set-Cookie` con la sesión nueva; hoy no incluye ninguno.
+- [x] La respuesta con el refresco incluye `Cache-Control: private, no-cache, no-store, must-revalidate, max-age=0`, `Expires: 0` y `Pragma: no-cache`.
+- [x] Después del refresco, una segunda request a `/staff` en la misma sesión no emite `Set-Cookie` de auth y el tiempo del proxy vuelve al rango fresco (~4–6 ms; baseline medido con token vencido: 90–294 ms).
+- [x] Un redirect del proxy con refresco pendiente (`/` → home, guard de sección, `/login?next=` sin sesión) incluye en el 307 las cookies refrescadas y los cache headers.
+- [x] Con sesión fresca, login, logout y guards sin cambios de comportamiento (staff → `/staff`, padre → `/familia`, no autenticado → `/login?next=`).
+- [x] Un Server Action POST no es redirigido por el proxy (comportamiento actual) y, si refresca, su respuesta conserva las cookies nuevas.
+- [x] No hay cambios en `utils/supabase/server.ts` ni en páginas/Server Actions.
+- [x] `pnpm lint` y `pnpm build` sin errores; consola sin errores ni warnings nuevos.
+- [x] No hay cambios en `supabase/migrations/`, RLS ni base de datos.
 
 ## Decisions
 
