@@ -1,6 +1,6 @@
 # SPEC 12 — Rendimiento de carga de /staff y /familia
 
-> **Estado:** Aprovad0
+> **Estado:** Aprovado
 > **Depende de:** SPEC 07, SPEC 10, SPEC 11
 > **Fecha:** 2026-10-10
 > **Objetivo:** Bajar la carga server-side en caliente de `/staff` de ~800 ms a <450 ms y la de `/familia` de ~420 ms a <350 ms eliminando la verificación de sesión duplicada y las consultas secuenciales a Supabase.
