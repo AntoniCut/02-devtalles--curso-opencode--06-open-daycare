@@ -24,10 +24,10 @@ const PUBLIC_PATHS = ["/login", "/activate"];
 export async function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
 
-  const { supabase, response: supabaseResponse } = createClient(request);
+  const client = createClient(request);
 
   // Refresh session before routes run
-  const { data } = await supabase.auth.getClaims();
+  const { data } = await client.supabase.auth.getClaims();
   const claims = data?.claims;
   const isAuthenticated = Boolean(claims);
 
@@ -78,7 +78,7 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  return supabaseResponse;
+  return client.response;
 }
 
 export const config = {
