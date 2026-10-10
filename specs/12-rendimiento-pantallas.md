@@ -1,6 +1,6 @@
 # SPEC 12 — Rendimiento de carga de /staff y /familia
 
-> **Estado:** Aprovado
+> **Estado:** Implementado
 > **Depende de:** SPEC 07, SPEC 10, SPEC 11
 > **Fecha:** 2026-10-10
 > **Objetivo:** Bajar la carga server-side en caliente de `/staff` de ~800 ms a <450 ms y la de `/familia` de ~420 ms a <350 ms eliminando la verificación de sesión duplicada y las consultas secuenciales a Supabase.
@@ -78,20 +78,20 @@ Convenciones: los wrappers conservan la firma actual (`nextPath?`) y el comporta
 
 ## Acceptance criteria
 
-- [ ] `GET /staff` en caliente (log de dev, campo `application-code`) ≤ 450 ms; baseline medido el 2026-10-10: 781–808 ms.
-- [ ] `GET /familia` en caliente (log de dev, campo `application-code`) ≤ 350 ms; baseline medido el 2026-10-10: 378–464 ms.
-- [ ] `/staff` emite como máximo 4 operaciones remotas a Supabase por request: perfil enriquecido (1), conteo de niños + publicaciones en paralelo (2) y URLs firmadas (1); hoy son ~9. Verificado con contador temporal de fetch, retirado del código final.
-- [ ] `/familia` emite como máximo 4 operaciones remotas por request y `parent_children` se consulta exactamente una vez aunque lo usen layout y página.
-- [ ] `getAuthenticatedProfile()` se resuelve una sola vez por request aunque la llamen layout y página (contador temporal: la verificación de sesión no se repite por componente).
-- [ ] La verificación de sesión no agrega roundtrips de red por request con `getClaims`; si el proyecto cae al fallback de red por secreto simétrico, queda documentado en la sección de riesgos con la medición.
-- [ ] El feed de `/staff` (staff@opendaycare.com) se ve y funciona idéntico: header con sala/conteo/fecha, publicaciones agrupadas, fotos firmadas, composer.
-- [ ] El feed de `/familia` (madre.prueba@opendaycare.com) se ve y funciona idéntico: pills de hijos, publicaciones con sala y fotos.
-- [ ] Publicar una publicación nueva desde `/staff/crear-publicacion` y verla en ambos feeds sigue funcionando (regresión E2E).
-- [ ] Smoke sin cambios de comportamiento: `/staff/kids`, `/staff/kids/[slug]`, `/staff/equipo` (staff → redirect), `/login`, `/activate`.
-- [ ] Con una cookie de sesión válida de un usuario eliminado (usuario desechable creado y borrado en Dev), `/login` responde 200 con el formulario — sin `ERR_TOO_MANY_REDIRECTS` — y un login posterior funciona.
-- [ ] Un usuario autenticado válido que visita `/login` es redirigido a su home (ahora lo resuelve la página, ya no el proxy).
-- [ ] `pnpm lint` y `pnpm build` sin errores; consola sin errores ni warnings nuevos.
-- [ ] No hay cambios en `supabase/migrations/` ni en policies/RLS.
+- [x] `GET /staff` en caliente (log de dev, campo `application-code`) ≤ 450 ms; baseline medido el 2026-10-10: 781–808 ms.
+- [x] `GET /familia` en caliente (log de dev, campo `application-code`) ≤ 350 ms; baseline medido el 2026-10-10: 378–464 ms.
+- [x] `/staff` emite como máximo 4 operaciones remotas a Supabase por request: perfil enriquecido (1), conteo de niños + publicaciones en paralelo (2) y URLs firmadas (1); hoy son ~9. Verificado con contador temporal de fetch, retirado del código final.
+- [x] `/familia` emite como máximo 4 operaciones remotas por request y `parent_children` se consulta exactamente una vez aunque lo usen layout y página.
+- [x] `getAuthenticatedProfile()` se resuelve una sola vez por request aunque la llamen layout y página (contador temporal: la verificación de sesión no se repite por componente).
+- [x] La verificación de sesión no agrega roundtrips de red por request con `getClaims`; si el proyecto cae al fallback de red por secreto simétrico, queda documentado en la sección de riesgos con la medición.
+- [x] El feed de `/staff` (staff@opendaycare.com) se ve y funciona idéntico: header con sala/conteo/fecha, publicaciones agrupadas, fotos firmadas, composer.
+- [x] El feed de `/familia` (madre.prueba@opendaycare.com) se ve y funciona idéntico: pills de hijos, publicaciones con sala y fotos.
+- [x] Publicar una publicación nueva desde `/staff/crear-publicacion` y verla en ambos feeds sigue funcionando (regresión E2E).
+- [x] Smoke sin cambios de comportamiento: `/staff/kids`, `/staff/kids/[slug]`, `/staff/equipo` (staff → redirect), `/login`, `/activate`.
+- [x] Con una cookie de sesión válida de un usuario eliminado (usuario desechable creado y borrado en Dev), `/login` responde 200 con el formulario — sin `ERR_TOO_MANY_REDIRECTS` — y un login posterior funciona.
+- [x] Un usuario autenticado válido que visita `/login` es redirigido a su home (ahora lo resuelve la página, ya no el proxy).
+- [x] `pnpm lint` y `pnpm build` sin errores; consola sin errores ni warnings nuevos.
+- [x] No hay cambios en `supabase/migrations/` ni en policies/RLS.
 
 ## Decisions
 
