@@ -116,24 +116,24 @@ Convenciones: código de 5 caracteres de `lib/invitation-code.ts`, vence en 7 d�
 
 ## Acceptance criteria
 
-- [ ] `supabase_list_tables` muestra `staff_invitations` con columnas, CHECKs e índices; `supabase_list_migrations` incluye ambas migraciones y `supabase_get_advisors` no reporta avisos nuevos.
-- [ ] RLS habilitado: un admin de la guardería puede SELECT/INSERT/DELETE `staff_invitations` (INSERT solo con `invited_by = auth.uid()` y su `daycare_id`); staff, padre y anon no pueden (tests de impersonación con rollback).
-- [ ] El CHECK impide `staff` sin sala y `admin` con sala.
-- [ ] `get_team_invitation_preview` devuelve la invitación solo si el código exacto existe, está `pending`, no expirado y sin `accepted_at`; anon puede ejecutarla y no expone invitaciones aceptadas.
-- [ ] `accept_team_invitation` promueve `public.users` a rol/sala/guardería de la invitación y marca `accepted` con `accepted_at`; código inválido, expirado, usado o email de sesión distinto → excepción y ningún cambio (impersonación con rollback).
-- [ ] `handle_new_user` resuelve `daycare_id` desde `staff_invitations` por email cuando no hay `app_metadata` ni invitación de padre; el perfil se crea con rol `parent` hasta que `accept_team_invitation` lo promueve.
-- [ ] `get_team_members` devuelve solo el equipo (staff/admin activos + invitaciones pendientes no expiradas) de la guardería del admin; un no-admin obtiene 0 filas.
-- [ ] `/staff/equipo` es accesible solo para admin; un staff es redirigido a `/staff` y un padre a `/familia`; el ítem "Equipo" del sidebar solo aparece para admin.
-- [ ] El listado muestra miembros activos (nombre, rol, sala) e invitaciones pendientes (badge PENDIENTE + vencimiento).
-- [ ] El formulario valida nombre, email, rol y sala (obligatoria para Maestra; Administrador sin sala) con errores inline y no envía nada inválido.
-- [ ] Enviar una invitación válida inserta la fila (`daycare_id` del admin, `invited_by = auth.uid()`, `status pending`, `expires_at` +7 días) y envía el email de Resend con código, rol y link a `/activate?code=`.
-- [ ] Si el envío falla, no queda fila en `staff_invitations` y se muestra error inline.
-- [ ] `/activate?code=<código de equipo>` muestra la tarjeta de equipo (guardería, rol, sala) y el email prellenado; la tarjeta de padres no cambia.
-- [ ] Activar con código+email válidos y contraseña crea la cuenta (`auth.users`), el perfil `public.users` con rol `staff`/`admin`, sala y guardería correctas, marca la invitación `accepted` y redirige a `/staff`.
-- [ ] Código inexistente/expirado/usado o email no coincidente → error inline unificado y no se crea ninguna cuenta; email ya registrado → "Ese email ya tiene cuenta. Iniciá sesión."
-- [ ] El flujo de activación de padres sigue funcionando igual (regresión E2E).
-- [ ] `admin@opendaycare.com` existe en producción (creado con aprobación explícita) y está documentado en `references/datos-prueba.md`.
-- [ ] `pnpm lint` y `pnpm build` sin errores; consola sin errores ni warnings de hidratación.
+- [x] `supabase_list_tables` muestra `staff_invitations` con columnas, CHECKs e índices; `supabase_list_migrations` incluye ambas migraciones y `supabase_get_advisors` no reporta avisos nuevos.
+- [x] RLS habilitado: un admin de la guardería puede SELECT/INSERT/DELETE `staff_invitations` (INSERT solo con `invited_by = auth.uid()` y su `daycare_id`); staff, padre y anon no pueden (tests de impersonación con rollback).
+- [x] El CHECK impide `staff` sin sala y `admin` con sala.
+- [x] `get_team_invitation_preview` devuelve la invitación solo si el código exacto existe, está `pending`, no expirado y sin `accepted_at`; anon puede ejecutarla y no expone invitaciones aceptadas.
+- [x] `accept_team_invitation` promueve `public.users` a rol/sala/guardería de la invitación y marca `accepted` con `accepted_at`; código inválido, expirado, usado o email de sesión distinto → excepción y ningún cambio (impersonación con rollback).
+- [x] `handle_new_user` resuelve `daycare_id` desde `staff_invitations` por email cuando no hay `app_metadata` ni invitación de padre; el perfil se crea con rol `parent` hasta que `accept_team_invitation` lo promueve.
+- [x] `get_team_members` devuelve solo el equipo (staff/admin activos + invitaciones pendientes no expiradas) de la guardería del admin; un no-admin obtiene 0 filas.
+- [x] `/staff/equipo` es accesible solo para admin; un staff es redirigido a `/staff` y un padre a `/familia`; el ítem "Equipo" del sidebar solo aparece para admin.
+- [x] El listado muestra miembros activos (nombre, rol, sala) e invitaciones pendientes (badge PENDIENTE + vencimiento).
+- [x] El formulario valida nombre, email, rol y sala (obligatoria para Maestra; Administrador sin sala) con errores inline y no envía nada inválido.
+- [x] Enviar una invitación válida inserta la fila (`daycare_id` del admin, `invited_by = auth.uid()`, `status pending`, `expires_at` +7 días) y envía el email de Resend con código, rol y link a `/activate?code=`.
+- [x] Si el envío falla, no queda fila en `staff_invitations` y se muestra error inline.
+- [x] `/activate?code=<código de equipo>` muestra la tarjeta de equipo (guardería, rol, sala) y el email prellenado; la tarjeta de padres no cambia.
+- [x] Activar con código+email válidos y contraseña crea la cuenta (`auth.users`), el perfil `public.users` con rol `staff`/`admin`, sala y guardería correctas, marca la invitación `accepted` y redirige a `/staff`.
+- [x] Código inexistente/expirado/usado o email no coincidente → error inline unificado y no se crea ninguna cuenta; email ya registrado → "Ese email ya tiene cuenta. Iniciá sesión."
+- [x] El flujo de activación de padres sigue funcionando igual (regresión E2E).
+- [x] `admin@opendaycare.com` existe en producción (creado con aprobación explícita) y está documentado en `references/datos-prueba.md`.
+- [x] `pnpm lint` y `pnpm build` sin errores; consola sin errores ni warnings de hidratación.
 
 ## Decisions
 
