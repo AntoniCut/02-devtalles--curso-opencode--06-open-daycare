@@ -2,6 +2,7 @@
 
 > **Estado: NO aplicados a ninguna base de datos.** Este archivo es el catálogo de cuentas y contenido de prueba, listo para usar cuando lo pidas en un proyecto Supabase de **desarrollo**.
 > **⚠️ Nunca ejecutar este seed contra producción** (`OpenDayCare-Prod`, ref `mdoftqngmqmijmowqqak`). Ver regla dura en `AGENTS.md`.
+> **Excepción en producción:** la cuenta `admin@opendaycare.com` **también existe en `OpenDayCare-Prod`** como admin de bootstrap, creada el **2026-10-10** con aprobación explícita del usuario (ver apéndice al final). El resto del catálogo no se aplica a producción.
 > **Contraseña de todas las cuentas:** `Test1234!`
 > **Prerrequisito del SQL de recreación:** el proyecto de desarrollo debe tener el daycare `Guardería Sala Soles`, las salas Soles/Estrellas/Luna y los niños base (mismos datos que producción). El SQL es idempotente: omite las cuentas que ya existan y no duplica contenido.
 
@@ -362,4 +363,55 @@ where email in (
 );
 
 commit;
+```
+
+## Apéndice — Admin de bootstrap en producción (excepción)
+
+`admin@opendaycare.com` (Carla Domínguez, `Test1234!`) existe también en **`OpenDayCare-Prod`** (ref `mdoftqngmqmijmowqqak`) como único admin de la guardería: sin un admin, la pantalla `/staff/equipo` no es operable en la app deployada. Fue creada el **2026-10-10** con aprobación explícita del usuario (SPEC 11) y verificada: `public.users` con rol `admin` y `daycare_id` correctos (perfil creado por el trigger `handle_new_user`).
+
+El resto del catálogo de pruebas sigue **sin aplicarse** a producción.
+
+```sql
+-- Aplicado en OpenDayCare-Prod el 2026-10-10 (aprobación explícita del usuario, SPEC 11).
+-- Idempotente: si la cuenta ya existe, no hace nada.
+do $$
+declare
+  v_daycare_id constant uuid := '38fdf77c-7adf-4720-b0a9-08ad8c72c134';
+  v_email constant text := 'admin@opendaycare.com';
+  v_full_name constant text := 'Carla Domínguez';
+  v_password constant text := 'Test1234!';
+  v_new_id uuid;
+begin
+  if exists (select 1 from auth.users where email = v_email) then
+    raise notice 'admin@opendaycare.com ya existe; sin cambios';
+    return;
+  end if;
+
+  v_new_id := gen_random_uuid();
+
+  insert into auth.users (
+    instance_id, id, aud, role, email, encrypted_password, email_confirmed_at,
+    raw_app_meta_data, raw_user_meta_data, created_at, updated_at,
+    confirmation_token, recovery_token, email_change_token_new, email_change
+  ) values (
+    '00000000-0000-0000-0000-000000000000', v_new_id, 'authenticated', 'authenticated',
+    v_email,
+    extensions.crypt(v_password, extensions.gen_salt('bf')),
+    now(),
+    jsonb_build_object('provider','email','providers',jsonb_build_array('email'),
+                       'role','admin','daycare_id',v_daycare_id,'full_name',v_full_name),
+    jsonb_build_object('full_name', v_full_name),
+    now(), now(), '', '', '', ''
+  );
+
+  insert into auth.identities (
+    provider_id, user_id, identity_data, provider, last_sign_in_at, created_at, updated_at
+  ) values (
+    v_new_id::text, v_new_id,
+    jsonb_build_object('sub', v_new_id::text, 'email', v_email, 'full_name', v_full_name,
+                       'role','admin','daycare_id',v_daycare_id,
+                       'email_verified', false, 'phone_verified', false),
+    'email', now(), now(), now()
+  );
+end $$;
 ```
